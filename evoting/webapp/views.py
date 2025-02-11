@@ -112,3 +112,23 @@ def reset_password(request):
         messages.error(request, 'Error resetting password.')
 
     return render(request, 'reset_password.html')
+
+
+
+
+from .forms import CandidateForm  
+from .models import Election
+
+def add_candidate(request, election_id):
+    election = Election.objects.get(id=election_id)  # Fetch the election
+    form = CandidateForm()  # Create the form instance
+
+    if request.method == 'POST':
+        form = CandidateForm(request.POST, request.FILES)  # Include files if you have file upload
+        if form.is_valid():
+            candidate = form.save(commit=False)
+            candidate.election = election  # Associate candidate with the election
+            candidate.save()
+            return redirect('manage_candidates', election_id=election.id)
+
+    return render(request, 'create.cand.html', {'form': form, 'election': election})  # Pass form to template
