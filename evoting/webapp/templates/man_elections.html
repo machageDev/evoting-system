@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Elections{% endblock %}
+
+{% block content %}
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center mb-4 text-primary">
+        <i class="fas fa-cogs"></i> Manage Elections
+    </h2>
+
+    <!-- Create New Election Button -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'create_election' %}" class="btn btn-success">
+            <i class="fas fa-plus-circle"></i> Create New Election
+        </a>
+    </div>
+
+    <!-- Elections Table -->
+    <div class="table-responsive">
+        <table class="table table-hover text-center align-middle">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"><i class="fas fa-poll"></i> Election Name</th>
+                    <th scope="col"><i class="fas fa-calendar-alt"></i> Date</th>
+                    <th scope="col"><i class="fas fa-info-circle"></i> Status</th>
+                    <th scope="col"><i class="fas fa-tools"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for election in elections %}
+                <tr class="table-light">
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td class="fw-bold">{{ election.name }}</td>
+                    <td>{{ election.election_date }}</td>
+                    <td>
+                        {% if election.status == 'pending' %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Pending</span>
+                        {% elif election.status == 'active' %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary"><i class="fas fa-flag-checkered text-light"></i> <span class= "text-light">Completed</span></span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button onclick = "openModal('{{election.id}}','{{election.name}}','{{election.status}}','{{election.election_date}}')"class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <a href="{% url 'create_candidate'%}?id={{election.id}}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Add Candidate
+                        </a>
+                        <a href="{% url 'delete_election'%}?id={{election.id}}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No elections available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

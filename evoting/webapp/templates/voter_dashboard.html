@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Voter Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-check"></i>  Vote Today</h2>
+
+    <!-- Vote Now Card -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-vote-yea"></i> Vote Now</div>
+                <div class="card-body">
+                    <a href="{% url 'vote'%}" class="btn btn-primary btn-block">Cast Your Vote</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Results Card -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chart-bar"></i> View Results</div>
+                <div class="card-body">
+                    <a href="{% url 'view_results'%}" class="btn btn-success btn-block">See Current Results</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Elections Section -->
+    <h4><i class="fas fa-chart-line"></i> Active Elections</h4>
+    <div class="table-responsive">
+        <table class="table table-hover text-center align-middle">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"><i class="fas fa-poll"></i> Election Name</th>
+                    <th scope="col"><i class="fas fa-calendar-alt"></i> Date</th>
+                    <th scope="col"><i class="fas fa-info-circle"></i> Status</th>
+                    <th scope="col"><i class="fas fa-tools"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for election in elections %}
+                <tr class="table-light">
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td class="fw-bold">{{ election.name }}</td>
+                    <td>{{ election.election_date }}</td>
+                    <td>
+                        {% if election.status == 'pending' %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Pending</span>
+                        {% elif election.status == 'active' %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary"><i class="fas fa-flag-checkered"></i> Completed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'vote' %}?id={{election.id}}" class="btn btn-success btn-sm">
+                            <i class="fas fa-edit"></i> vote
+                        </a>
+                       
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No elections available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Function to fetch results dynamically using AJAX
+    function fetchResults(electionId) {
+        $.get(`/election/${electionId}/results/`, function(data) {
+            updateResults(electionId, data);
+        });
+    }
+
+    // Function to update the results display in the UI
+    function updateResults(electionId, results) {
+        let resultsHtml = '<ul>';
+        for (const option in results) {
+            resultsHtml += `<li>${option}: ${results[option]} votes</li>`;
+        }
+        resultsHtml += '</ul>';
+        $('#results-' + electionId).html(resultsHtml);
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Cast Your Vote{% endblock %}
+
+{% block content %}
+<h2 class ="ml-5">Elections for( {{ election.name }})</h2>
+<div class ="m-5">
+    <h5 class ="text-center">Choose your candidate</h6>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Candidate Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for option in candidate %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ option.name }}</td>
+            <td>
+                <form method="POST" action="{% url 'cast_vote' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="vote_option" value="{{ option.id }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Vote</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'voter_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+
+{% endblock %}
