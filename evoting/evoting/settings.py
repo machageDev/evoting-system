@@ -25,10 +25,9 @@ SECRET_KEY = 'django-insecure-0*(0-+2)3i-^st%6n4gui!)ri%)y&+kf1q_l2!ug2#52$_lfft
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ ]
 
-
-# Application definition
+                 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -136,3 +135,4 @@ EMAIL_HOST_USER = 'machagefranklyn@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'qazxsw21'  # Use an app password, not your real password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4' 

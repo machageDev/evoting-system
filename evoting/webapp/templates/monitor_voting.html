@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Monitor Voting{% endblock %}
+
+{% block content %}
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center mb-4 text-primary">
+        <i class="fas fa-chart-line"></i> Monitor Ongoing Voting
+    </h2>
+
+    {% if ongoing_elections %}
+    <div class="table-responsive">
+        <table class="table table-hover text-center align-middle">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"><i class="fas fa-poll"></i> Election Name</th>
+                    <th scope="col"><i class="fas fa-info-circle"></i> Status</th>
+                    <th scope="col"><i class="fas fa-eye"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for election in ongoing_elections %}
+                <tr class="table-light">
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td class="fw-bold">{{ election.name }}</td>
+                    <td>
+                        <span class="badge {% if election.status == 'Ongoing' %} bg-success {% else %} bg-warning {% endif %}">
+                            <i class="fas fa-hourglass-half"></i> {{ election.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'results' election.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-chart-bar"></i> View Results
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" role="alert">
+        <i class="fas fa-info-circle"></i> No ongoing elections at the moment.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

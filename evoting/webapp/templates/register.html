@@ -11,20 +11,27 @@
 
             <form method="POST" autocomplete="off">
                 {% csrf_token %}
+                
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
 
-                {{form.username|as_crispy_field}}
-                <br>
-                {{form.password1|as_crispy_field}}
-                <br>
-                {{form.password2|as_crispy_field}}
-                <br>
-
-                <button type="submit" class="btn btn-primary w-100 btn-block p-2"> Create account &nbsp; <i class="fa fa-user" aria-hidden="true"></i> </button>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>                
+                
+              
+                <button type="submit" class="btn btn-primary">Register</button>
             </form>
+            <script src="register.js"></script>
+
+            
+    
             <br>
             <div class="text-center">
 
-                <p> Already have an account? </p> <a href="{% url 'my-login' %}"> Login </a>
+                <p> Already have an account? </p> <a href="{% url 'login' %}"> Login </a>
             </div>
         </div>
         <br>

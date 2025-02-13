@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %} 
+{% block title %}Edit User: {{ user.username }}{% endblock %}
+
+{% block content %}
+<h2>Edit User: {{ user.username }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update User</button>
+</form>
+<a href="{% url 'manage_users' %}" class="btn btn-secondary">Back to User Management</a>
+{% endblock %}

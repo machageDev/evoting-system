@@ -1,3 +1,4 @@
+from multiprocessing import AuthenticationError
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
@@ -12,10 +13,26 @@ def base(request):  # Ensure this function exists
     return render(request, 'base.html')
 
 def user_login(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = AuthenticationError(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            return render(request, "login.html",{"error":"invalid credentials"})
     return render(request, 'login.html')
 
 def register(request):
-    return render(request, 'register.html')
+    form = CreateUserForm()
+    if request.method == "POST":
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("login")
+    return render(request,"register.html",{"form":form})
+
 def navbar(request):
     return render(request, 'navbar.html')
 def dashboard(request):
@@ -24,7 +41,7 @@ def dashboard(request):
 
 
 from .models import Election
-from .forms import ElectionForm
+from .forms import CreateUserForm, ElectionForm
 
 def create_election(request):
     if request.method == 'POST':
@@ -132,3 +149,68 @@ def add_candidate(request, election_id):
             return redirect('manage_candidates', election_id=election.id)
 
     return render(request, 'create.cand.html', {'form': form, 'election': election})  # Pass form to template
+
+
+from .forms import CreateUserForm
+from django.contrib.auth import login
+
+def create_user(request):
+    if request.method == "POST":
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])  # Hash the password
+            user.save()
+            return redirect('manage_users')  # Redirect to the user management page
+    else:
+        form = CreateUserForm()
+    
+    return render(request, 'create_user.html', {'form': form})
+
+def monitor_voting(request):
+    """View to display ongoing elections."""
+    ongoing_elections = Election.objects.filter(status="Ongoing")
+    return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
+
+def election_results(request, election_id):
+    """View to display election results."""
+    election = get_object_or_404(Election, id=election_id)
+    return render(request, "election_results.html", {"election": election})
+
+
+from .models import Candidate
+from .forms import CandidateForm
+
+def create_candidate(request):
+    """View to create a new candidate."""
+    if request.method == "POST":
+        form = CandidateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("manage_candidates")
+    else:
+        form = CandidateForm()
+    return render(request, "create_cand.html", {"form": form})
+
+def edit_candidate(request, candidate_id):
+    """View to edit an existing candidate."""
+    candidate = get_object_or_404(Candidate, id=candidate_id)
+    if request.method == "POST":
+        form = CandidateForm(request.POST, instance=candidate)
+        if form.is_valid():
+            form.save()
+            return redirect("manage_candidates")
+    else:
+        form = CandidateForm(instance=candidate)
+    return render(request, "edit_cand.html", {"form": form, "candidate": candidate})
+
+def delete_candidate(request, candidate_id):
+    """View to delete a candidate."""
+    candidate = get_object_or_404(Candidate, id=candidate_id)
+    candidate.delete()
+    return redirect("manage_candidates")
+
+def manage_candidates(request):
+    """View to display all candidates."""
+    candidates = Candidate.objects.all()
+    return render(request, "manage_cand.html", {"candidates": candidates})

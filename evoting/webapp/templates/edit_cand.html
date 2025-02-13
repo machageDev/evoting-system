@@ -1,0 +1,37 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Edit Candidate{% endblock %}
+
+{% block content %}
+<h2>Edit Candidate: {{ candidate.name }}</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="candidate_name">Candidate Name</label>
+        <input type="text" name="candidate_name" id="candidate_name" class="form-control" value="{{ candidate.name }}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="position">Position</label>
+        <select name="position" id="position" class="form-control" required>
+            {% for value, label in position_choices %}
+                <option value="{{ value }}" {% if candidate.position == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="profile_picture">Profile Picture</label>
+        <input type="file" name="profile_picture" id="profile_picture" class="form-control">
+        {% if candidate.profile_picture %}
+            <img src="{{ candidate.profile_picture.url }}" alt="{{ candidate.name }}" style="width:100px; height:auto;">
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+<a href="{% url 'manage_candidates' candidate.election.id %}" class="btn btn-secondary mt-3">Back to Candidates</a>
+{% endblock %}

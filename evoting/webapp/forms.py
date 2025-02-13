@@ -13,9 +13,13 @@ class ElectionForm(forms.ModelForm):
 # forms.py
 
 
-class LoginForm(forms.Form):
-    username = forms.CharField(label="Username", max_length=150)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
+
+from django.contrib.auth.forms import AuthenticationForm
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
 
 # forms.py
 
@@ -39,3 +43,19 @@ class CandidateForm(forms.ModelForm):
     )
 
     
+from django.contrib.auth.models import User
+
+class CreateUserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, label="Password")
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+        
+
+
+class ElectionFilterForm(forms.Form):
+    """Form to filter elections."""
+    status_choices = [("pending", "Pending"), ("active", "Active")]
+    status = forms.ChoiceField(choices=status_choices, required=False, widget=forms.Select(attrs={'class': 'form-control'}))

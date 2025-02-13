@@ -9,16 +9,20 @@
             <h3> Login to your account </h3>
             <hr>
             <br>
-            <form method="POST" autocomplete="off">
-                {% csrf_token %}
-                {{form.username|as_crispy_field}}
-                <br>
-                {{form.password|as_crispy_field}}
-                <br>
-                <button type="submit" class="btn btn-primary w-100 btn-block p-2"> Login &nbsp; <i class="fa fa-key" aria-hidden="true"></i> </button>
-
-
+            <form method="POST">
+                
+                    {% csrf_token %}
+                    
+                    <button type="submit" class="btn btn-primary">Register</button>
+                
+                <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
             </form>
+            <script src="login.js"></script>
+        
             <br>
             <div class="text-center">
                 <p> Don't have an account? </p> <a href="{% url 'register' %}"> Register </a>

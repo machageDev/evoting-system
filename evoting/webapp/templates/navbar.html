@@ -1,13 +1,10 @@
 {% load static%}
+{% load crispy_forms_tags%}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary justify-content-center">
-
-    <a class="navbar-brand main-heading" href="{% url 'index' %}">  
-
+    <a class="navbar-brand main-heading" href="{% url 'index' %}">     
             
-      &nbsp; E-voting system
-    
+      &nbsp; E-voting system    
     </a>
-  
   
     <button
       class="navbar-toggler"
@@ -18,16 +15,12 @@
       aria-expanded="false"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon"></span>
-  
+      <span class="navbar-toggler-icon"></span>  
     </button>
   
-  
-      <div class="collapse navbar-collapse text-center" id="navbarNavDropdown">
-  
+      <div class="collapse navbar-collapse text-center" id="navbarNavDropdown"> 
         
-        <ul class="navbar-nav mr-auto">
-  
+        <ul class="navbar-nav mr-auto"> 
   
           &nbsp;     &nbsp;     &nbsp; 
   
@@ -38,21 +31,13 @@
               <a class="nav-link" href="{% url 'dashboard' %}">Dashboard &nbsp; <i class="fa fa-home" aria-hidden="true"></i> </a>
   
             </li>
+            <script src="navbar.js"></script>  
+            &nbsp;     &nbsp;     &nbsp;      
   
-  
-            &nbsp;     &nbsp;     &nbsp; 
-  
-  
-           
-  
-        </ul>
-  
-        {% else %}
-  
-        <li class="nav-item">
-  
-          <a class="nav-link" href="{% url 'register' %}"> Register </a>
-  
+        </ul>  
+        {% else %}  
+        <li class="nav-item">  
+          <a class="nav-link" href="{% url 'register' %}"> Register </a>  
         </li>
   
   
@@ -60,7 +45,6 @@
   
         <li class="nav-item">
   
-          <a class="nav-link" href="{% url 'my-login' %}">Login</a>
   
         </li> 
   
