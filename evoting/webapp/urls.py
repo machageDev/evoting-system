@@ -3,6 +3,7 @@ from . import views
 from .views import create_election, create_user, manage_elections, delete_election
 from .views import send_otp, otp, reset_password  
 from .views import monitor_voting, election_results
+from .views import voter_dashboard, vote, view_results
 
 
 urlpatterns = [
@@ -43,6 +44,12 @@ urlpatterns = [
 
     path("monitor/", monitor_voting, name="monitor_voting"),
     path("results/<int:election_id>/", election_results, name="results"),
+    path("voter_dashboard/", views.voter_dashboard, name="voter_dashboard"),
+    path('vote/',views.voter,name="vote"),
 
-
-]
+    path("dashboard/", voter_dashboard, name="voter_dashboard"),
+    path("vote/", vote, name="vote"),
+    path("results/", view_results, name="view_result"),
+ 
+    
+    ]

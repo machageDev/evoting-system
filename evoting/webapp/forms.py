@@ -1,7 +1,5 @@
 from django import forms
 from .models import Election
-
-
 class ElectionForm(forms.ModelForm):
     class Meta:
         model = Election
@@ -59,3 +57,21 @@ class ElectionFilterForm(forms.Form):
     """Form to filter elections."""
     status_choices = [("pending", "Pending"), ("active", "Active")]
     status = forms.ChoiceField(choices=status_choices, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
+    
+
+
+from django.apps import apps
+
+Election = apps.get_model('webapp', 'Election')
+Voter = apps.get_model('webapp', 'Voter')
+
+
+
+
+class VoterRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = Voter
+        fields = ['phone_number', 'otp_verified', 'status']
+        widgets = {
+            'status': forms.Select(choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')])
+        }

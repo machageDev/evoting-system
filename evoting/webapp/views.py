@@ -5,6 +5,8 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth.models import User  # Import User model
 from django.conf import settings
+from .models import Election, Voter
+
 
 def home(request):
     return render(request, 'index.html')
@@ -214,3 +216,45 @@ def manage_candidates(request):
     """View to display all candidates."""
     candidates = Candidate.objects.all()
     return render(request, "manage_cand.html", {"candidates": candidates})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Election, Vote
+
+@login_required
+def voter_dashboard(request):
+    """Display the voter dashboard with active elections."""
+    elections = Election.objects.filter(status="active")  # Show only active elections
+
+    context = {
+        "elections": elections,
+    }
+    return render(request, "voter_dashboard.html", context)
+
+@login_required
+def vote(request):
+    """Handles the voting process."""
+    if request.method == "POST":
+        election_id = request.POST.get("election_id")
+        candidate_id = request.POST.get("candidate_id")
+
+        # Get the election object
+        election = get_object_or_404(Election, id=election_id)
+
+        # Ensure the user has not voted already
+        if Vote.objects.filter(user=request.user, election=election).exists():
+            return render(request, "vote.html", {"error": "You have already voted!"})
+
+        # Save the vote
+        vote = Vote(user=request.user, election=election, candidate_id=candidate_id)
+        vote.save()
+
+        return redirect("voter_dashboard")  # Redirect after voting
+
+    # Show elections for voting
+    elections = Election.objects.filter(status="active")
+    return render(request, "vote.html", {"elections": elections})
+
+
+

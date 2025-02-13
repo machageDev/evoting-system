@@ -1,28 +1,38 @@
 {% extends 'base.html' %}
+{% load_cripsy_form %}
 
 {% block title %}Voter Dashboard{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2><i class="fas fa-check"></i>  Vote Today</h2>
+    <h2><i class="fas fa-user"></i> Voter Dashboard</h2>
 
-    <!-- Vote Now Card -->
+    <!-- Display Voter Info -->
+    {% if user.is_authenticated and user.vote %}
+    <div class="alert alert-info">
+        <p><strong>Name:</strong> {{ user.vote.name }}</p>
+        <p><strong>Username:</strong> {{ user.vote.username }}</p>
+        <p><strong>Age:</strong> {{ user.vote.age }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Voting Section -->
     <div class="row">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header"><i class="fas fa-vote-yea"></i> Vote Now</div>
+                <div class="card-header"><i class="fas fa-vote-yea"></i> Cast Your Vote</div>
                 <div class="card-body">
-                    <a href="{% url 'vote'%}" class="btn btn-primary btn-block">Cast Your Vote</a>
+                    <a href="{% url 'vote' %}" class="btn btn-primary btn-block">Vote Now</a>
                 </div>
             </div>
         </div>
 
-        <!-- View Results Card -->
+        <!-- View Results Section -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header"><i class="fas fa-chart-bar"></i> View Results</div>
                 <div class="card-body">
-                    <a href="{% url 'view_results'%}" class="btn btn-success btn-block">See Current Results</a>
+                    <a href="{% url 'view_results' %}" class="btn btn-success btn-block">See Current Results</a>
                 </div>
             </div>
         </div>
@@ -57,16 +67,21 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'vote' %}?id={{election.id}}" class="btn btn-success btn-sm">
-                            <i class="fas fa-edit"></i> vote
+                        {% if election.status == 'active' %}
+                        <a href="{% url 'vote' %}?id={{ election.id }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-edit"></i> Vote
                         </a>
-                       
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            <i class="fas fa-ban"></i> Closed
+                        </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="5" class="text-center text-muted">
-                        <i class="fas fa-info-circle"></i> No elections available.
+                        <i class="fas fa-info-circle"></i> No active elections.
                     </td>
                 </tr>
                 {% endfor %}
@@ -76,14 +91,14 @@
 </div>
 
 <script>
-    // Function to fetch results dynamically using AJAX
+    // Fetch election results dynamically using AJAX
     function fetchResults(electionId) {
         $.get(`/election/${electionId}/results/`, function(data) {
             updateResults(electionId, data);
         });
     }
 
-    // Function to update the results display in the UI
+    // Update results display in the UI
     function updateResults(electionId, results) {
         let resultsHtml = '<ul>';
         for (const option in results) {

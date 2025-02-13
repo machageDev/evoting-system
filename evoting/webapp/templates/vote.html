@@ -1,36 +1,49 @@
 {% extends 'base.html' %}
+{ % load_cripsy_form %}
 
-{% block title %}Cast Your Vote{% endblock %}
+{% block title %}Vote Now{% endblock %}
 
 {% block content %}
-<h2 class ="ml-5">Elections for( {{ election.name }})</h2>
-<div class ="m-5">
-    <h5 class ="text-center">Choose your candidate</h6>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Candidate Name</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for option in candidate %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ option.name }}</td>
-            <td>
-                <form method="POST" action="{% url 'cast_vote' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="vote_option" value="{{ option.id }}">
-                    <button type="submit" class="btn btn-primary btn-sm">Vote</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <h2><i class="fas fa-check"></i> Cast Your Vote</h2>
 
-<a href="{% url 'voter_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    <!-- Display Voter Information -->
+    {% if user.is_authenticated %}
+    <div class="alert alert-info">
+        <p><strong>Name:</strong> {{ user.vote.name }}</p>
+        <p><strong>Username:</strong> {{ user.vote.username }}</p>
+        <p><strong>Age:</strong> {{ user.vote.age }}</p>
+    </div>
+    {% endif %}
 
+    <!-- Voting Form -->
+    <form method="POST" action="{% url 'vote' %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="election" class="form-label">Select Election</label>
+            <select class="form-control" name="election_id" required>
+                {% for election in elections %}
+                <option value="{{ election.id }}">{{ election.name }}</option>
+                {% empty %}
+                <option disabled>No elections available</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="candidate" class="form-label">Choose Candidate</label>
+            <select class="form-control" name="candidate_id" required>
+                {% for candidate in candidates %}
+                <option value="{{ candidate.id }}">{{ candidate.name }}</option>
+                {% empty %}
+                <option disabled>No candidates available</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary"><i class="fas fa-vote-yea"></i> Submit Vote</button>
+    </form>
+
+</div>
 {% endblock %}

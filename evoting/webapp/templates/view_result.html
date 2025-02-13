@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load_cripsy_form %}
+
+{% block title %}All Elections Results{% endblock %}
+
+{% block content %}
+<a href="{% url 'view_result' %}" class="btn btn-success btn-block">See Current Results</a>
+
+<div class="container mt-5 p-4 shadow-lg bg-white rounded" style="margin: 20px;">
+    <h2 class="text-center text-primary mb-4">
+        <i class="fas fa-chart-bar"></i> Election Results for Chairman Elect
+    </h2>
+
+    <!-- Chart Container -->
+    <div style="height: 20%; width:20%; padding: 20px;">
+        <canvas id="voteChart"></canvas> <!-- Removed fixed width and height -->
+    </div>
+
+    <!-- Display Candidates List -->
+    <div class="mt-4">
+        <h4 class="text-center text-info mb-3"><i class="fas fa-users"></i> Candidate Votes</h4>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>John Mwangi</strong>
+                <span class="badge bg-success rounded-pill">350 votes</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Jane Wambui</strong>
+                <span class="badge bg-success rounded-pill">280 votes</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Mary Achieng</strong>
+                <span class="badge bg-success rounded-pill">220 votes</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>James Otieno</strong>
+                <span class="badge bg-success rounded-pill">150 votes</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Emily Njeri</strong>
+                <span class="badge bg-success rounded-pill">100 votes</span>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('voteChart').getContext('2d');
+    var voteChart = new Chart(ctx, {
+        type: 'pie',  // Change this to 'bar' for a bar chart
+        data: {
+            labels: ['J', 'Jane Wambui', 'Mary Achieng', 'James Otieno', 'Emily Njeri'],  // Hardcoded Kenyan names
+            datasets: [{
+                label: 'Votes',
+                data: [350, 280, 220, 150, 100],  // Hardcoded vote counts for each candidate
+                backgroundColor: [
+                    '#ff5733', '#33ff57', '#3357ff', '#ff33a8', '#f2f233',  // Pie chart slice colors
+                ],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return tooltipItem.label + ': ' + tooltipItem.raw + ' votes';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

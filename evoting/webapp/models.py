@@ -3,12 +3,15 @@ from django.db import models
 # Create your models here.
 from django.contrib.auth.models import User
 
-class voter(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name=models.CharField(max_length=200)
-    username=models.CharField(max_length=100)
-    age=models.CharField(max_length=18)
 
+class Vote(models.Model):
+   user = models.OneToOneField(User, on_delete=models.CASCADE)
+   name = models.CharField(max_length=200)
+   username = models.CharField(max_length=100, unique=True)
+   age = models.PositiveIntegerField()  # Corrected from CharField
+
+   def __str__(self):
+        return self.name  # Fixed __str__ method
 
 
 class Election(models.Model):
@@ -43,3 +46,8 @@ class User(models.Model):
 
     def __str__(self):    
         return self.user.username 
+    
+
+
+
+    
