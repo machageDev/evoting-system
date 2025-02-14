@@ -30,7 +30,7 @@ urlpatterns = [
 
      
     path('create-candidate/<int:election_id>/', views.create_candidate, name='create_candidate'),
-    path("edit-candidate/<int:candidate_id>/", views.edit_candidate, name="edit_candidate"),
+    path('edit-cand/<int:candidate_id>/', views.edit_candidate, name='edit_cand'),
     path("delete-candidate/<int:candidate_id>/", views.delete_candidate, name="delete_candidate"),
     path("manage-candidates/", views.manage_candidates, name="manage_candidates"),
 

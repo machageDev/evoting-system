@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/cand.css' %}">
+
+{% block title %}Delete Candidate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+                </div>
+
+                <div class="card-body text-center">
+                    <p class="lead">Are you sure you want to delete <strong>{{ candidate.name }}</strong>?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+
+                    <!-- Delete Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                        <script src="{% static 'js/cand.js' %}"></script>
+                        <a href="{% url 'manage_cand' candidate.election.id %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

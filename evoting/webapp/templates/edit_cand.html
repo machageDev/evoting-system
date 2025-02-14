@@ -1,37 +1,45 @@
-
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/cand.css' %}">
 
 {% block title %}Edit Candidate{% endblock %}
 
 {% block content %}
-<h2>Edit Candidate: {{ candidate.name }}</h2>
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center text-primary mb-4">
+        <i class="fas fa-edit"></i> Edit Candidate: <span class="text-dark">{{ candidate.name }}</span>
+    </h2>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="candidate_name">Candidate Name</label>
-        <input type="text" name="candidate_name" id="candidate_name" class="form-control" value="{{ candidate.name }}" required>
-    </div>
-    
-    <div class="form-group">
-        <label for="position">Position</label>
-        <select name="position" id="position" class="form-control" required>
-            {% for value, label in position_choices %}
-                <option value="{{ value }}" {% if candidate.position == value %}selected{% endif %}>{{ label }}</option>
+    <!-- Candidate Edit Form -->
+    <form method="POST" enctype="multipart/form-data" class="p-4 border rounded bg-light">
+        {% csrf_token %}
+        {{ form|crispy }}  <!-- Renders the form with Crispy Forms -->
+
+        <!-- Submit Button -->
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save"></i> Update Candidate
+            </button>
+            <a href="{% url 'manage_cand' candidate.election.id %}" class="btn btn-secondary px-4">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </div>
+        <script src="{% static 'js/cand.js' %}"></script>
+
+    </form>
+
+    <!-- Error Message Section -->
+    {% if form.errors %}
+    <div class="alert alert-danger mt-4">
+        <ul class="mb-0">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
             {% endfor %}
-        </select>
+        </ul>
     </div>
-
-    <div class="form-group">
-        <label for="profile_picture">Profile Picture</label>
-        <input type="file" name="profile_picture" id="profile_picture" class="form-control">
-        {% if candidate.profile_picture %}
-            <img src="{{ candidate.profile_picture.url }}" alt="{{ candidate.name }}" style="width:100px; height:auto;">
-        {% endif %}
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-</form>
-
-<a href="{% url 'manage_candidates' candidate.election.id %}" class="btn btn-secondary mt-3">Back to Candidates</a>
+    {% endif %}
+</div>
 {% endblock %}

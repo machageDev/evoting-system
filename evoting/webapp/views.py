@@ -201,24 +201,31 @@ def create_candidate(request, election_id):
     return render(request, 'create_candidate.html', {'form': form, 'election': election})
 
 
+
 def edit_candidate(request, candidate_id):
-    """View to edit an existing candidate."""
     candidate = get_object_or_404(Candidate, id=candidate_id)
+
     if request.method == "POST":
-        form = CandidateForm(request.POST, instance=candidate)
+        form = CandidateForm(request.POST, request.FILES, instance=candidate)
         if form.is_valid():
             form.save()
-            return redirect("manage_candidates")
+            return redirect('manage_cand', election_id=candidate.election.id)  # Redirect back to candidate management
     else:
         form = CandidateForm(instance=candidate)
-    return render(request, "edit_cand.html", {"form": form, "candidate": candidate})
+
+    return render(request, 'edit_cand.html', {'form': form, 'candidate': candidate})
+
+
+from .models import Candidate
 
 def delete_candidate(request, candidate_id):
-    """View to delete a candidate."""
     candidate = get_object_or_404(Candidate, id=candidate_id)
-    candidate.delete()
-    return redirect("manage_candidates")
 
+    if request.method == "POST":
+        candidate.delete()
+        return redirect('manage_cand', election_id=candidate.election.id)  # Redirect to manage_cand.html
+
+    return render(request, 'delete_cand.html', {'candidate': candidate})
 def manage_candidates(request):
     """View to display all candidates."""
     candidates = Candidate.objects.all()
