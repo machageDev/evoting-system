@@ -1,41 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Voting System</title>
 
-{% extends 'base.html' %}
-{% load static %}
-{% load crispy_forms_tags %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-{% block content %}
-    <body>
-        <div class="container bg-light shadow-md p-5 form-layout">
-            <h3> Login to your account </h3>
-            <hr>
-            <br>
-            <form method="POST">
-                
-                    {% csrf_token %}
-                    
-                    <button type="submit" class="btn btn-primary">Register</button>
-                
-                <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            </form>
-            <script src="login.js"></script>
-        
-            <br>
-            <div class="text-center">
-                <p> Don't have an account? </p> <a href="{% url 'register' %}"> Register </a>
-            </div>
+    <style>
+        /* Reset & Base Styles */
+        *,
+        *:before,
+        *:after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #080710;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #2C3E50;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Background Shapes */
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 20%;
+        }
+
+        /* Login Form */
+        form {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.13);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        form h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.07);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 14px;
+            color: white;
+            border: none;
+        }
+
+        ::placeholder {
+            color: #e5e5e5;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #ffffff;
+            color: #080710;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Social Login */
+        .social {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .social div {
+            width: 150px;
+            border-radius: 5px;
+            padding: 8px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.27);
+            color: #eaf0fb;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .social div:hover {
+            background-color: rgba(255, 255, 255, 0.47);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            form {
+                width: 90%;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <h2>E-Voting System</h2>
+        <div>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
         </div>
-        <br>
-    </body>
-{% endblock %}
+    </div>
 
+    <!-- Background Shapes -->
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
 
+    <!-- Login Form -->
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <h3>Login Here</h3>
 
+        <label for="username">Username</label>
+        <input type="text" name="username" placeholder="Enter username" id="username">
 
+        <label for="password">Password</label>
+        <input type="password" name="password" placeholder="Enter password" id="password">
 
+        <button type="submit">Log In</button>
+        <div class="text-center mt-3">
+            <a href="{% url 'forgot_password' %}" class="text-danger">Forgot Password?</a>
+        </div>
+        <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
 
+        <!-- Social Login -->
+        <div class="social">
+            <div class="x"><i class="fab fa-twitter"></i> Twitter</div>
+            <div class="ig"><i class="fab fa-instagram"></i> Instagram</div>
+        </div>
+    </form>
 
-
+</body>
+</html>

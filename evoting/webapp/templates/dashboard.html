@@ -1,50 +1,139 @@
-{% extends 'base.html' %}
-{% block content %}
-    <h5> Welcome, {{user}}! 👋 </h5>
-    <hr>
-    </a>
-    <hr> 
-    <table class="table table-hover table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th scope="col"> ID </th>
-                <th scope="col"> Full name </th>
-                <th scope="col"> Email </th>
-                <th scope="col"> Phone </th>             
-                <th scope="col"> Date joined </th>
-                <th scope="col"> View </th>               
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | E-Voting</title>
+    
+    <style>
+        /* Reset & Base Styles */
+        *, *:before, *:after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            </tr>
-        </thead>
-        <tbody>
-        {% if records %}
-            {% for record in records %}
-            <tr>
+        body {
+            background-color: #080710;
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+        }
 
-                <td> {{record.id}} </td>
-                <td> {{record.first_name}}  {{record.last_name}} </td>
-                <td> {{record.email}} </td>
-                <td> {{record.phone}} </td>
-                <td> {{record.address}} </td>
-                
-                
-            
+        /* Navbar */
+        .navbar {
+            background-color: #2C3E50;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-                <td> {{record.creation_date}} </td>
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
 
-                <td> <a class="btn btn-success btn-sm" href="{% url 'record' record.id %}"> <i class="fa fa-eye" aria-hidden="true"></i> </a> </td>
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
 
-            </tr>
+        /* Main Container */
+        .container {
+            width: 80%;
+            margin: auto;
+            margin-top: 30px;
+            text-align: center;
+        }
 
-            {% endfor %}
-        
-        {% endif %}
+        /* Welcome Box */
+        .welcome-box {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
 
+        /* Poll Cards */
+        .poll-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin: 15px 0;
+            color: black;
+        }
 
-        </tbody>
+        .poll-card h4 {
+            color: #2C3E50;
+        }
 
+        /* Vote Button */
+        .vote-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
 
-    </table>
+        .vote-btn:hover {
+            background-color: #218838;
+        }
 
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
 
-{% endblock %}
+    <div class="navbar">
+        <h2>E-Voting System</h2>
+        <div>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-box">
+            <h2>Welcome, {{ user.username }}!</h2>
+            <p>Ready to cast your vote? See active elections below.</p>
+        </div>
+
+        <h3>🗳️ Active Polls</h3>
+        {% for poll in active_polls %}
+        <div class="poll-card">
+            <h4>{{ poll.question }}</h4>
+            <p>Ends on: {{ poll.end_date }}</p>
+            <a href="{% url 'votingpage' pk=poll.id %}">
+                <button class="vote-btn">Vote Now</button>
+            </a>
+        </div>
+        {% empty %}
+        <p>No active polls at the moment.</p>
+        {% endfor %}
+
+        <h3>🏆 Election Results</h3>
+        {% for poll in closed_polls %}
+        <div class="poll-card">
+            <h4>{{ poll.question }}</h4>
+            <p><strong>Winner:</strong> {{ poll.get_winner_option }}</p>
+        </div>
+        {% empty %}
+        <p>No closed elections yet.</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

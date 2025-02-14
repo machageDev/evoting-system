@@ -9,7 +9,9 @@ class Vote(models.Model):
    name = models.CharField(max_length=200)
    username = models.CharField(max_length=100, unique=True)
    age = models.PositiveIntegerField()  # Corrected from CharField
-
+   phone_number = models.CharField(max_length=20)
+   otp_verified = models.BooleanField(default=False)
+   status = models.CharField(max_length = 50,default = 'inactive')
    def __str__(self):
         return self.name  # Fixed __str__ method
 
@@ -29,12 +31,18 @@ class Election(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Post(models.Model):
+    name = models.CharField(max_length=100)  # e.g., "Chairman", "Secretary"
+
+    def __str__(self):
+        return self.name
 
 
 class Candidate(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    position = models.CharField(max_length=255)
+    position = models.CharField(max_length=255,default="unknown")
     profile_picture = models.ImageField(upload_to='candidate_pics/', blank=True, null=True)  
 
 

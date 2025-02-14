@@ -1,58 +1,38 @@
-{% load static%}
-{% load crispy_forms_tags%}
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary justify-content-center">
-    <a class="navbar-brand main-heading" href="{% url 'index' %}">     
-            
-      &nbsp; E-voting system    
-    </a>
-  
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavDropdown"
-      aria-controls="navbarNavDropdown"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>  
-    </button>
-  
-      <div class="collapse navbar-collapse text-center" id="navbarNavDropdown"> 
-        
-        <ul class="navbar-nav mr-auto"> 
-  
-          &nbsp;     &nbsp;     &nbsp; 
-  
-          {% if user.is_authenticated %}
-  
-            <li class="nav-item">
-        
-              <a class="nav-link" href="{% url 'dashboard' %}">Dashboard &nbsp; <i class="fa fa-home" aria-hidden="true"></i> </a>
-  
-            </li>
-            <script src="navbar.js"></script>  
-            &nbsp;     &nbsp;     &nbsp;      
-  
-        </ul>  
-        {% else %}  
-        <li class="nav-item">  
-          <a class="nav-link" href="{% url 'register' %}"> Register </a>  
-        </li>
-  
-  
-        &nbsp;     &nbsp;     &nbsp;  
-  
-        <li class="nav-item">
-  
-  
-        </li> 
-  
-        {% endif %}      
-        
-      </div>
-  
-  </nav>
+{% load static %}
+{% load crispy_forms_tags %}
 
+<!-- Link to Global CSS -->
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
 
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand main-heading" href="{% url 'home' %}">
+            E-Voting System
+        </a>
 
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard <i class="fa fa-home"></i></a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Link to JavaScript -->
+<script src="{% static 'js/navbar.js' %}"></script>

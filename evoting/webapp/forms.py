@@ -63,7 +63,7 @@ class ElectionFilterForm(forms.Form):
 from django.apps import apps
 
 Election = apps.get_model('webapp', 'Election')
-Voter = apps.get_model('webapp', 'Voter')
+Voter = apps.get_model('webapp', 'Vote')
 
 
 

@@ -4,8 +4,9 @@ import random
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth.models import User  # Import User model
+from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
-from .models import Election, Voter
+from .models import Election, Vote
 
 
 def home(request):
@@ -16,9 +17,9 @@ def base(request):  # Ensure this function exists
 
 def user_login(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = AuthenticationError(request, username=username, password=password)
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             return redirect('home')
@@ -27,13 +28,17 @@ def user_login(request):
     return render(request, 'login.html')
 
 def register(request):
-    form = CreateUserForm()
     if request.method == "POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("login")
-    return render(request,"register.html",{"form":form})
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        if User.objects.filter(username=username).exists():
+            return render(request, "register.html", {"error": "Username already exists"})
+        if User.objects.filter(email=email).exists():
+            return render(request, "register.html", {"error": "Email already exists"})
+        User.objects.create_user(username=username,email=email,password=password)
+        return redirect("login")
+    return render(request,"register.html")
 
 def navbar(request):
     return render(request, 'navbar.html')
@@ -183,16 +188,18 @@ def election_results(request, election_id):
 from .models import Candidate
 from .forms import CandidateForm
 
-def create_candidate(request):
-    """View to create a new candidate."""
-    if request.method == "POST":
-        form = CandidateForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("manage_candidates")
-    else:
-        form = CandidateForm()
-    return render(request, "create_cand.html", {"form": form})
+def create_candidate(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
+    form = CandidateForm(request.POST or None, request.FILES or None)
+
+    if request.method == "POST" and form.is_valid():
+        candidate = form.save(commit=False)
+        candidate.election = election  # Assign election
+        candidate.save()
+        return redirect('manage_candidates', election_id=election.id)
+
+    return render(request, 'create_candidate.html', {'form': form, 'election': election})
+
 
 def edit_candidate(request, candidate_id):
     """View to edit an existing candidate."""
@@ -256,5 +263,24 @@ def vote(request):
     elections = Election.objects.filter(status="active")
     return render(request, "vote.html", {"elections": elections})
 
+from django.shortcuts import render
+
+def view_result(request):
+    return render(request, "view_result.html")  # Ensure you have a 'results.html' template
+
+from django.shortcuts import render
+from .models import Candidate, Post
+
+from django.shortcuts import render, get_object_or_404
+from .models import Post, Candidate  # Import your models
+
+def view_result(request, post_id):
+    post = get_object_or_404(Post, id=post_id)  # Get the election post
+    candidates = Candidate.objects.filter(position=post)  # Get candidates for this post
+
+    return render(request, "view_result.html", {
+        "post": post,
+        "candidates": candidates
+    })
 
 

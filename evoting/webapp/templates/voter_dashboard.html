@@ -1,5 +1,8 @@
-{% extends 'base.html' %}
-{% load_cripsy_form %}
+
+{% load static  %}
+<head>
+<link rel="stylesheet" type="text/css" href="{% static 'css/voter.css' %}">
+</head>
 
 {% block title %}Voter Dashboard{% endblock %}
 
@@ -32,7 +35,7 @@
             <div class="card">
                 <div class="card-header"><i class="fas fa-chart-bar"></i> View Results</div>
                 <div class="card-body">
-                    <a href="{% url 'view_results' %}" class="btn btn-success btn-block">See Current Results</a>
+                    <a href="{% url 'view_result' %}" class="btn btn-success btn-block">See Current Results</a>
                 </div>
             </div>
         </div>
@@ -52,7 +55,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for election in elections %}
+                
                 <tr class="table-light">
                     <th scope="row">{{ forloop.counter }}</th>
                     <td class="fw-bold">{{ election.name }}</td>
@@ -78,13 +81,13 @@
                         {% endif %}
                     </td>
                 </tr>
-                {% empty %}
+                
                 <tr>
                     <td colspan="5" class="text-center text-muted">
                         <i class="fas fa-info-circle"></i> No active elections.
                     </td>
                 </tr>
-                {% endfor %}
+                
             </tbody>
         </table>
     </div>

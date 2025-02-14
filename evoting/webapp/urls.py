@@ -1,13 +1,10 @@
 from django.urls import path
 from . import views
-from .views import create_election, create_user, manage_elections, delete_election
-from .views import send_otp, otp, reset_password  
-from .views import monitor_voting, election_results
-from .views import voter_dashboard, vote, view_results
+
 
 
 urlpatterns = [
-    path('', views.home, name="index"),  
+    path('', views.home, name="home"),  
     path('base/', views.base, name="base"),
     path('login/', views.user_login, name="login"), 
     path('register/', views.register, name="register"),
@@ -19,37 +16,42 @@ urlpatterns = [
     
     #manage elections
 
-    path('create_election', create_election, name='create_election'),
-    path('man_elections', manage_elections, name='man_elections'),
+    path('create_election', views.create_election, name='create_election'),
+    path('man_elections', views.manage_elections, name='man_elections'),
     
 
 
-    path('forgot-password/', send_otp, name='forgot_password'),
-    path('verify-otp/', otp, name='otp'),
-    path('reset_password/', reset_password, name='reset_password'),
+    path('forgot-password/', views.send_otp, name='forgot_password'),
+    path('verify-otp/', views.otp, name='otp'),
+    path('reset_password/', views.reset_password, name='reset_password'),
+    path('send-otp/', views.send_otp, name='send_otp'),  
+
+
 
      
-    path("create-candidate/", views.create_candidate, name="create_candidate"),
+    path('create-candidate/<int:election_id>/', views.create_candidate, name='create_candidate'),
     path("edit-candidate/<int:candidate_id>/", views.edit_candidate, name="edit_candidate"),
     path("delete-candidate/<int:candidate_id>/", views.delete_candidate, name="delete_candidate"),
     path("manage-candidates/", views.manage_candidates, name="manage_candidates"),
 
 
 
-     path('create-user/', create_user,name='create_user'),
+     path('create-user/', views.create_user,name='create_user'),
 
     
 
 
 
-    path("monitor/", monitor_voting, name="monitor_voting"),
-    path("results/<int:election_id>/", election_results, name="results"),
+    path("monitor/", views.monitor_voting, name="monitor_voting"),
+    path("results/<int:election_id>/", views.election_results, name="results"),
     path("voter_dashboard/", views.voter_dashboard, name="voter_dashboard"),
-    path('vote/',views.voter,name="vote"),
+    #path('vote/',views.voter,name="vote"),
 
-    path("dashboard/", voter_dashboard, name="voter_dashboard"),
-    path("vote/", vote, name="vote"),
-    path("results/", view_results, name="view_result"),
+    path("dashboard/", views.voter_dashboard, name="voter_dashboard"),
+    path("vote/", views.vote, name="vote"),    
+    path("results/<int:post_id>/", views.view_result, name="view_result"),
+
+
  
     
     ]

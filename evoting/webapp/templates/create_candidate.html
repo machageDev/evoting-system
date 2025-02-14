@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}  <!-- Load crispy forms -->
+
 
 {% block title %}Add Candidate{% endblock %}
 
@@ -38,7 +38,7 @@
     <!-- Back to Candidates Button -->
     <div class="text-center mt-4">
         <a href="{% url 'manage_candidates' election.id %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to elections
+            <i class="fas fa-arrow-left"></i> Back to Elections
         </a>
     </div>
 </div>
