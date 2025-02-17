@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/election.css' %}">
 
 {% block title %}Create Election{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4"><i class="fas fa-calendar-plus"></i> Create New Election</h2>
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center mb-4 text-primary"><i class="fas fa-calendar-plus"></i> Create New Election</h2>
 
-    <form method="POST" action = "{%url 'create_election'%}">
+    <form method="POST" action="{% url 'create_election' %}">
         {% csrf_token %}
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -28,19 +30,51 @@
                     <select class="form-control" id="election_status" name="status" required>
                         <option value="pending">Pending</option>
                         <option value="active">Active</option>
-                        
                     </select>
                 </div>
 
                 <!-- Create Election Button -->
-                <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-check-circle"></i> Create Election</button>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-check-circle"></i> Create Election
+                </button>
             </div>
         </div>
     </form>
 
+    <!-- Error Messages -->
+    {% if error %}
+    <div class="alert alert-danger mt-4">
+        <ul class="mb-0">
+            <li>{{ error }}</li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Back Button -->
     <div class="text-center mt-4">
-        <a href="{% url 'manage_elections' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Election Management</a>
+        <a href="{% url 'man_elections' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Election Management
+        </a>
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Example: Add custom JS for form validation or other features if needed
+    document.addEventListener('DOMContentLoaded', function () {
+        // Example validation (optional, depending on your needs)
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (event) {
+            const electionName = document.getElementById('election_name').value;
+            const electionDate = document.getElementById('election_date').value;
+            
+            if (!electionName || !electionDate) {
+                alert('Please fill in all fields');
+                event.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+    });
+</script>
 {% endblock %}

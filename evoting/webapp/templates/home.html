@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the eVoting System</title>
+    {% load static %}
+    <style>
+        <style>
+            /* Reset margins and padding */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+    
+            /* Body styling with background image */
+            body {
+                font-family: Arial, sans-serif;
+                background: url("{% static '/images/voting_background.jpg'%}") no-repeat center center/cover;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+    
+            /* Overlay effect for readability */
+            .overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+            }
+    
+            /* Container box */
+            .container {
+                position: relative;
+                width: 100%;
+                max-width: 450px;
+                background-color: white;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                border-radius: 10px;
+                padding: 25px;
+                text-align: center;
+                z-index: 1;
+            }
+    
+            /* Header styling */
+            .header {
+                color: #5bc0de;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+    
+            .header h1 {
+                font-size: 24px;
+                font-weight: bold;
+            }
+    
+            .header p {
+                font-size: 14px;
+                color: #777;
+            }
+    
+            /* Card header */
+            .card-header {
+                background-color: #5bc0de;
+                color: white;
+                padding: 15px;
+                border-radius: 8px 8px 0 0;
+                font-size: 20px;
+                font-weight: bold;
+            }
+    
+            /* Form controls */
+            .form-group {
+                margin-bottom: 20px;
+                text-align: left;
+            }
+    
+            .form-group label {
+                font-weight: bold;
+                color: #333;
+            }
+    
+            .form-control {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+    
+            .form-control:focus {
+                border-color: #5bc0de;
+                outline: none;
+            }
+    
+            /* Button styling */
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                border: none;
+                background-color: #5bc0de;
+                color: white;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+    
+            .btn:hover {
+                background-color: #31a7d2;
+            }
+    
+            /* Links */
+            .card-body a {
+                color: #5bc0de;
+                text-decoration: none;
+            }
+    
+            .card-body a:hover {
+                text-decoration: underline;
+            }
+    
+            /* Register and forgot password links */
+            .extra-links {
+                margin-top: 15px;
+                text-align: center;
+            }
+    
+            .extra-links a {
+                display: block;
+                margin-top: 5px;
+                font-size: 14px;
+            }
+    
+        </style>
+</head>
+<body>
+    <div class="hero">
+        <div>
+            <h1>Welcome to the eVoting System</h1>
+            <p>Your secure and efficient platform for online voting.</p>
+            <a href="{% url 'login' %}" class="cta-button">Log In</a>
+        </div>
+    </div>
+    <div class="content">
+        <h2>About Our System</h2>
+        <p>Our eVoting system offers a secure and user-friendly platform for conducting elections and polls online. With advanced encryption and real-time results, we ensure transparency and trust in the voting process.</p>
+    </div>
+</body>
+</html>

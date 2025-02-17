@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/cand.css' %}">
 
 {% block title %}Edit Candidate{% endblock %}
 
@@ -14,30 +12,45 @@
     <!-- Candidate Edit Form -->
     <form method="POST" enctype="multipart/form-data" class="p-4 border rounded bg-light">
         {% csrf_token %}
-        {{ form|crispy }}  <!-- Renders the form with Crispy Forms -->
+
+        <!-- Candidate Name -->
+        <div class="mb-3">
+            <label class="form-label">Candidate Name</label>
+            <input type="text" name="name" class="form-control" value="{{ candidate.name }}" required>
+        </div>
+
+        <!-- Position -->
+        <div class="mb-3">
+            <label class="form-label">Position</label>
+            <input type="text" name="position" class="form-control" value="{{ candidate.position }}" required>
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="mb-3">
+            <label class="form-label">Profile Picture</label>
+            <input type="file" name="profile_picture" class="form-control">
+            {% if candidate.profile_picture %}
+                <p class="mt-2">Current Image:</p>
+                <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture" width="100">
+            {% endif %}
+        </div>
 
         <!-- Submit Button -->
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-success px-4">
                 <i class="fas fa-save"></i> Update Candidate
             </button>
-            <a href="{% url 'manage_cand' candidate.election.id %}" class="btn btn-secondary px-4">
+            <a href="{% url 'manage_candidates' candidate.election.id %}" class="btn btn-secondary px-4">
                 <i class="fas fa-arrow-left"></i> Cancel
             </a>
         </div>
-        <script src="{% static 'js/cand.js' %}"></script>
-
     </form>
 
     <!-- Error Message Section -->
-    {% if form.errors %}
+    {% if error %}
     <div class="alert alert-danger mt-4">
         <ul class="mb-0">
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
+            <li>{{ error }}</li>
         </ul>
     </div>
     {% endif %}

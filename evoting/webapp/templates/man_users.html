@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table table-striped table-bordered" id="dataTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                {% if not user.is_staff %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                {{ user.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- Only show activate link for inactive users -->
+                            {% if not user.is_active %}
+                                <a href="{% url 'activate_user' user.id %}"
+                                   class="btn btn-success btn-sm">
+                                   <i class="fas fa-user-check"></i> Activate
+                                </a>
+                            {% endif %}
+
+                            <!-- Delete User -->
+                            <a href="#" class="btn btn-danger btn-sm"
+                               onclick="confirmDelete('{{ user.id }}', '{{ user.username }}'); return false;">
+                               <i class="fas fa-trash-alt"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No users available.</td>
+                </tr>                    
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function confirmDelete(userId, username) {
+    if (confirm(`Are you sure you want to delete ${username}?`)) {
+        fetch(`/delete_user/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}" // Pass CSRF token
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();  // Refresh the page after deletion
+            } else {
+                alert("Failed to delete user.");
+            }
+        }).catch(error => console.error("Error:", error));
+    }
+}
+</script>
+
+{% endblock %}

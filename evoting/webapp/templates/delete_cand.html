@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/cand.css' %}">
 
 {% block title %}Delete Candidate{% endblock %}
 
@@ -17,14 +16,13 @@
                     <p class="lead">Are you sure you want to delete <strong>{{ candidate.name }}</strong>?</p>
                     <p class="text-muted">This action cannot be undone.</p>
 
-                    <!-- Delete Form -->
+                    <!-- Manual Form -->
                     <form method="POST">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger px-4">
                             <i class="fas fa-trash-alt"></i> Delete
                         </button>
-                        <script src="{% static 'js/cand.js' %}"></script>
-                        <a href="{% url 'manage_cand' candidate.election.id %}" class="btn btn-secondary px-4">
+                        <a href="{% url 'manage_candidates' candidate.election.id %}" class="btn btn-secondary px-4">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </form>

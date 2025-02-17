@@ -1,81 +1,351 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html>
-    <head> 
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title> E- voting system </title>
-        
-        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-        <!DOCTYPE html>
-<html>
-    <head> 
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title> E-Voting System </title>
-        
-        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
-        
-    </head>
-    <body>
+<html lang="en">
 
-        <!-- Create Navbar here -->
-        {% include 'navbar.html' %}
-        <div class="container">
-            <br>
-            <!-- Notification messages -->
-            {% for message in messages %}
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                    <p id="message-timer" class="alert alert-success float-center text-center message-text"> 
-                        <i class="fas fa-check" aria-hidden="true"></i> &nbsp; {{message}}
-                    </p>                    
-                    {% endif %}
-
-            {% endfor %}
-           {% block content %}
-           {% endblock %}
-        </div>
-        <script src="{% static 'js/app.js' %}"></script>
-
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-        
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-P+9j0gY6uzq5rdwnHObXMZQKf9g5Q7StmDyjMDzIyoLjIs5Jh9uiiAeUT5xjgR6K1nN9nkoFKrD4Lj3omtOlFEOz1ZM9F7qH" crossorigin="anonymous"></script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>E-voting Systems</title>
+    <link href="{% static "vendor/fontawesome-free/css/all.min.css" %}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="{% static "css/sb-admin-2.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendor/datatables/dataTables.bootstrap4.min.css" %}" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div class="modal fade" id="addtopic" tabindex="-1" role="dialog" aria-labelledby="addtopic" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="exampleModalLongTitle">
+                            <i class="fas fa-plus-circle"></i> New Topic
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Topic Name -->
+                        <div class="form-group">
+                            <label for="election-name"><i class="fas fa-heading"></i> Topic Name</label>
+                            <input type="text" id="topic-name" name="name" class="form-control" placeholder="Enter topic name" required />
+                        </div>
     
-    </body>
-</html>
-    </head>
-    <body>
-
-        <!-- Create Navbar here -->
-
-        {% include 'navbar.html' %}
-        <div class="container">
-            <br>
-            <!-- Notification messages -->
-            {% for message in messages %}
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                    <p id="message-timer" class="alert alert-success float-center text-center message-text"> 
-                        <i class="fa fa-check" aria-hidden="true"></i> &nbsp; {{message}}
-                    </p>                    
-                    {% endif %}
-
-            {% endfor %}
-           
-           
-        </div>
-        <script src="{% static 'js/app.js' %}"></script>
-
-
-        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-        
-        
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+                        <!-- Topic Type -->
+                        <div class="form-group">
+                            <label for="election-status"><i class="fas fa-question-circle"></i> Topic Type</label>
+                            <select id="topic-type" name="status" class="form-control" required>
+                                <option value="active">Open Ended</option>
+                                <option value="pending">Yes/No</option>
+                            </select>
+                        </div>
     
-    </body>
+                        <!-- Additional Fields (if necessary) -->
+                        <!-- Add more fields here if needed -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times-circle"></i> Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+      <!-- Modal -->
+      <div class="modal fade" id="editElection" tabindex="-1" role="dialog" aria-labelledby="editElection" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="exampleModalLongTitle">
+                            <i class="fas fa-edit"></i> Edit Election: <span id="electionName" class="font-weight-bold"></span>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Election Name -->
+                        <div class="form-group">
+                            <label for="election-name"><i class="fas fa-pen"></i> Election Name</label>
+                            <input type="text" id="election-name" name="name" class="form-control" placeholder="Enter election name" required />
+                        </div>
+    
+                        <!-- Election Status -->
+                        <div class="form-group">
+                            <label for="election-status"><i class="fas fa-check-circle"></i> Election Status</label>
+                            <select id="election-status" name="status" class="form-control" required>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+    
+                        <!-- Election End Date -->
+                        <div class="form-group">
+                            <label for="election-end-date"><i class="fas fa-calendar-alt"></i> End Date</label>
+                            <input type="date" id="election-end-date" name="date" class="form-control" required />
+                        </div>
+                         <!-- Voters Dropdown -->
+                        
+                                <div class="form-group mb-4">
+                                    <label for="voters"><i class="fas fa-users"></i> Voters</label>
+                                    <select class="form-control" id="voters" name="voters" required>
+                                        <option value="all">All</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+
+                        <!-- Hidden Election ID (for editing purposes) -->
+                        <input type="hidden" id="election-id" name="election_id">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times-circle"></i> Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-secondary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-poll"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">E-Voting</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <!-- Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <!-- Reports Section -->
+            
+
+            <!-- Loans Section -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLoans" aria-expanded="true" aria-controls="collapseLoans">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Voting</span>
+                </a>
+                <div id="collapseLoans" class="collapse" aria-labelledby="headingLoans" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Options</h6>
+                        <a class="collapse-item" href="#">Active Sessions</a>
+                        <a class="collapse-item" href="#">Voting Results</a>
+                        
+                        <!--<a class="collapse-item" href="#">All loans</a>-->
+                        
+                    </div>
+               
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsemanage" aria-expanded="true" aria-controls="collapsemanage">
+                        <i class="fas fa-fw fa-receipt"></i>
+                        <span>Manage</span>
+                    </a>
+                    <div id="collapsemanage" class="collapse" aria-labelledby="headingLoans" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Options</h6>
+                            <a class="collapse-item" href="#">Manage Elections</a>
+                            <a class="collapse-item" href="#">New Election</a>
+                            <a class="collapse-item" href="#">Manage Users</a>
+                        </div>
+                    </div>
+                </li>
+           
+            
+        
+        
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-fw fa-hand-holding-usd"></i>
+                    <span>Deposits</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <!-- Account Section -->
+            <div class="sidebar-heading">Account</div>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAccount" aria-expanded="true" aria-controls="collapseAccount">
+                    <i class="fas fa-fw fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <div id="collapseAccount" class="collapse" aria-labelledby="headingAccount" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="#">Profile</a>
+                        
+                    </div>
+                </div>
+            </li>
+
+            <hr class="sidebar-divider d-none d-md-block">
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+        
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+                <nav class="navbar navbar-expand  bg-gradient-secondary topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-light small">{{ request.user.username }}</span>
+  
+                                <img class="img-profile rounded-circle" src="{% static '/img/undraw_profile.svg' %}">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile</a>
+                                <!--<a class="dropdown-item" href="#"><i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Settings</a>
+                                <a class="dropdown-item" href="#"><i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i> Activity Log</a>-->
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                
+
+                <!-- Content Section -->
+                {% block content %}
+                {% endblock %}
+
+ 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id = "messagebody"class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% if messages %}
+{% for message in messages%}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // Show the modal if there are any messages
+            mes= document.getElementById("messagebody")
+            mes.innerHTML = ""
+            mes.innerHTML = "{{message}}"
+            $('#exampleModal').modal('show');
+        });
+    </script>
+    {% endfor%}
+    {% endif %}
+
+
+
+
+
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        
+                        <span>Copyright &copy; Surestep Systems and Solutions</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+        <!--logout modal-->
+        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="#">Logout</a>
+                </div>
+            </div>
+        </div>
+<script>
+    
+    function openModal(id,name,status,date) {
+        document.getElementById("electionName").innerHTML = name;
+        document.getElementById("election-name").value = name;
+        document.getElementById("election-status").value = status;
+        document.getElementById("election-id").value = id;
+        let dateObject = new Date(date); // Convert to Date object    
+        let formattedDate = dateObject.toISOString().split("T")[0];
+        document.getElementById("election-end-date").value = formattedDate;
+        var myModal = new bootstrap.Modal(document.getElementById('editElection'));
+        myModal.show();
+    }
+</script>
+    </div>
+    <!-- End of Page Wrapper -->
+    <script src="{% static "vendor/jquery/jquery.min.js" %}"></script>
+    <script src="{% static "vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+    <script src="{% static "vendor/jquery-easing/jquery.easing.min.js" %}"></script>
+    <script src="{% static "js/sb-admin-2.min.js" %}"></script>
+    <script src="{% static "vendor/datatables/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "vendor/datatables/dataTables.bootstrap4.min.js" %}"></script>
+    <script src="{% static "js/demo/datatables-demo.js" %}"></script>
+    
+
+</body>
+
 </html>

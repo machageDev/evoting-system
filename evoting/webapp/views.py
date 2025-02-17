@@ -1,4 +1,5 @@
 from multiprocessing import AuthenticationError
+from sqlite3 import DatabaseError
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
@@ -6,7 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.models import User  # Import User model
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
-from .models import Election, Vote
+from .models import Candidate, Election, Post, Vote
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
@@ -46,32 +48,133 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 
+def create_candidate(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
 
-from .models import Election
-from .forms import CreateUserForm, ElectionForm
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        position = request.POST.get('position')
+        profile_picture = request.FILES.get('profile_picture')
 
+        # Handle manual validation
+        if not name or not position:
+            return render(request, 'create_candidate.html', {'error': 'All fields are required!', 'election': election})
+
+        # Save the candidate to the database
+        Candidate.objects.create(
+            name=name, 
+            position=position, 
+            profile_picture=profile_picture, 
+            election=election
+        )
+        return redirect('manage_candidates', election_id=election.id)
+
+    return render(request, 'create_candidate.html', {'election': election})
+
+
+
+def manage_candidates(request, election_id):
+    """Displays a list of candidates for a given election."""
+    election = get_object_or_404(Election, id=election_id)
+    candidates = Candidate.objects.filter(election=election)
+    
+    return render(request, "manage_cand.html", {
+        "election": election,
+        "candidates": candidates
+    })
+
+def create_candidate(request, election_id):
+    """Handles candidate creation without Django forms."""
+    election = get_object_or_404(Election, id=election_id)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        position = request.POST.get('position')
+        profile_picture = request.FILES.get('profile_picture')
+
+        if not name or not position:
+            return render(request, 'create_candidate.html', {
+                'error': 'All fields are required!',
+                'election': election
+            })
+
+        Candidate.objects.create(
+            name=name, 
+            position=position, 
+            profile_picture=profile_picture, 
+            election=election
+        )
+        return redirect('manage_candidates', election_id=election.id)
+
+    return render(request, 'create_candidate.html', {'election': election})
+
+def edit_candidate(request, candidate_id):
+    """Handles editing an existing candidate without Django forms."""
+    candidate = get_object_or_404(Candidate, id=candidate_id)
+
+    if request.method == 'POST':
+        candidate.name = request.POST.get('name')
+        candidate.position = request.POST.get('position')
+        if 'profile_picture' in request.FILES:
+            candidate.profile_picture = request.FILES.get('profile_picture')
+        candidate.save()
+        return redirect('manage_candidates', election_id=candidate.election.id)
+
+    return render(request, 'edit_cand.html', {'candidate': candidate})
+
+def delete_candidate(request, candidate_id):
+    """Handles deleting a candidate."""
+    candidate = get_object_or_404(Candidate, id=candidate_id)
+    election_id = candidate.election.id
+
+    if request.method == "POST":
+        candidate.delete()
+        return redirect('manage_candidates', election_id=election_id)
+
+    return render(request, 'delete_cand.html', {'candidate': candidate})
+
+
+
+
+# Create Election
 def create_election(request):
     if request.method == 'POST':
-        form = ElectionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('manage_elections')  # Redirect to election list
-    else:
-        form = ElectionForm()
+        name = request.POST.get('name')
+        date = request.POST.get('date')
+        status = request.POST.get('status')
+        new_election = Election.objects.create(name=name, election_date=date, status=status)
+        messages.success(request, f"Election '{new_election.name}' created successfully!")
+        return redirect('manage_elections')
+    return render(request, 'create_election.html')
 
-    return render(request, 'create_election.html', {'form': form})
+# Edit Election
+def edit_election(request):
+    try:
+        election = Election.objects.get(Election, pk=request.GET.get("pk"))
+    except Exception as e:
+        messages.error(request,e)
+        return redirect("man_elections")
+    if request.method == 'POST':
+        election.name = request.POST.get('name')
+        election.election_date = request.POST.get('date')
+        election.status = request.POST.get('status')
+        election.save()
+        messages.success(request, f"Election '{election.name}' updated successfully!")
+        return redirect('manage_elections')
+    return render(request, 'edit_election.html', {'election': election})
 
-def manage_elections(request):
-    elections = Election.objects.all()
-    return render(request, 'manage_elections.html', {'elections': elections})
-
-def delete_election(request, election_id):
+# Delete Election
+def delete_election(request):
+    election_id = request.GET.get('id')
     election = get_object_or_404(Election, id=election_id)
     election.delete()
+    messages.success(request, f"Election '{election.name}' deleted successfully!")
     return redirect('manage_elections')
 
-
-
+# Manage Elections (Display all elections)
+def manage_elections(request):
+    elections = Election.objects.all()
+    return render(request, 'man_elections.html', {'elections': elections})
 
 # Step 1: Generate and send OTP
 def send_otp(request):
@@ -140,146 +243,234 @@ def reset_password(request):
 
 
 
-from .forms import CandidateForm  
-from .models import Election
-
-def add_candidate(request, election_id):
-    election = Election.objects.get(id=election_id)  # Fetch the election
-    form = CandidateForm()  # Create the form instance
-
-    if request.method == 'POST':
-        form = CandidateForm(request.POST, request.FILES)  # Include files if you have file upload
-        if form.is_valid():
-            candidate = form.save(commit=False)
-            candidate.election = election  # Associate candidate with the election
-            candidate.save()
-            return redirect('manage_candidates', election_id=election.id)
-
-    return render(request, 'create.cand.html', {'form': form, 'election': election})  # Pass form to template
 
 
-from .forms import CreateUserForm
-from django.contrib.auth import login
-
-def create_user(request):
-    if request.method == "POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])  # Hash the password
-            user.save()
-            return redirect('manage_users')  # Redirect to the user management page
-    else:
-        form = CreateUserForm()
-    
-    return render(request, 'create_user.html', {'form': form})
-
+# Monitor Voting (Ongoing Elections)
 def monitor_voting(request):
     """View to display ongoing elections."""
     ongoing_elections = Election.objects.filter(status="Ongoing")
     return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
 
-def election_results(request, election_id):
+# Election Results
+def view_result(request, election_id):
     """View to display election results."""
     election = get_object_or_404(Election, id=election_id)
     return render(request, "election_results.html", {"election": election})
 
+def election_results(request, election_id):
+    """View to display election results."""
+    election = get_object_or_404(Election, id=election_id)
+    return render(request, "view_result.html", {"election": election})
 
-from .models import Candidate
-from .forms import CandidateForm
 
+
+# Create User
+def create_user(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        
+        # Create the user object
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+        
+        return redirect('man_users')  # Redirect to the user management page
+    return render(request, 'create_user.html')
+def man_users(request):
+    if not request.user.is_authenticated:
+        return redirect('login')  
+
+    try:
+        users = User.objects.all()  
+    except DatabaseError as e:
+        
+        print(f"Database error occurred: {e}")
+        users = []  
+
+    context = {
+        'users': users
+    }
+    return render(request, 'man_users.html', context)
+
+
+
+def edit_user(request):
+    try:
+        user_id = request.GET.get('user_id')  # Get user_id from request
+        if not user_id:
+            messages.error(request, "User ID is missing.")
+            return redirect('manage_users')
+
+        user = get_object_or_404(User, id=user_id)
+
+        if request.method == "POST":
+            user.username = request.POST.get('username')
+            user.email = request.POST.get('email')
+            if request.POST.get('password'):
+                user.set_password(request.POST.get('password'))  # Update password securely
+            user.save()
+            messages.success(request, "User updated successfully.")
+            return redirect('man_users')  # Redirect to user management page
+
+        return render(request, 'edit_user.html', {'user': user})
+
+    except Exception as e:
+        messages.error(request, f"Error updating user: {str(e)}")
+        return redirect('man_users')  # Redirect in case of errors
+
+
+def delete_user(request):
+    try:
+        user_id = request.GET.get('user_id')  # Get user_id from request
+        if not user_id:
+            messages.error(request, "User ID is missing.")
+            return redirect('man_users')
+
+        user = get_object_or_404(User, id=user_id)
+
+        if request.method == "POST":
+            user.delete()
+            messages.success(request, "User deleted successfully.")
+            return redirect('man_users')  # Redirect to user management page
+
+        return render(request, 'delete_user.html', {'user': user})
+
+    except Exception as e:
+        messages.error(request, f"Error deleting user: {str(e)}")
+        return redirect('man_users')  # Redirect in case of errors
+
+
+# Monitor Voting (Ongoing Elections)
+def monitor_voting(request):
+    ongoing_elections = Election.objects.filter(status="Ongoing")
+    return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
+
+# Election Results
+def election_results(request, election_id):
+    election = get_object_or_404(Election, id=election_id)
+    return render(request, "election_results.html", {"election": election})
+
+# Create Candidate
 def create_candidate(request, election_id):
     election = get_object_or_404(Election, id=election_id)
-    form = CandidateForm(request.POST or None, request.FILES or None)
-
-    if request.method == "POST" and form.is_valid():
-        candidate = form.save(commit=False)
-        candidate.election = election  # Assign election
-        candidate.save()
+    
+    if request.method == "POST":
+        name = request.POST.get('name')
+        party = request.POST.get('party')
+        
+        # Create the candidate and associate with the election
+        candidate = Candidate.objects.create(name=name, party=party, election=election)
+        messages.success(request, f"Candidate '{candidate.name}' added to election '{election.name}' successfully!")
         return redirect('manage_candidates', election_id=election.id)
 
-    return render(request, 'create_candidate.html', {'form': form, 'election': election})
+    return render(request, 'create_candidate.html', {'election': election})
 
-
-
+# Edit Candidate
 def edit_candidate(request, candidate_id):
     candidate = get_object_or_404(Candidate, id=candidate_id)
-
+    
     if request.method == "POST":
-        form = CandidateForm(request.POST, request.FILES, instance=candidate)
-        if form.is_valid():
-            form.save()
-            return redirect('manage_cand', election_id=candidate.election.id)  # Redirect back to candidate management
-    else:
-        form = CandidateForm(instance=candidate)
+        candidate.name = request.POST.get('name')
+        candidate.party = request.POST.get('party')
+        candidate.save()
+        return redirect('manage_cand', election_id=candidate.election.id)
 
-    return render(request, 'edit_cand.html', {'form': form, 'candidate': candidate})
+    return render(request, 'edit_cand.html', {'candidate': candidate})
 
-
-from .models import Candidate
-
+# Delete Candidate
 def delete_candidate(request, candidate_id):
     candidate = get_object_or_404(Candidate, id=candidate_id)
-
+    
     if request.method == "POST":
         candidate.delete()
-        return redirect('manage_cand', election_id=candidate.election.id)  # Redirect to manage_cand.html
+        messages.success(request, f"Candidate '{candidate.name}' deleted successfully!")
+        return redirect('manage_cand', election_id=candidate.election.id)
 
     return render(request, 'delete_cand.html', {'candidate': candidate})
+
+# Manage Candidates (View all candidates)
 def manage_candidates(request):
-    """View to display all candidates."""
     candidates = Candidate.objects.all()
     return render(request, "manage_cand.html", {"candidates": candidates})
 
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Election, Vote
-
+# Voter Dashboard (Active Elections)
 @login_required
 def voter_dashboard(request):
-    """Display the voter dashboard with active elections."""
-    elections = Election.objects.filter(status="active")  # Show only active elections
+    elections = Election.objects.filter(status="active")
+    return render(request, "voter_dashboard.html", {"elections": elections})
 
-    context = {
-        "elections": elections,
-    }
-    return render(request, "voter_dashboard.html", context)
-
+# Voting Process
 @login_required
 def vote(request):
-    """Handles the voting process."""
     if request.method == "POST":
         election_id = request.POST.get("election_id")
         candidate_id = request.POST.get("candidate_id")
-
-        # Get the election object
+        
         election = get_object_or_404(Election, id=election_id)
 
-        # Ensure the user has not voted already
+        # Check if the user has already voted
         if Vote.objects.filter(user=request.user, election=election).exists():
             return render(request, "vote.html", {"error": "You have already voted!"})
 
         # Save the vote
-        vote = Vote(user=request.user, election=election, candidate_id=candidate_id)
-        vote.save()
+        Vote.objects.create(user=request.user, election=election, candidate_id=candidate_id)
+        return redirect("voter_dashboard")  # Redirect to dashboard after voting
 
-        return redirect("voter_dashboard")  # Redirect after voting
-
-    # Show elections for voting
     elections = Election.objects.filter(status="active")
     return render(request, "vote.html", {"elections": elections})
 
-from django.shortcuts import render
+# View Election Result (for a Post)
+def view_result(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    candidates = Candidate.objects.filter(position=post)
+    return render(request, "view_result.html", {
+        "post": post,
+        "candidates": candidates
+    })
+
+
+# Voter Dashboard (Active Elections)
+@login_required
+def voter_dashboard(request):
+    elections = Election.objects.filter(status="active")
+    return render(request, "voter_dashboard.html", {"elections": elections})
+
+# Voting Process
+@login_required
+def vote(request):
+    if request.method == "POST":
+        election_id = request.POST.get("election_id")
+        candidate_id = request.POST.get("candidate_id")
+        
+        election = get_object_or_404(Election, id=election_id)
+
+        # Check if the user has already voted
+        if Vote.objects.filter(user=request.user, election=election).exists():
+            return render(request, "vote.html", {"error": "You have already voted!"})
+
+        # Save the vote
+        Vote.objects.create(user=request.user, election=election, candidate_id=candidate_id)
+        return redirect("voter_dashboard")  # Redirect to dashboard after voting
+
+    elections = Election.objects.filter(status="active")
+    return render(request, "vote.html", {"elections": elections})
+
+# View Election Result (for a Post)
+def view_result(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    candidates = Candidate.objects.filter(position=post)
+    return render(request, "view_result.html", {
+        "post": post,
+        "candidates": candidates
+    })
+
 
 def view_result(request):
     return render(request, "view_result.html")  # Ensure you have a 'results.html' template
 
-from django.shortcuts import render
-from .models import Candidate, Post
 
-from django.shortcuts import render, get_object_or_404
-from .models import Post, Candidate  # Import your models
+
 
 def view_result(request, post_id):
     post = get_object_or_404(Post, id=post_id)  # Get the election post
@@ -289,5 +480,7 @@ def view_result(request, post_id):
         "post": post,
         "candidates": candidates
     })
+
+
 
 

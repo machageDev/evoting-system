@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
+
+
 
 {% block title %}Manage Elections{% endblock %}
 
@@ -39,17 +42,22 @@
                         {% elif election.status == 'active' %}
                         <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
                         {% else %}
-                        <span class="badge bg-secondary"><i class="fas fa-flag-checkered text-light"></i> <span class= "text-light">Completed</span></span>
+                        <span class="badge bg-secondary"><i class="fas fa-flag-checkered text-light"></i> <span class="text-light">Completed</span></span>
                         {% endif %}
                     </td>
                     <td>
-                        <button onclick = "openModal('{{election.id}}','{{election.name}}','{{election.status}}','{{election.election_date}}')"class="btn btn-warning btn-sm">
+                        <!-- Edit Election Button -->
+                        <button class="btn btn-warning btn-sm edit-election-btn" 
+                            data-id="{{ election.id }}" 
+                            data-name="{{ election.name }}" 
+                            data-status="{{ election.status }}" 
+                            data-date="{{ election.election_date }}">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <a href="{% url 'create_candidate'%}?id={{election.id}}" class="btn btn-success btn-sm">
+                        <a href="{% url 'create_candidate' %}?id={{ election.id }}" class="btn btn-success btn-sm">
                             <i class="fas fa-plus"></i> Add Candidate
                         </a>
-                        <a href="{% url 'delete_election'%}?id={{election.id}}" class="btn btn-danger btn-sm">
+                        <a href="{% url 'delete_election' %}?id={{ election.id }}" class="btn btn-danger btn-sm">
                             <i class="fas fa-trash-alt"></i> Delete
                         </a>
                     </td>
@@ -65,4 +73,58 @@
         </table>
     </div>
 </div>
+
+<!-- Edit Election Modal -->
+<div id="editElectionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h3>Edit Election</h3>
+        <form method="POST" action="{% url 'edit_election' %}">
+            {% csrf_token %}
+            <input type="hidden" id="editElectionId" name="election_id">
+            
+            <label for="editElectionName">Election Name:</label>
+            <input type="text" id="editElectionName" name="name" required>
+
+            <label for="editElectionDate">Election Date:</label>
+            <input type="date" id="editElectionDate" name="election_date" required>
+
+            <label for="editElectionStatus">Status:</label>
+            <select id="editElectionStatus" name="status" required>
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function openEditModal(id, name, status, date) {
+            document.getElementById("editElectionId").value = id;
+            document.getElementById("editElectionName").value = name;
+            document.getElementById("editElectionStatus").value = status;
+            document.getElementById("editElectionDate").value = date;
+            document.getElementById("editElectionModal").style.display = "block";
+        }
+
+        document.querySelectorAll(".edit-election-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let electionId = this.getAttribute("data-id");
+                let electionName = this.getAttribute("data-name");
+                let electionStatus = this.getAttribute("data-status");
+                let electionDate = this.getAttribute("data-date");
+                openEditModal(electionId, electionName, electionStatus, electionDate);
+            });
+        });
+
+        document.getElementById("closeModal").addEventListener("click", function () {
+            document.getElementById("editElectionModal").style.display = "none";
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,25 +1,23 @@
 {% extends 'base.html' %}
-{ % load_cripsy_form %}
 
 {% block title %}Vote Now{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2><i class="fas fa-check"></i> Cast Your Vote</h2>
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center text-primary"><i class="fas fa-check"></i> Cast Your Vote</h2>
 
     <!-- Display Voter Information -->
     {% if user.is_authenticated %}
     <div class="alert alert-info">
-        <p><strong>Name:</strong> {{ user.vote.name }}</p>
-        <p><strong>Username:</strong> {{ user.vote.username }}</p>
-        <p><strong>Age:</strong> {{ user.vote.age }}</p>
+        <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+        <p><strong>Username:</strong> {{ user.username }}</p>
     </div>
     {% endif %}
 
     <!-- Voting Form -->
-    <form method="POST" action="{% url 'vote' %}">
+    <form method="POST" action="{% url 'vote' %}" class="mt-3">
         {% csrf_token %}
-        
+
         <div class="mb-3">
             <label for="election" class="form-label">Select Election</label>
             <select class="form-control" name="election_id" required>
@@ -42,8 +40,9 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary"><i class="fas fa-vote-yea"></i> Submit Vote</button>
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-vote-yea"></i> Submit Vote
+        </button>
     </form>
-
 </div>
 {% endblock %}
