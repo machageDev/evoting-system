@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . views import user_profile
 
 
 
@@ -34,10 +35,10 @@ urlpatterns = [
 
 
      
-    path('create-candidate', views.create_candidate, name='create_candidate'),
-    path('edit-cand', views.edit_candidate, name='edit_cand'),
-    path('delete-candidate', views.delete_candidate, name="delete_candidate"),
-    path("manage-cand", views.manage_candidates, name="manage_candidates"),
+    path('create_candidate', views.create_candidate, name='create_candidate'),
+    path('edit_cand', views.edit_candidate, name='edit_cand'),
+    path('delete_candidate', views.delete_candidate, name="delete_candidate"),
+    path("manage_cand", views.manage_candidates, name="manage_candidates"),
 
 
 
@@ -49,15 +50,16 @@ urlpatterns = [
 
 
 
-    path("monitor/", views.monitor_voting, name="monitor_voting"),
-    path("results", views.election_results, name="results"),
+    path('monitor', views.monitor_voting, name="monitor_voting"),
+    path('results', views.election_results, name="view_result"),
     path("voter_dashboard", views.voter_dashboard, name="voter_dashboard"),
-    #path('vote/',views.voter,name="vote"),
+    path('vote',views.vote,name="vote"),
 
-    path("dashboard", views.voter_dashboard, name="voter_dashboard"),
-    path("vote", views.vote, name="vote"),    
-    path('results', views.view_result, name="view_result"),
 
+     
+
+    path('profile', user_profile, name='user_profile'),
+    path('edit_profile',views.edit_profile, name = "edit_profile"),
 
  
     

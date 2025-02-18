@@ -352,47 +352,81 @@ def election_results(request, election_id):
     return render(request, "election_results.html", {"election": election})
 
 # Create Candidate
-def create_candidate(request, election_id):
-    election = get_object_or_404(Election, id=election_id)
-    
-    if request.method == "POST":
-        name = request.POST.get('name')
-        party = request.POST.get('party')
-        
-        # Create the candidate and associate with the election
-        candidate = Candidate.objects.create(name=name, party=party, election=election)
-        messages.success(request, f"Candidate '{candidate.name}' added to election '{election.name}' successfully!")
-        return redirect('manage_candidates', election_id=election.id)
+def create_candidate(request):
+    try:
+        if request.method == "POST":
+            name = request.POST.get('name')
+            position = request.POST.get('position')
+            profile_picture = request.FILES.get('profile_picture')
 
-    return render(request, 'create_candidate.html', {'election': election})
+            if not name or not position:
+                messages.error(request, "Name and position are required.")
+                return redirect('create_candidate')
+            try:
+                candidate = Candidate.objects.create(name=name, position=position, profile_picture=profile_picture)
+                messages.success(request, "Candidate created successfully.")
+                return redirect('manage_cand')
+            except Exception as e:
+                messages.error(request, f"Error creating candidate:")
+                return redirect('create_candidate')
+    except Exception as e:
+                messages.error(request, f"Error creating candidate: {str(e)}")
+                return redirect('manage_cande')
+    return render(request, 'create_candidate.html')    
+
 
 # Edit Candidate
-def edit_candidate(request, candidate_id):
-    candidate = get_object_or_404(Candidate, id=candidate_id)
-    
-    if request.method == "POST":
-        candidate.name = request.POST.get('name')
-        candidate.party = request.POST.get('party')
-        candidate.save()
-        return redirect('manage_cand', election_id=candidate.election.id)
+def edit_candidate(request):
+    try:
+        if request.method == "POST":
+            candidate_name = request.POST.get('name')
+            candidate_party = request.POST.get('party')
 
-    return render(request, 'edit_cand.html', {'candidate': candidate})
+            candidate = Candidate.objects.filter(name=candidate_name, party=candidate_party).first()
+            if not candidate:
+                messages.error(request, "Candidate not found.")
+                return redirect('manage_cand')
+
+            candidate.name = candidate_name
+            candidate.party = candidate_party
+            candidate.save()
+            messages.success(request, f"Candidate '{candidate.name}' updated successfully!")
+            return redirect('manage_cand')
+
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+        return redirect('manage_cand')
+
+    return render(request, 'edit_cand.html')
+
 
 # Delete Candidate
-def delete_candidate(request, candidate_id):
-    candidate = get_object_or_404(Candidate, id=candidate_id)
-    
-    if request.method == "POST":
-        candidate.delete()
-        messages.success(request, f"Candidate '{candidate.name}' deleted successfully!")
-        return redirect('manage_cand', election_id=candidate.election.id)
+def delete_candidate(request):
+    try:
+        if request.method == "POST":
+            candidate_name = request.POST.get('name')
+            candidate = Candidate.objects.filter(name=candidate_name).first()
 
-    return render(request, 'delete_cand.html', {'candidate': candidate})
+            if not candidate:
+                messages.error(request, "Candidate not found.")
+                return redirect('manage_cand')
+
+            candidate.delete()
+            messages.success(request, "Candidate deleted successfully!")
+            return redirect('manage_cand')
+
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+        return redirect('manage_cand')
+
+    return render(request, 'delete_cand.html')
+
 
 # Manage Candidates (View all candidates)
 def manage_candidates(request):
     candidates = Candidate.objects.all()
     return render(request, "manage_cand.html", {"candidates": candidates})
+
 
 # Voter Dashboard (Active Elections)
 @login_required
@@ -482,5 +516,27 @@ def view_result(request, post_id):
     })
 
 
+@login_required
+def user_profile(request):
+    return render(request, 'profile.html', {'user': request.user})
 
+@login_required
+def edit_profile(request):
+    if request.method == "POST":
+        user = request.user
+        first_name = request.POST.get('first_name')
+        last_name  = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone_number = request.POST.get('phone_number')
 
+        try:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.phone_number = phone_number
+            user.save()
+            messages.success(request,"profile updated successfully!")
+            return redirect('user_profile')
+        except Exception as e:
+            messages.error(request,f"Error updating profile:{e}")
+            return redirect('edit_profile.html',{'user':request.user})
