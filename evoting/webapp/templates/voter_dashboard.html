@@ -1,14 +1,11 @@
-
-{% load static  %}
-<head>
-<link rel="stylesheet" type="text/css" href="{% static 'css/voter.css' %}">
-</head>
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Voter Dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2><i class="fas fa-user"></i> Voter Dashboard</h2>
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-user"></i> Voter Dashboard</h2>
 
     <!-- Display Voter Info -->
     {% if user.is_authenticated and user.vote %}
@@ -19,46 +16,46 @@
     </div>
     {% endif %}
 
-    <!-- Voting Section -->
     <div class="row">
+        <!-- Voting Section -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-vote-yea"></i> Cast Your Vote</div>
-                <div class="card-body">
-                    <a href="{% url 'vote' %}" class="btn btn-primary btn-block">Vote Now</a>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white"><i class="fas fa-vote-yea"></i> Cast Your Vote</div>
+                <div class="card-body text-center">
+                    <a href="{% url 'vote' %}" class="btn btn-primary">Vote Now</a>
                 </div>
             </div>
         </div>
 
         <!-- View Results Section -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-chart-bar"></i> View Results</div>
-                <div class="card-body">
-                    <a href="{% url 'view_result' %}" class="btn btn-success btn-block">See Current Results</a>
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white"><i class="fas fa-chart-bar"></i> View Results</div>
+                <div class="card-body text-center">
+                    <a href="{% url 'view_result' %}" class="btn btn-success">See Current Results</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Active Elections Section -->
-    <h4><i class="fas fa-chart-line"></i> Active Elections</h4>
+    <h4 class="mt-5"><i class="fas fa-chart-line"></i> Active Elections</h4>
     <div class="table-responsive">
         <table class="table table-hover text-center align-middle">
             <thead class="bg-primary text-white">
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col"><i class="fas fa-poll"></i> Election Name</th>
-                    <th scope="col"><i class="fas fa-calendar-alt"></i> Date</th>
-                    <th scope="col"><i class="fas fa-info-circle"></i> Status</th>
-                    <th scope="col"><i class="fas fa-tools"></i> Actions</th>
+                    <th>#</th>
+                    <th><i class="fas fa-poll"></i> Election Name</th>
+                    <th><i class="fas fa-calendar-alt"></i> Date</th>
+                    <th><i class="fas fa-info-circle"></i> Status</th>
+                    <th><i class="fas fa-tools"></i> Actions</th>
                 </tr>
             </thead>
             <tbody>
-                
-                <tr class="table-light">
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td class="fw-bold">{{ election.name }}</td>
+                {% for election in elections %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ election.name }}</td>
                     <td>{{ election.election_date }}</td>
                     <td>
                         {% if election.status == 'pending' %}
@@ -81,35 +78,34 @@
                         {% endif %}
                     </td>
                 </tr>
-                
+                {% empty %}
                 <tr>
                     <td colspan="5" class="text-center text-muted">
                         <i class="fas fa-info-circle"></i> No active elections.
                     </td>
                 </tr>
-                
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
 <script>
-    // Fetch election results dynamically using AJAX
     function fetchResults(electionId) {
-        $.get(`/election/${electionId}/results/`, function(data) {
-            updateResults(electionId, data);
-        });
+        fetch(`/election/${electionId}/results/`)
+            .then(response => response.json())
+            .then(data => updateResults(electionId, data));
     }
 
-    // Update results display in the UI
     function updateResults(electionId, results) {
         let resultsHtml = '<ul>';
         for (const option in results) {
             resultsHtml += `<li>${option}: ${results[option]} votes</li>`;
         }
         resultsHtml += '</ul>';
-        $('#results-' + electionId).html(resultsHtml);
+        document.getElementById('results-' + electionId).innerHTML = resultsHtml;
     }
 </script>
-
 {% endblock %}

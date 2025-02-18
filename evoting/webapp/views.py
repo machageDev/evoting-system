@@ -48,68 +48,62 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 
-def create_candidate(request, election_id):
-    election = get_object_or_404(Election, id=election_id)
-
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        position = request.POST.get('position')
-        profile_picture = request.FILES.get('profile_picture')
-
-        # Handle manual validation
-        if not name or not position:
-            return render(request, 'create_candidate.html', {'error': 'All fields are required!', 'election': election})
-
-        # Save the candidate to the database
-        Candidate.objects.create(
-            name=name, 
-            position=position, 
-            profile_picture=profile_picture, 
-            election=election
-        )
-        return redirect('manage_candidates', election_id=election.id)
-
-    return render(request, 'create_candidate.html', {'election': election})
-
-
-
-def manage_candidates(request, election_id):
-    """Displays a list of candidates for a given election."""
-    election = get_object_or_404(Election, id=election_id)
-    candidates = Candidate.objects.filter(election=election)
+def create_candidate(request):
     
-    return render(request, "manage_cand.html", {
-        "election": election,
-        "candidates": candidates
-    })
+    try:
+        
+        election = Election.objects.filter(status='active').latest('date')  
 
-def create_candidate(request, election_id):
-    """Handles candidate creation without Django forms."""
-    election = get_object_or_404(Election, id=election_id)
+        if request.method == "POST":
+            name = request.POST.get("name")
+            position = request.POST.get("position")
+            profile_picture = request.FILES.get("profile_picture")
 
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        position = request.POST.get('position')
-        profile_picture = request.FILES.get('profile_picture')
+            if not name or not position:
+                messages.error(request, "Candidate name and position are required.")
+                return render(request, "create_candidate.html", {"election": election})
 
-        if not name or not position:
-            return render(request, 'create_candidate.html', {
-                'error': 'All fields are required!',
-                'election': election
-            })
+            # Create and save candidate
+            candidate = Candidate(name=name, position=position, profile_picture=profile_picture, election=election)
+            candidate.save()
+            
+            messages.success(request, "Candidate added successfully!")
+            return redirect('manage_cand')
 
-        Candidate.objects.create(
-            name=name, 
-            position=position, 
-            profile_picture=profile_picture, 
-            election=election
-        )
-        return redirect('manage_candidates', election_id=election.id)
+        return render(request, "create_candidate.html", {"election": election})
 
-    return render(request, 'create_candidate.html', {'election': election})
+    except Election.DoesNotExist:
+        messages.error(request, "No active election found.")
+        return redirect('manage_cand')
+
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+        return redirect('manage_cand')
+
+
+def manage_cand(request):
+    """Displays a list of candidates for the latest active election."""
+    try:
+        
+        election = Election.objects.filter(status='active').latest('election_date')
+
+        candidates = Candidate.objects.filter(election=election)
+
+        return render(request, "manage_cand.html", {
+            "election": election,
+            "candidates": candidates
+        })
+
+    except Election.DoesNotExist:
+        return render("No active election found.", status=404)
+
+    except Exception as e:
+        return render (f"An error occurred: {str(e)}", status=500)
+
+
 
 def edit_candidate(request, candidate_id):
-    """Handles editing an existing candidate without Django forms."""
+    
     candidate = get_object_or_404(Candidate, id=candidate_id)
 
     if request.method == 'POST':
@@ -123,7 +117,7 @@ def edit_candidate(request, candidate_id):
     return render(request, 'edit_cand.html', {'candidate': candidate})
 
 def delete_candidate(request, candidate_id):
-    """Handles deleting a candidate."""
+    
     candidate = get_object_or_404(Candidate, id=candidate_id)
     election_id = candidate.election.id
 
@@ -138,38 +132,77 @@ def delete_candidate(request, candidate_id):
 
 # Create Election
 def create_election(request):
+    
     if request.method == 'POST':
-        name = request.POST.get('name')
-        date = request.POST.get('date')
-        status = request.POST.get('status')
-        new_election = Election.objects.create(name=name, election_date=date, status=status)
-        messages.success(request, f"Election '{new_election.name}' created successfully!")
-        return redirect('manage_elections')
-    return render(request, 'create_election.html')
+        # Get form data
+        name = request.POST.get("name")
+        date = request.POST.get("date")
+        status = request.POST.get("status")
 
-# Edit Election
+        # Validate the data
+        if not name or not date:
+            messages.error(request, "Election name and date are required.")
+            return render(request, "create_election.html")  # Make sure to return an HttpResponse here
+
+        # Create and save the election
+        try:
+            election = Election(name=name, date=date, status=status)
+            election.save()
+            messages.success(request, "Election created successfully!")
+            return redirect('man_elections')  # Redirect to election management page
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return render(request, "create_election.html")  
+
+    return render(request, "create_election.html")
+
+
 def edit_election(request):
     try:
-        election = Election.objects.get(Election, pk=request.GET.get("pk"))
+        # Try to retrieve the election using a query parameter
+        election_name = request.GET.get('name')  # Use the election name instead of primary key
+        election = Election.objects.get(name=election_name)  # Get election by name or another unique field
+    except Election.DoesNotExist:
+        # Handle the case where the election doesn't exist
+        messages.error(request, "Election not found.")
+        return redirect('man_elections')  # Redirect to the election management page if not found
     except Exception as e:
-        messages.error(request,e)
-        return redirect("man_elections")
+        # General exception handling
+        messages.error(request, f"Error: {str(e)}")
+        return redirect('man_elections')
+
     if request.method == 'POST':
+        # Update the election details
         election.name = request.POST.get('name')
-        election.election_date = request.POST.get('date')
+        election.date = request.POST.get('date')
         election.status = request.POST.get('status')
         election.save()
+
         messages.success(request, f"Election '{election.name}' updated successfully!")
         return redirect('manage_elections')
+
+    # If it's a GET request, render the edit form with the election details
     return render(request, 'edit_election.html', {'election': election})
 
-# Delete Election
 def delete_election(request):
-    election_id = request.GET.get('id')
-    election = get_object_or_404(Election, id=election_id)
+    try:
+        # Get the election by name or any unique field
+        election_name = request.GET.get('name')  # Assuming you're passing the name instead of the id
+        election = Election.objects.get(name=election_name)  # Search by name instead of id
+    except Election.DoesNotExist:
+        # Handle the case where the election doesn't exist
+        messages.error(request, "Election not found.")
+        return redirect('man_elections')  # Redirect if the election doesn't exist
+    except Exception as e:
+        # Handle any other unexpected errors
+        messages.error(request, f"Error: {str(e)}")
+        return redirect('man_elections')
+
+    # Delete the election
     election.delete()
     messages.success(request, f"Election '{election.name}' deleted successfully!")
     return redirect('manage_elections')
+
 
 # Manage Elections (Display all elections)
 def manage_elections(request):
