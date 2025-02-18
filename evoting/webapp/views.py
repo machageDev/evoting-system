@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def home(request):
-    return render(request, 'index.html')
+    return render(request, 'home.html')
 
 def base(request):  # Ensure this function exists
     return render(request, 'base.html')

@@ -1,9 +1,7 @@
+{% extends 'base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 
-<!-- Link to Global CSS -->
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+{% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand main-heading" href="{% url 'home' %}">
@@ -33,6 +31,8 @@
         </div>
     </div>
 </nav>
+{% endblock %}
 
-<!-- Link to JavaScript -->
+{% block scripts %}
 <script src="{% static 'js/navbar.js' %}"></script>
+{% endblock %}
