@@ -488,13 +488,29 @@ def vote(request):
     return render(request, "vote.html", {"elections": elections})
 
 # View Election Result (for a Post)
-def view_result(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+
+def view_result(request):
+    try:
+        
+        post_name = request.GET.get('name')  
+        post = Post.objects.get(name=post_name)  
+    except Post.DoesNotExist:
+        # Handle the case where the post is not found
+        messages.error(request, "Post not found.")
+        return redirect("some_default_page")  
+    except Exception as e:
+        
+        messages.error(request, f"Error: {str(e)}")
+        return redirect("some_default_page")
+
+    # Fetch candidates related to the post
     candidates = Candidate.objects.filter(position=post)
+
     return render(request, "view_result.html", {
         "post": post,
         "candidates": candidates
     })
+
 
 
 # Voter Dashboard (Active Elections)
@@ -573,3 +589,7 @@ def edit_profile(request):
         except Exception as e:
             messages.error(request,f"Error updating profile:{e}")
             return redirect('edit_profile.html',{'user':request.user})
+ 
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)

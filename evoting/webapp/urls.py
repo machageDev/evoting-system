@@ -2,6 +2,10 @@ from django.urls import path
 from . import views
 from . views import user_profile
 
+from django.conf.urls import handler404
+from .views import custom_404_view
+
+handler404 = custom_404_view
 
 
 urlpatterns = [
@@ -61,6 +65,7 @@ urlpatterns = [
     path('profile', user_profile, name='user_profile'),
     path('edit_profile',views.edit_profile, name = "edit_profile"),
 
- 
+   
+
     
     ]
