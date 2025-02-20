@@ -11,27 +11,40 @@
 
     <form method="POST" class="p-4 border rounded bg-light">
         {% csrf_token %}
+        
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" class="form-control" id="username" name="username" required>
         </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="phone_number" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number">
+        </div>
+
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control" id="email" name="email" required>
         </div>
+
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
             <input type="password" class="form-control" id="password" name="password" required>
-            <small id="password-strength"></small>
-
+            <small id="password-strength" class="text-muted"></small>
         </div>
+
         <button type="submit" class="btn btn-primary w-100">Create User</button>
     </form>
-    
-
 
     <div class="text-center mt-3">
-
+        <a href="{% url 'man_users' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
     </div>
 </div>
 {% endblock %}

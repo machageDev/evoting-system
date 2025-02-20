@@ -1,0 +1,122 @@
+/* LOGIN FORM */
+
+.login {
+    background: var(--darkened-bg);
+    height: auto;
+}
+
+.login #header {
+    height: auto;
+    padding: 15px 16px;
+    justify-content: center;
+}
+
+.login #header h1 {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.login #header h1 a {
+    color: var(--header-link-color);
+}
+
+.login #content {
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+    padding: 20px;
+=======
+    padding: 20px 20px 0;
+>>>>>>> c25daed (change)
+=======
+=======
+>>>>>>> c5b4b76 (admin static files)
+=======
+>>>>>>> 76a1a11 (admin static files)
+    padding: 20px 20px 0;
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+    padding: 20px 20px 0;
+=======
+    padding: 20px;
+>>>>>>> a420006 (production settings)
+=======
+=======
+>>>>>>> b57a7f8 (admin static files)
+=======
+>>>>>>> 98751f7 (admin static files)
+    padding: 20px;
+=======
+    padding: 20px 20px 0;
+>>>>>>> c25daed (change)
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> bca57da (change)
+>>>>>>> c63776d (admin static files)
+<<<<<<< HEAD
+>>>>>>> f670750 (admin static files)
+=======
+=======
+>>>>>>> b57a7f8 (admin static files)
+<<<<<<< HEAD
+>>>>>>> c5b4b76 (admin static files)
+=======
+=======
+=======
+    padding: 20px 20px 0;
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+    padding: 20px 20px 0;
+=======
+    padding: 20px;
+>>>>>>> a420006 (production settings)
+=======
+    padding: 20px;
+=======
+    padding: 20px 20px 0;
+>>>>>>> c25daed (change)
+>>>>>>> bca57da (change)
+>>>>>>> c63776d (admin static files)
+>>>>>>> f670750 (admin static files)
+>>>>>>> 98751f7 (admin static files)
+>>>>>>> 76a1a11 (admin static files)
+}
+
+.login #container {
+    background: var(--body-bg);
+    border: 1px solid var(--hairline-color);
+    border-radius: 4px;
+    overflow: hidden;
+    width: 28em;
+    min-width: 300px;
+    margin: 100px auto;
+    height: auto;
+}
+
+.login .form-row {
+    padding: 4px 0;
+}
+
+.login .form-row label {
+    display: block;
+    line-height: 2em;
+}
+
+.login .form-row #id_username, .login .form-row #id_password {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.login .submit-row {
+    padding: 1em 0 0 0;
+    margin: 0;
+    text-align: center;
+}
+
+.login .password-reset-link {
+    text-align: center;
+}

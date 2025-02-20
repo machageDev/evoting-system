@@ -21,8 +21,6 @@ urlpatterns = [
     
     path('admin/', admin.site.urls),
     path('', include('webapp.urls')),
-    # main_project/urls.py
 
+] 
 
-
-]

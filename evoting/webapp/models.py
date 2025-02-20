@@ -40,7 +40,7 @@ class Post(models.Model):
 
 
 class Candidate(models.Model):
-    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True) 
     name = models.CharField(max_length=200)
     position = models.CharField(max_length=255,default="unknown")
     profile_picture = models.ImageField(upload_to='candidate_pics/', blank=True, null=True)  

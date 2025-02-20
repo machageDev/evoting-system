@@ -1,14 +1,13 @@
-from multiprocessing import AuthenticationError
-from sqlite3 import DatabaseError
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.contrib.auth.models import User  # Import User model
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .models import Candidate, Election, Post, Vote
-from django.contrib.auth.decorators import login_required
+
 
 
 def home(request):
@@ -24,7 +23,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('dashboard')
         else:
             return render(request, "login.html",{"error":"invalid credentials"})
     return render(request, 'login.html')
@@ -44,93 +43,15 @@ def register(request):
 
 def navbar(request):
     return render(request, 'navbar.html')
+
+
+@login_required
 def dashboard(request):
     return render(request, 'dashboard.html')
 
 
-def create_candidate(request):
-    
-    try:
-        
-        election = Election.objects.filter(status='active').latest('date')  
-
-        if request.method == "POST":
-            name = request.POST.get("name")
-            position = request.POST.get("position")
-            profile_picture = request.FILES.get("profile_picture")
-
-            if not name or not position:
-                messages.error(request, "Candidate name and position are required.")
-                return render(request, "create_candidate.html", {"election": election})
-
-            # Create and save candidate
-            candidate = Candidate(name=name, position=position, profile_picture=profile_picture, election=election)
-            candidate.save()
-            
-            messages.success(request, "Candidate added successfully!")
-            return redirect('manage_cand')
-
-        return render(request, "create_candidate.html", {"election": election})
-
-    except Election.DoesNotExist:
-        messages.error(request, "No active election found.")
-        return redirect('manage_cand')
-
-    except Exception as e:
-        messages.error(request, f"An unexpected error occurred: {str(e)}")
-        return redirect('manage_cand')
-
-
-def manage_cand(request):
-    """Displays a list of candidates for the latest active election."""
-    try:
-        
-        election = Election.objects.filter(status='active').latest('election_date')
-
-        candidates = Candidate.objects.filter(election=election)
-
-        return render(request, "manage_cand.html", {
-            "election": election,
-            "candidates": candidates
-        })
-
-    except Election.DoesNotExist:
-        return render("No active election found.", status=404)
-
-    except Exception as e:
-        return render (f"An error occurred: {str(e)}", status=500)
-
-
-
-def edit_candidate(request, candidate_id):
-    
-    candidate = get_object_or_404(Candidate, id=candidate_id)
-
-    if request.method == 'POST':
-        candidate.name = request.POST.get('name')
-        candidate.position = request.POST.get('position')
-        if 'profile_picture' in request.FILES:
-            candidate.profile_picture = request.FILES.get('profile_picture')
-        candidate.save()
-        return redirect('manage_candidates', election_id=candidate.election.id)
-
-    return render(request, 'edit_cand.html', {'candidate': candidate})
-
-def delete_candidate(request, candidate_id):
-    
-    candidate = get_object_or_404(Candidate, id=candidate_id)
-    election_id = candidate.election.id
-
-    if request.method == "POST":
-        candidate.delete()
-        return redirect('manage_candidates', election_id=election_id)
-
-    return render(request, 'delete_cand.html', {'candidate': candidate})
-
-
-
-
 # Create Election
+@login_required 
 def create_election(request):
     
     if request.method == 'POST':
@@ -184,30 +105,37 @@ def edit_election(request):
     # If it's a GET request, render the edit form with the election details
     return render(request, 'edit_election.html', {'election': election})
 
-def delete_election(request):
-    try:
-        # Get the election by name or any unique field
-        election_name = request.GET.get('name')  # Assuming you're passing the name instead of the id
-        election = Election.objects.get(name=election_name)  # Search by name instead of id
-    except Election.DoesNotExist:
-        # Handle the case where the election doesn't exist
-        messages.error(request, "Election not found.")
-        return redirect('man_elections')  # Redirect if the election doesn't exist
-    except Exception as e:
-        # Handle any other unexpected errors
-        messages.error(request, f"Error: {str(e)}")
-        return redirect('man_elections')
 
-    # Delete the election
-    election.delete()
-    messages.success(request, f"Election '{election.name}' deleted successfully!")
-    return redirect('manage_elections')
+# views.py
+
+# views.py
+
+
+def delete_election(request):
+    election_id = request.GET.get('id')  
+    try:
+        election = Election.objects.get(id=election_id)
+        election.delete()
+        return redirect('man_elections') 
+    except Election.DoesNotExist:
+        return redirect('man_elections')  
+
+
 
 
 # Manage Elections (Display all elections)
+@login_required
 def manage_elections(request):
+    if request.method == "POST":
+        election_id = request.POST.get("election_id")
+        election = get_object_or_404(Election, id=election_id)
+        election.delete()
+        messages.success(request, "Election deleted successfully!")
+        return redirect('manage_elections')  # Redirect after deletion
+
     elections = Election.objects.all()
     return render(request, 'man_elections.html', {'elections': elections})
+
 
 # Step 1: Generate and send OTP
 def send_otp(request):
@@ -279,17 +207,19 @@ def reset_password(request):
 
 
 # Monitor Voting (Ongoing Elections)
+@login_required
 def monitor_voting(request):
     """View to display ongoing elections."""
     ongoing_elections = Election.objects.filter(status="Ongoing")
     return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
 
 # Election Results
+@login_required
 def view_result(request, election_id):
     """View to display election results."""
     election = get_object_or_404(Election, id=election_id)
     return render(request, "election_results.html", {"election": election})
-
+@login_required
 def election_results(request, election_id):
     """View to display election results."""
     election = get_object_or_404(Election, id=election_id)
@@ -298,117 +228,97 @@ def election_results(request, election_id):
 
 
 # Create User
+@login_required
+
+
+@login_required
 def create_user(request):
     if request.method == "POST":
         username = request.POST.get('username')
-        password = request.POST.get('password')
         email = request.POST.get('email')
-        
-        # Create the user object
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
-        
-        return redirect('man_users')  # Redirect to the user management page
-    return render(request, 'create_user.html')
-def man_users(request):
-    if not request.user.is_authenticated:
-        return redirect('login')  
+        password = request.POST.get('password')
 
-    try:
-        users = User.objects.all()  
-    except DatabaseError as e:
-        
-        print(f"Database error occurred: {e}")
-        users = []  
-
-    context = {
-        'users': users
-    }
-    return render(request, 'man_users.html', context)
-
-
-
-def edit_user(request):
-    try:
-        user_id = request.GET.get('user_id')  # Get user_id from request
-        if not user_id:
-            messages.error(request, "User ID is missing.")
-            return redirect('manage_users')
-
-        user = get_object_or_404(User, id=user_id)
-
-        if request.method == "POST":
-            user.username = request.POST.get('username')
-            user.email = request.POST.get('email')
-            if request.POST.get('password'):
-                user.set_password(request.POST.get('password'))  # Update password securely
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
-            messages.success(request, "User updated successfully.")
-            return redirect('man_users')  # Redirect to user management page
-
-        return render(request, 'edit_user.html', {'user': user})
-
-    except Exception as e:
-        messages.error(request, f"Error updating user: {str(e)}")
-        return redirect('man_users')  # Redirect in case of errors
-
-
-def delete_user(request):
-    try:
-        user_id = request.GET.get('user_id')  # Get user_id from request
-        if not user_id:
-            messages.error(request, "User ID is missing.")
+            messages.success(request, "User created successfully.")
             return redirect('man_users')
 
-        user = get_object_or_404(User, id=user_id)
+        except Exception as e:
+            messages.error(request, f"Error creating user: {str(e)}")
 
-        if request.method == "POST":
-            user.delete()
-            messages.success(request, "User deleted successfully.")
-            return redirect('man_users')  # Redirect to user management page
+    return render(request, 'create_user.html')
 
-        return render(request, 'delete_user.html', {'user': user})
 
+
+
+@login_required
+def man_users(request):
+    """View to manage users."""
+    try:
+        users = User.objects.all()  # Fetch all users
     except Exception as e:
-        messages.error(request, f"Error deleting user: {str(e)}")
-        return redirect('man_users')  # Redirect in case of errors
+        messages.error(request, f"Database error: {e}")
+        users = []
+    
+    return render(request, 'man_users.html', {'users': users})
 
 
-# Monitor Voting (Ongoing Elections)
-def monitor_voting(request):
-    ongoing_elections = Election.objects.filter(status="Ongoing")
-    return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
 
-# Election Results
-def election_results(request, election_id):
-    election = get_object_or_404(Election, id=election_id)
-    return render(request, "election_results.html", {"election": election})
+@login_required
+def edit_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        
+        if request.POST.get('password'):
+            user.set_password(request.POST.get('password'))
+
+        user.save()
+        messages.success(request, "User updated successfully.")
+        return redirect('man_users')
+
+    return render(request, 'edit_user.html', {'user': user})
+
+@login_required
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        user.delete()
+        messages.success(request, "User deleted successfully.")
+        return redirect('man_users')
+
+    return render(request, 'delete_user.html', {'user': user})
+
 
 # Create Candidate
-def create_candidate(request):
-    try:
-        if request.method == "POST":
-            name = request.POST.get('name')
-            position = request.POST.get('position')
-            profile_picture = request.FILES.get('profile_picture')
 
-            if not name or not position:
-                messages.error(request, "Name and position are required.")
-                return redirect('create_candidate')
-            try:
-                candidate = Candidate.objects.create(name=name, position=position, profile_picture=profile_picture)
-                messages.success(request, "Candidate created successfully.")
-                return redirect('manage_cand')
-            except Exception as e:
-                messages.error(request, f"Error creating candidate:")
-                return redirect('create_candidate')
-    except Exception as e:
-                messages.error(request, f"Error creating candidate: {str(e)}")
-                return redirect('manage_cande')
-    return render(request, 'create_candidate.html')    
+@login_required
+def create_candidate(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        position = request.POST.get('position')
+        profile_picture = request.FILES.get('profile_picture')
+
+        if not name or not position:
+            messages.error(request, "Name and position are required.")
+            return redirect('create_candidate')  
+
+        try:
+            Candidate.objects.create(name=name, position=position, profile_picture=profile_picture)
+            messages.success(request, "Candidate added successfully.")
+            return redirect('manage_cand')  
+        except Exception as e:
+            messages.error(request, f"Error adding candidate: {str(e)}")
+
+    return render(request, 'create_candidate.html') 
 
 
 # Edit Candidate
+
 def edit_candidate(request):
     try:
         if request.method == "POST":
@@ -456,9 +366,25 @@ def delete_candidate(request):
 
 
 # Manage Candidates (View all candidates)
+
 def manage_candidates(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+
+        if "delete" in request.POST:  # Handle delete
+            Candidate.objects.filter(email=email).delete()
+
+        elif "edit" in request.POST:  # Handle edit
+            candidate = Candidate.objects.get(email=email)
+            candidate.username = username
+            candidate.save()
+
+        return redirect("manage_cand")
+
     candidates = Candidate.objects.all()
     return render(request, "manage_cand.html", {"candidates": candidates})
+
 
 
 # Voter Dashboard (Active Elections)
@@ -488,7 +414,7 @@ def vote(request):
     return render(request, "vote.html", {"elections": elections})
 
 # View Election Result (for a Post)
-
+@login_required
 def view_result(request):
     try:
         

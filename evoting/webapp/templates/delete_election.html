@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Election{% endblock %}
+
+{% block content %}
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center mb-4 text-danger">
+        <i class="fas fa-trash-alt"></i> Confirm Delete Election
+    </h2>
+    
+    <p class="text-center">Are you sure you want to delete the election "<strong>{{ election.name }}</strong>"?</p>
+    
+    <form method="POST" action="{% url 'delete_election' %}">
+        {% csrf_token %}
+        <div class="text-center">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-check-circle"></i> Yes, Delete
+            </button>
+            <a href="{% url 'man_elections' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

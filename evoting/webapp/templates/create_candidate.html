@@ -4,14 +4,13 @@
 {% block content %}
 <div class="container mt-5 p-4 shadow-lg bg-white rounded">
     <h2 class="text-center text-primary mb-4">
-        <i class="fas fa-user-plus"></i> Add Candidate  <span class="text-dark">{{ election.name }}</span>
+        <i class="fas fa-user-plus"></i> Add Candidate
     </h2>
 
-    <!-- Error Message -->
-    {% if error %}
-    <div class="alert alert-danger">
-        <strong>Error:</strong> {{ error }}
-    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
     {% endif %}
 
     <form method="POST" enctype="multipart/form-data">
@@ -39,8 +38,8 @@
     </form>
 
     <div class="text-center mt-3">
-        <a href="{url'manage_cand'}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back
+        <a href="{% url 'manage_cand' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Manage Candidates
         </a>
     </div>
 </div>

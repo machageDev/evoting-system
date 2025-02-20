@@ -1,0 +1,83 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #121212; /* Dark background */
+    color: white; /* White text */
+    padding: 20px;
+}
+
+/* Center the Dashboard */
+.dashboard-container {
+    max-width: 800px;
+    margin: auto;
+    background: #181818; /* Darker box */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Dashboard Title */
+h1, h3, h5 {
+    font-weight: bold;
+}
+
+/* Buttons Styling */
+.btn {
+    font-size: 16px;
+    padding: 10px 15px;
+    margin: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Success Button */
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #1d9237;
+}
+
+/* Disabled Button */
+.btn-block {
+    background-color: gray;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid white;
+    text-align: left;
+}
+
+th {
+    background-color: #222;
+}
+
+/* Center 'No Active Elections' Message */
+.no-elections {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #bbb;
+}
