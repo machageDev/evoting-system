@@ -44,6 +44,7 @@ urlpatterns = [
     path('edit_cand', views.edit_candidate, name='edit_cand'),
     path('delete_cand', views.delete_candidate, name='delete_cand'),
     path("manage_cand", views.manage_candidates, name='manage_cand'),
+    path('save_changes', views.save_changes, name='save_changes'),
 
 
     path('delete_user', views.delete_user, name='delete_user'),

@@ -3,34 +3,100 @@
 {% block title %}Manage Candidates{% endblock %}
 
 {% block content %}
-<h2>Candidates for {{ election.name }}</h2>
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
+    <h2 class="text-center text-primary mb-4">
+        <i class="fas fa-users"></i> Manage candidate
+    </h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for candidate in election.candidates.all %}
-        <tr>
-            <td>{{ candidate.name }}</td>
-            <td>{{ candidate.get_position_display }}</td>
-            <td>
-                <a href="{% url 'edit_candidate' candidate.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'delete_candidate' candidate.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this candidate?')">Delete</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3">No candidates available.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <div class="text-end mb-3">
+        <a href="{% url 'create_candidate' %}" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Add Candidate
+        </a>
+    </div>  
 
-<a href="{% url 'create_candidate'%}?id={{election.id}}" class="btn btn-primary">Add New Candidate</a>
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Election</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for candidate in candidates %}
+            <tr id="candidate-row-{{ candidate.id }}">
+                <td>{{ candidate.id }}</td>
+                <td id="name-{{ candidate.id }}">{{ candidate.name }}</td>
+                <td id="position-{{ candidate.id }}">{{ candidate.position }}</td>
+                <td>{{ candidate.election.name }}</td>
+                <td>
+                    <!-- Edit Candidate -->
+                    <button onclick="editCandidate({{ candidate.id }})" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+
+                    <!-- Delete Candidate -->
+                    <button onclick="deleteCandidate({{ candidate.id }})" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No candidates found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Hidden Form to handle Edit and Delete -->
+<form id="editDeleteForm" method="POST" action="{% url 'save_changes' %}">
+    {% csrf_token %}
+    <input type="hidden" name="candidate_id" id="hidden_candidate_id">
+    <input type="hidden" name="name" id="hidden_name">
+    <input type="hidden" name="position" id="hidden_position">
+</form>
+<script>
+    function editCandidate(candidateId) {
+        // Get the current values of the candidate
+        let currentName = document.getElementById(`name-${candidateId}`).innerText;
+        let currentPosition = document.getElementById(`position-${candidateId}`).innerText;
+
+        // Prompt the user for new values
+        let newName = prompt("Enter new name:", currentName);
+        let newPosition = prompt("Enter new position:", currentPosition);
+
+        if (newName && newPosition) {
+            // Update the table values immediately
+            document.getElementById(`name-${candidateId}`).innerText = newName;
+            document.getElementById(`position-${candidateId}`).innerText = newPosition;
+
+            // Populate the hidden form with the new values
+            document.getElementById("hidden_candidate_id").value = candidateId;
+            document.getElementById("hidden_name").value = newName;
+            document.getElementById("hidden_position").value = newPosition;
+
+            // Submit the form
+            document.getElementById("editDeleteForm").submit();
+        }
+    }
+
+    function deleteCandidate(candidateId) {
+        if (confirm("Are you sure you want to delete this candidate?")) {
+            // Remove the candidate row from the table immediately
+            let row = document.getElementById(`candidate-row-${candidateId}`);
+            row.remove();
+
+            // Populate the hidden form with the candidate ID to delete
+            document.getElementById("hidden_candidate_id").value = candidateId;
+
+            // Submit the form to delete the candidate
+            document.getElementById("editDeleteForm").submit();
+        }
+    }
+</script>
 
 {% endblock %}

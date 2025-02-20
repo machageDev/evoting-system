@@ -338,6 +338,7 @@ def create_candidate(request):
 
 
 # MANAGE CANDIDATES
+@login_required
 def manage_candidates(request):
     try:
         position = request.GET.get('position', '')  # Get filter from query params
@@ -350,34 +351,56 @@ def manage_candidates(request):
         candidates = []
 
     return render(request, 'manage_cand.html', {'candidates': candidates, 'selected_position': position})
+                  
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from .models import Candidate
-
-# Edit Candidate
 def edit_candidate(request):
     if request.method == "POST":
-        candidate_id = request.POST.get('candidate_id')
-        name = request.POST.get('name')
-        position = request.POST.get('position')
+        candidate_id = request.POST.get("candidate_id")
+        new_name = request.POST.get("name")
+        new_position = request.POST.get("position")
 
-        candidate = Candidate.objects.get(id=candidate_id)
-        candidate.name = name
-        candidate.position = position
+        candidate = get_object_or_404(Candidate, id=candidate_id)
+        candidate.name = new_name
+        candidate.position = new_position
         candidate.save()
 
-        return JsonResponse({'status': 'success'})
+        messages.success(request, "Candidate updated successfully.")
+        return redirect('manage_cand')
 
-# Delete Candidate
+    messages.error(request, "Invalid request.")
+    return redirect('manage_cand')
+
 def delete_candidate(request):
     if request.method == "POST":
-        candidate_id = request.POST.get('candidate_id')
-        candidate = Candidate.objects.get(id=candidate_id)
+        candidate_id = request.POST.get("candidate_id")
+
+        candidate = get_object_or_404(Candidate, id=candidate_id)
         candidate.delete()
 
-        return JsonResponse({'status': 'success'})
+        messages.success(request, "Candidate deleted successfully.")
+        return redirect('manage_cand')
 
+    messages.error(request, "Invalid request.")
+    return redirect('manage_cand')
+
+
+def save_changes(request):
+    if request.method == "POST":
+        candidate_id = request.POST.get("candidate_id")
+        name = request.POST.get("name")
+        position = request.POST.get("position")
+
+        try:
+            # Fetch the candidate by ID and update their details
+            candidate = get_object_or_404(Candidate, id=candidate_id)
+            candidate.name = name
+            candidate.position = position
+            candidate.save()  # Save changes to the database
+            return redirect('manage_cand')  # Redirect to candidate management page after saving changes
+        except Candidate.DoesNotExist:
+            return HttpResponse("Candidate not found.")
+    
+    return redirect('manage_cand')  # If it's not a POST request, just redirect
 
 
 
