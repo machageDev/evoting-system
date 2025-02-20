@@ -1,58 +1,142 @@
 {% extends 'base.html' %}
+{% block title %}Manage Users{% endblock %}
 
 {% block content %}
-<div class="table-responsive">
-    <table class="table table-striped table-bordered" id="dataTable">
-        <thead class="thead-dark">
+
+<table class="table table-striped table-bordered" id="dataTable">
+    <thead class="thead-dark">
+        <form action="{%}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" id="hidden_user_id">
+            
+            <!-- This will store the updated user data -->
+            <input type="hidden" name="email" id="hidden_email">
+            <input type="hidden" name="phone_number" id="hidden_phone_number">
+            
+            <button type="submit" class="btn btn-success">Save Changes</button>
+        </form>
+        
+        <tr>
+            <th>#</th>
+            <th>Username</th>
+            <th>Fullname</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            {% if not user.is_staff %}
+                <tr id="user-row-{{ user.id }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name }}</td>
+                    <td id="email-{{ user.id }}">{{ user.email }}</td>
+                    <td id="phone-{{ user.id }}">{{ user.phone_number }}</td>
+                    <td>
+                        <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ user.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </td>
+                    <td>
+                        <!-- Edit User -->
+                        <button onclick="editUser({{ user.id }})" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+
+                        <!-- Delete User -->
+                        <button onclick="deleteUser({{ user.id }})" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            {% endif %}
+        {% empty %}
             <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Fullname</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
-            {% for user in users %}
-                {% if not user.is_staff %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.get_full_name }}</td> <!-- Assuming you have a method to get full name -->
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.phone_number }}</td> <!-- Assuming you have a phone_number field -->
-                        <td>
-                            <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ user.is_active|yesno:"Active,Inactive" }}
-                            </span>
-                        </td>
-                        <td>
-                            <!-- Only show activate link for inactive users -->
-                            {% if not user.is_active %}
-                                <a href="{% url 'activate_user' %}"
-                                   class="btn btn-success btn-sm">
-                                   <i class="fas fa-user-check"></i> Activate
-                                </a>
-                            {% endif %}
-
-                            <!-- Delete User -->
-                            <a href="#" class="btn btn-danger btn-sm"
-                               onclick="confirmDelete('{{ user.id }}', '{{ user.username }}'); return false;">
-                               <i class="fas fa-trash-alt"></i> Delete
-                            </a>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center">No users available.</td>
-                </tr>                    
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-{% endblock %}
+                <td colspan="7" class="text-center">No users available.</td>
+            </tr>                    
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    function editUser(userId) {
+        let emailField = document.getElementById(`email-${userId}`);
+        let phoneField = document.getElementById(`phone-${userId}`);
+        
+        let newEmail = prompt("Enter new email:", emailField.innerText);
+        let newPhone = prompt("Enter new phone number:", phoneField.innerText);
+        
+        if (newEmail && newPhone) {
+            // Update the table values immediately
+            emailField.innerText = newEmail;
+            phoneField.innerText = newPhone;
+    
+            // Create a form dynamically to submit the edited data
+            let form = document.createElement("form");
+            form.method = "POST";
+            form.action = "{% url 'save_changes' %}";  // URL for the save_changes view
+    
+            // Add CSRF token to the form
+            let csrfToken = document.createElement("input");
+            csrfToken.type = "hidden";
+            csrfToken.name = "csrfmiddlewaretoken";
+            csrfToken.value = "{{ csrf_token }}";
+            form.appendChild(csrfToken);
+    
+            // Hidden inputs for the user ID and updated data
+            let userIdField = document.createElement("input");
+            userIdField.type = "hidden";
+            userIdField.name = "user_id";
+            userIdField.value = userId;
+            form.appendChild(userIdField);
+    
+            let emailFieldHidden = document.createElement("input");
+            emailFieldHidden.type = "hidden";
+            emailFieldHidden.name = "email";
+            emailFieldHidden.value = newEmail;
+            form.appendChild(emailFieldHidden);
+    
+            let phoneFieldHidden = document.createElement("input");
+            phoneFieldHidden.type = "hidden";
+            phoneFieldHidden.name = "phone_number";
+            phoneFieldHidden.value = newPhone;
+            form.appendChild(phoneFieldHidden);
+    
+            document.body.appendChild(form);
+            form.submit();  // Submit the form to save changes
+        }
+    }
+    
+    function deleteUser(userId) {
+        if (confirm("Are you sure you want to delete this user?")) {
+            // Remove the user row from the table immediately
+            let row = document.getElementById(`user-row-${userId}`);
+            row.remove();
+    
+            // Create a form dynamically to submit the delete request
+            let form = document.createElement("form");
+            form.method = "POST";
+            form.action = "{% url 'delete_user' %}";  // URL for the delete_user view
+    
+            // Add CSRF token to the form
+            let csrfToken = document.createElement("input");
+            csrfToken.type = "hidden";
+            csrfToken.name = "csrfmiddlewaretoken";
+            csrfToken.value = "{{ csrf_token }}";
+            form.appendChild(csrfToken);
+    
+            // Hidden input for the user ID to delete
+            let userIdField = document.createElement("input");
+            userIdField.type = "hidden";
+            userIdField.name = "user_id";
+            userIdField.value = userId;
+            form.appendChild(userIdField);
+    
+            document.body.appendChild(form);
+            form.submit();  // Submit the form to delete the user
+        }
+    }
+    </script>
+    {% endblock %}

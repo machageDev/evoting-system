@@ -229,9 +229,6 @@ def election_results(request, election_id):
 
 # Create User
 @login_required
-
-
-@login_required
 def create_user(request):
     if request.method == "POST":
         username = request.POST.get('username')
@@ -266,8 +263,8 @@ def man_users(request):
 
 
 @login_required
-def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+def edit_user(request):
+    user = get_object_or_404(User)
 
     if request.method == "POST":
         user.username = request.POST.get('username')
@@ -282,112 +279,110 @@ def edit_user(request, user_id):
 
     return render(request, 'edit_user.html', {'user': user})
 
-@login_required
-def delete_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+from django.http import HttpResponse
 
+def save_changes(request):
     if request.method == "POST":
-        user.delete()
-        messages.success(request, "User deleted successfully.")
-        return redirect('man_users')
+        user_id = request.POST.get("user_id")
+        email = request.POST.get("email")
+        phone_number = request.POST.get("phone_number")
 
+        try:
+            # Fetch the user by ID and update their details
+            user = User.objects.get(id=user_id)
+            user.email = email
+            user.phone_number = phone_number
+            user.save()  # Save changes to the database
+            return redirect('man_users')  # Redirect to user management page after saving changes
+        except User.DoesNotExist:
+            return HttpResponse("User not found.")
+    return redirect('man_users')  # If it's not a POST request, just redirect
+
+
+@login_required
+def delete_user(request):
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        try:
+            # Find the user by ID and delete them
+            user = User.objects.get(id=user_id)
+            user.delete()  # Delete the user from the database
+            return redirect('man_users')  # Redirect to the user management page
+        except User.DoesNotExist:
+            return HttpResponse("User not found.")
+    return redirect('man_users') 
     return render(request, 'delete_user.html', {'user': user})
 
 
 # Create Candidate
-
 @login_required
 def create_candidate(request):
-    if request.method == "POST":
-        name = request.POST.get('name')
-        position = request.POST.get('position')
-        profile_picture = request.FILES.get('profile_picture')
-
-        if not name or not position:
-            messages.error(request, "Name and position are required.")
-            return redirect('create_candidate')  
-
-        try:
-            Candidate.objects.create(name=name, position=position, profile_picture=profile_picture)
-            messages.success(request, "Candidate added successfully.")
-            return redirect('manage_cand')  
-        except Exception as e:
-            messages.error(request, f"Error adding candidate: {str(e)}")
-
-    return render(request, 'create_candidate.html') 
-
-
-# Edit Candidate
-
-def edit_candidate(request):
     try:
         if request.method == "POST":
-            candidate_name = request.POST.get('name')
-            candidate_party = request.POST.get('party')
+            name = request.POST.get('name')
+            position = request.POST.get('position')
+            profile_picture = request.FILES.get('profile_picture')
 
-            candidate = Candidate.objects.filter(name=candidate_name, party=candidate_party).first()
-            if not candidate:
-                messages.error(request, "Candidate not found.")
-                return redirect('manage_cand')
+            if not name or not position:
+                messages.error(request, "Name and position are required.")
+                return redirect('create_candidate')
 
-            candidate.name = candidate_name
-            candidate.party = candidate_party
-            candidate.save()
-            messages.success(request, f"Candidate '{candidate.name}' updated successfully!")
+            Candidate.objects.create(name=name, position=position, profile_picture=profile_picture)
+            messages.success(request, "Candidate added successfully.")
             return redirect('manage_cand')
 
     except Exception as e:
-        messages.error(request, f"An error occurred: {e}")
-        return redirect('manage_cand')
+        messages.error(request, f"Error creating candidate: {str(e)}")
 
-    return render(request, 'edit_cand.html')
+    return render(request, 'create_candidate.html')
 
+
+# MANAGE CANDIDATES
+def manage_candidates(request):
+    try:
+        position = request.GET.get('position', '')  # Get filter from query params
+        if position:
+            candidates = Candidate.objects.filter(position=position).order_by('name')
+        else:
+            candidates = Candidate.objects.all().order_by('name')
+    except Exception as e:
+        messages.error(request, f"Error fetching candidates: {str(e)}")
+        candidates = []
+
+    return render(request, 'manage_cand.html', {'candidates': candidates, 'selected_position': position})
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Candidate
+
+# Edit Candidate
+def edit_candidate(request):
+    if request.method == "POST":
+        candidate_id = request.POST.get('candidate_id')
+        name = request.POST.get('name')
+        position = request.POST.get('position')
+
+        candidate = Candidate.objects.get(id=candidate_id)
+        candidate.name = name
+        candidate.position = position
+        candidate.save()
+
+        return JsonResponse({'status': 'success'})
 
 # Delete Candidate
 def delete_candidate(request):
-    try:
-        if request.method == "POST":
-            candidate_name = request.POST.get('name')
-            candidate = Candidate.objects.filter(name=candidate_name).first()
-
-            if not candidate:
-                messages.error(request, "Candidate not found.")
-                return redirect('manage_cand')
-
-            candidate.delete()
-            messages.success(request, "Candidate deleted successfully!")
-            return redirect('manage_cand')
-
-    except Exception as e:
-        messages.error(request, f"An error occurred: {e}")
-        return redirect('manage_cand')
-
-    return render(request, 'delete_cand.html')
-
-
-# Manage Candidates (View all candidates)
-
-def manage_candidates(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
+        candidate_id = request.POST.get('candidate_id')
+        candidate = Candidate.objects.get(id=candidate_id)
+        candidate.delete()
 
-        if "delete" in request.POST:  # Handle delete
-            Candidate.objects.filter(email=email).delete()
-
-        elif "edit" in request.POST:  # Handle edit
-            candidate = Candidate.objects.get(email=email)
-            candidate.username = username
-            candidate.save()
-
-        return redirect("manage_cand")
-
-    candidates = Candidate.objects.all()
-    return render(request, "manage_cand.html", {"candidates": candidates})
+        return JsonResponse({'status': 'success'})
 
 
 
-# Voter Dashboard (Active Elections)
+
+
+# Voter Dashboard 
 @login_required
 def voter_dashboard(request):
     elections = Election.objects.filter(status="active")

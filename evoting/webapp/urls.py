@@ -42,7 +42,7 @@ urlpatterns = [
      
     path('create_candidate', views.create_candidate, name='create_candidate'),
     path('edit_cand', views.edit_candidate, name='edit_cand'),
-    path('delete_candidate', views.delete_candidate, name='delete_cand'),
+    path('delete_cand', views.delete_candidate, name='delete_cand'),
     path("manage_cand", views.manage_candidates, name='manage_cand'),
 
 
@@ -50,6 +50,7 @@ urlpatterns = [
     path('create_user', views.create_user,name='create_user'),
     path('edit_user', views.edit_user, name='edit_user'),
     path('man_users', views.man_users, name='man_users'),
+    path('save_changes', views.save_changes, name='save_changes'),
   
 
 

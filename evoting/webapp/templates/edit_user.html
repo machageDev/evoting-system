@@ -1,37 +1,14 @@
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
-{% block title %}Edit User{% endblock %}
+{% extends 'base.html' %}
+
+{% block title %}Edit User: {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5 p-4 shadow-lg bg-white rounded">
-    <h2 class="text-center text-warning mb-4">
-        <i class="fas fa-user-edit"></i> Edit User - {{ user.username }}
-    </h2>
-
-    <form method="POST" class="p-4 border rounded bg-light">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">New Password (optional)</label>
-            <input type="password" class="form-control" id="password" name="password">
-            <small id="password-strength"></small>
-
-        </div>
-        <button type="submit" class="btn btn-warning w-100">Update User</button>
-    </form>
-    <script src="{% static 'js/user.js' %}"></script>
-
-
-    <div class="text-center mt-3">
-        <a href="{% url 'manage_users' %}" class="btn btn-secondary">Back to User List</a>
-    </div>
-</div>
+<h2>Edit User: {{ user.username }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update User</button>
+</form>
+<a href="{% url 'man_users' %}" class="btn btn-secondary">Back to User Management</a>
 {% endblock %}
