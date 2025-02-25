@@ -157,8 +157,8 @@
                 <div id="collapseLoans" class="collapse" aria-labelledby="headingLoans" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Options</h6>
-                        <a class="collapse-item" href="#">Active Sessions</a>
-                        <a class="collapse-item" href="#">Voting Results</a>
+                        <a class="collapse-item" href="{% url 'voter_dashboard' %}">Voter Dashboard</a>
+                        <a class="collapse-item" href="#">view Results</a>
                         
                         <!--<a class="collapse-item" href="#">All loans</a>-->
                         
@@ -172,11 +172,12 @@
                     <div id="collapsemanage" class="collapse" aria-labelledby="headingLoans" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Options</h6>
-                            <a class="collapse-item" href="#">Manage Elections</a>
-                            <a class="collapse-item" href="#">New Election</a>
-                            <a class="collapse-item" href="#">Manage Users</a>
+                            <a class="collapse-item" href="{% url 'man_elections' %}">Manage Elections</a>
+                            <a class="collapse-item" href="{% url 'create_election' %}">New Election</a>
+                            <a class="collapse-item" href="{% url 'man_users' %}">Manage Users</a>
                         </div>
                     </div>
+               
                 </li>
            
             
@@ -200,7 +201,7 @@
                 </a>
                 <div id="collapseAccount" class="collapse" aria-labelledby="headingAccount" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="#">Profile</a>
+                        <a class="collapse-item" href="{% url 'profile' %}">user_Profile</a>
                         
                     </div>
                 </div>
@@ -303,13 +304,14 @@
         </div>
         <!-- End of Content Wrapper -->
 
-        <!--logout modal-->
-        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+        
+    
+        <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title" id="logoutLabel">Ready to Leave?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -317,10 +319,39 @@
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="#">Logout</a>
+                    <button class="btn btn-primary" id="logoutBtn">Logout</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Hidden CSRF Token -->
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+    <!-- JavaScript for Logout -->
+    <script>
+        document.getElementById("logoutBtn").addEventListener("click", function() {
+            let csrftoken = document.getElementById("csrf_token").value;
+
+            fetch("{% url 'logout' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = "{% url 'login' %}";  // Redirect to login page
+                } else {
+                    alert("Logout failed!");
+                    console.error("Logout failed:", response.statusText);
+                }
+            }).catch(error => {
+                console.error("Logout error:", error);
+            });
+        });
+    </script>   
+
 <script>
     
     function openModal(id,name,status,date) {

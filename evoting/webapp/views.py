@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .models import Candidate, Election, Post, Vote
-
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def home(request):
@@ -200,10 +200,6 @@ def reset_password(request):
         messages.error(request, 'Error resetting password.')
 
     return render(request, 'reset_password.html')
-
-
-
-
 
 
 # Monitor Voting (Ongoing Elections)
@@ -412,24 +408,7 @@ def voter_dashboard(request):
     return render(request, "voter_dashboard.html", {"elections": elections})
 
 # Voting Process
-@login_required
-def vote(request):
-    if request.method == "POST":
-        election_id = request.POST.get("election_id")
-        candidate_id = request.POST.get("candidate_id")
-        
-        election = get_object_or_404(Election, id=election_id)
 
-        # Check if the user has already voted
-        if Vote.objects.filter(user=request.user, election=election).exists():
-            return render(request, "vote.html", {"error": "You have already voted!"})
-
-        # Save the vote
-        Vote.objects.create(user=request.user, election=election, candidate_id=candidate_id)
-        return redirect("voter_dashboard")  # Redirect to dashboard after voting
-
-    elections = Election.objects.filter(status="active")
-    return render(request, "vote.html", {"elections": elections})
 
 # View Election Result (for a Post)
 @login_required
@@ -457,56 +436,73 @@ def view_result(request):
 
 
 
-# Voter Dashboard (Active Elections)
-@login_required
-def voter_dashboard(request):
-    elections = Election.objects.filter(status="active")
-    return render(request, "voter_dashboard.html", {"elections": elections})
-
 # Voting Process
 @login_required
+
 def vote(request):
+    try:
+        # Fetch all elections with their related candidates
+        elections = Election.objects.prefetch_related('candidate_set').all()
+
+        if request.method == "POST":
+            election_id = request.POST.get("election_id")
+            candidate_id = request.POST.get("candidate_id")
+
+            if not election_id or not candidate_id:
+                messages.error(request, "Please select both election and candidate.")
+                return redirect("vote")
+
+            # Ensure election and candidate exist
+            election = Election.objects.filter(id=election_id).first()
+            candidate = Candidate.objects.filter(id=candidate_id, election=election).first()
+
+            if not election or not candidate:
+                messages.error(request, "Invalid election or candidate selected.")
+                return redirect("vote")
+
+            # Save vote
+            Vote.objects.create(user=request.user, election=election, candidate=candidate)
+            messages.success(request, "Your vote has been successfully submitted!")
+
+            return redirect("view_results")  # Redirect to results page after voting
+
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect("vote")
+
+    return render(request, "vote.html", {"elections": elections})
+
+def submit_vote(request):
     if request.method == "POST":
         election_id = request.POST.get("election_id")
         candidate_id = request.POST.get("candidate_id")
+
+        if not election_id or not candidate_id:
+            return HttpResponse("Invalid vote. Election or candidate missing.", status=400)
+
+        # Ensure election and candidate exist
+        try:
+            election = Election.objects.get(id=election_id)
+            candidate = Candidate.objects.get(id=candidate_id, election=election)
+        except (Election.DoesNotExist, Candidate.DoesNotExist):
+            return HttpResponse("Invalid election or candidate.", status=400)
+
         
-        election = get_object_or_404(Election, id=election_id)
+        Vote.objects.create(user=request.user, election=election, candidate=candidate)
 
-        # Check if the user has already voted
-        if Vote.objects.filter(user=request.user, election=election).exists():
-            return render(request, "vote.html", {"error": "You have already voted!"})
+        return redirect("voter_dashboard")  
 
-        # Save the vote
-        Vote.objects.create(user=request.user, election=election, candidate_id=candidate_id)
-        return redirect("voter_dashboard")  # Redirect to dashboard after voting
-
-    elections = Election.objects.filter(status="active")
-    return render(request, "vote.html", {"elections": elections})
-
-# View Election Result (for a Post)
-def view_result(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    candidates = Candidate.objects.filter(position=post)
-    return render(request, "view_result.html", {
-        "post": post,
-        "candidates": candidates
-    })
-
+    return HttpResponse("Invalid request method.", status=405)
 
 def view_result(request):
-    return render(request, "view_result.html")  # Ensure you have a 'results.html' template
-
-
-
-
-def view_result(request, post_id):
-    post = get_object_or_404(Post, id=post_id)  # Get the election post
-    candidates = Candidate.objects.filter(position=post)  # Get candidates for this post
+    elections = Election.objects.all()
+    candidates = Candidate.objects.all()  # Get all candidates
 
     return render(request, "view_result.html", {
-        "post": post,
+        "elections": elections,
         "candidates": candidates
     })
+
 
 
 @login_required
@@ -537,3 +533,28 @@ def edit_profile(request):
 
 def custom_404_view(request, exception):
     return render(request, '404.html', status=404)
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html') 
+@login_required
+def edit_profile(request):
+    if request.method == "POST":
+        first_name = request.POST.get('first_name')
+        last_name  = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone_number = request.POST.get('phone_number')
+        user = request.user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+        if hasattr(user,'profile'):
+            user.profile.phone_number = phone_number
+            user.profile.save()   
+            messages.success(request,"profile updated successfully!")
+        return redirect('profile')
+    
+    return render(request,'edit_profile.html')      
+
+

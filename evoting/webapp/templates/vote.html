@@ -15,28 +15,27 @@
     {% endif %}
 
     <!-- Voting Form -->
-    <form method="POST" action="{% url 'vote' %}" class="mt-3">
+    <form method="POST" action="{% url 'submit_vote' %}" class="mt-3">
         {% csrf_token %}
 
+        <!-- Select Election -->
         <div class="mb-3">
             <label for="election" class="form-label">Select Election</label>
-            <select class="form-control" name="election_id" required>
+            <select id="election" name="election_id" class="form-control" required>
+                <option value="" disabled selected>Select an election</option>
                 {% for election in elections %}
-                <option value="{{ election.id }}">{{ election.name }}</option>
-                {% empty %}
-                <option disabled>No elections available</option>
+                <option value="{{ election.id }}" data-candidates="{{ election.candidate_set.all|join:', ' }}">
+                    {{ election.name }}
+                </option>
                 {% endfor %}
             </select>
         </div>
 
+        <!-- Choose Candidate -->
         <div class="mb-3">
             <label for="candidate" class="form-label">Choose Candidate</label>
-            <select class="form-control" name="candidate_id" required>
-                {% for candidate in candidates %}
-                <option value="{{ candidate.id }}">{{ candidate.name }}</option>
-                {% empty %}
-                <option disabled>No candidates available</option>
-                {% endfor %}
+            <select id="candidate" name="candidate_id" class="form-control" required>
+                <option value="" disabled selected>Select an election first</option>
             </select>
         </div>
 
@@ -45,4 +44,39 @@
         </button>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const electionSelect = document.getElementById("election");
+        const candidateSelect = document.getElementById("candidate");
+
+        electionSelect.addEventListener("change", function () {
+            // Clear previous candidates
+            while (candidateSelect.firstChild) {
+                candidateSelect.removeChild(candidateSelect.firstChild);
+            }
+
+            let selectedOption = electionSelect.options[electionSelect.selectedIndex];
+            let candidatesData = selectedOption.getAttribute("data-candidates");
+
+            if (candidatesData && candidatesData.trim() !== "") {
+                let candidates = candidatesData.split(", ");
+
+                candidates.forEach(candidate => {
+                    let option = document.createElement("option");
+                    let [id, name] = candidate.split("|");
+                    option.value = id;
+                    option.textContent = name;
+                    candidateSelect.appendChild(option);
+                });
+            } else {
+                let option = document.createElement("option");
+                option.textContent = "No candidates available";
+                option.disabled = true;
+                candidateSelect.appendChild(option);
+            }
+        });
+    });
+</script>
+
 {% endblock %}

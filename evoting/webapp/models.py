@@ -2,20 +2,17 @@ from django.db import models
 
 # Create your models here.
 from django.contrib.auth.models import User
-
+from django.utils.timezone import now
 
 class Vote(models.Model):
-   user = models.OneToOneField(User, on_delete=models.CASCADE)
-   name = models.CharField(max_length=200)
-   username = models.CharField(max_length=100, unique=True)
-   age = models.PositiveIntegerField()  # Corrected from CharField
-   phone_number = models.CharField(max_length=20)
-   otp_verified = models.BooleanField(default=False)
-   status = models.CharField(max_length = 50,default = 'inactive')
-   def __str__(self):
-        return self.name  # Fixed __str__ method
+    user = models.ForeignKey(User, on_delete=models.CASCADE) 
+    candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE,default=1)  
+    timestamp = models.DateTimeField(auto_now_add=True)  
 
+    def __str__(self):
+        return f"{self.user.username} voted for {self.candidate.name} in {self.candidate.election.name}"
 
+   
 class Election(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -25,7 +22,7 @@ class Election(models.Model):
     name = models.CharField(max_length=255, unique=True)
     date = models.DateField()
     from django.utils import timezone
-    some_field = models.DateTimeField(default=timezone.now)  # Example for a DateTimeField
+    some_field = models.DateTimeField(default=timezone.now)  
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
@@ -33,7 +30,7 @@ class Election(models.Model):
         return self.name
     
 class Post(models.Model):
-    name = models.CharField(max_length=100)  # e.g., "Chairman", "Secretary"
+    name = models.CharField(max_length=100) 
 
     def __str__(self):
         return self.name

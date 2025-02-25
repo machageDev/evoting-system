@@ -57,17 +57,21 @@ urlpatterns = [
 
 
     path('monitor', views.monitor_voting, name='monitor_voting'),
-    path('results', views.election_results, name='view_result'),
+    path('results', views.view_result, name='view_result'),
     path("voter_dashboard", views.voter_dashboard, name='voter_dashboard'),
     path('vote',views.vote,name="vote"),
-
+    path('submit_vote', views.submit_vote, name='submit_vote'),
 
      
 
-    path('profile', user_profile, name='user_profile'),
-    path('edit_profile',views.edit_profile, name = "edit_profile"),  
     
 
+    path('profile', views.profile, name='profile'),
+
+
+    path('edit_profile',views.edit_profile, name = "edit_profile"),  
+    
+    path('logout', LogoutView.as_view(next_page='login'), name='logout'),
 
 
     
