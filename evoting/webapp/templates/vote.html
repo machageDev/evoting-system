@@ -24,9 +24,7 @@
             <select id="election" name="election_id" class="form-control" required>
                 <option value="" disabled selected>Select an election</option>
                 {% for election in elections %}
-                <option value="{{ election.id }}" data-candidates="{{ election.candidate_set.all|join:', ' }}">
-                    {{ election.name }}
-                </option>
+                <option value="{{ election.id }}">{{ election.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -50,23 +48,28 @@
         const electionSelect = document.getElementById("election");
         const candidateSelect = document.getElementById("candidate");
 
+        // Store the candidates for each election
+        const electionCandidates = {
+            {% for election in elections %}
+                "{{ election.id }}": [
+                    {% for candidate in election.candidate_set.all %}
+                        { id: "{{ candidate.id }}", name: "{{ candidate.name }}" },
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+
         electionSelect.addEventListener("change", function () {
             // Clear previous candidates
-            while (candidateSelect.firstChild) {
-                candidateSelect.removeChild(candidateSelect.firstChild);
-            }
+            candidateSelect.innerHTML = "<option value='' disabled selected>Select a candidate</option>";
 
-            let selectedOption = electionSelect.options[electionSelect.selectedIndex];
-            let candidatesData = selectedOption.getAttribute("data-candidates");
+            let selectedElectionId = electionSelect.value;
 
-            if (candidatesData && candidatesData.trim() !== "") {
-                let candidates = candidatesData.split(", ");
-
-                candidates.forEach(candidate => {
+            if (electionCandidates[selectedElectionId] && electionCandidates[selectedElectionId].length > 0) {
+                electionCandidates[selectedElectionId].forEach(candidate => {
                     let option = document.createElement("option");
-                    let [id, name] = candidate.split("|");
-                    option.value = id;
-                    option.textContent = name;
+                    option.value = candidate.id;
+                    option.textContent = candidate.name;
                     candidateSelect.appendChild(option);
                 });
             } else {

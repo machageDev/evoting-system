@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .models import Candidate, Election, Post, Vote
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.contrib.auth import get_user_model
 
 def home(request):
     return render(request, 'home.html')
@@ -106,10 +106,6 @@ def edit_election(request):
     return render(request, 'edit_election.html', {'election': election})
 
 
-# views.py
-
-# views.py
-
 
 def delete_election(request):
     election_id = request.GET.get('id')  
@@ -182,7 +178,6 @@ def otp(request):
 
 
 # Step 3: Reset Password
-from django.contrib.auth import get_user_model
 
 def reset_password(request):
     if request.method == 'POST':
@@ -208,19 +203,6 @@ def monitor_voting(request):
     """View to display ongoing elections."""
     ongoing_elections = Election.objects.filter(status="Ongoing")
     return render(request, "monitor_voting.html", {"ongoing_elections": ongoing_elections})
-
-# Election Results
-@login_required
-def view_result(request, election_id):
-    """View to display election results."""
-    election = get_object_or_404(Election, id=election_id)
-    return render(request, "election_results.html", {"election": election})
-@login_required
-def election_results(request, election_id):
-    """View to display election results."""
-    election = get_object_or_404(Election, id=election_id)
-    return render(request, "view_result.html", {"election": election})
-
 
 
 # Create User
@@ -412,96 +394,86 @@ def voter_dashboard(request):
 
 # View Election Result (for a Post)
 @login_required
-def view_result(request):
+def result(request):
     try:
-        
-        post_name = request.GET.get('name')  
-        post = Post.objects.get(name=post_name)  
+        post_name = request.GET.get('name')
+        if not post_name:
+            messages.error(request, "No post specified.")
+            return redirect("vote")  
+
+        post = Post.objects.get(name=post_name)
     except Post.DoesNotExist:
-        # Handle the case where the post is not found
         messages.error(request, "Post not found.")
-        return redirect("some_default_page")  
+        return redirect("vote")  
     except Exception as e:
-        
         messages.error(request, f"Error: {str(e)}")
-        return redirect("some_default_page")
+        return redirect("vote")
 
     # Fetch candidates related to the post
-    candidates = Candidate.objects.filter(position=post)
+    candidates = Candidate.objects.filter(position=post)  # Ensure 'position' is the correct field
 
     return render(request, "view_result.html", {
         "post": post,
         "candidates": candidates
     })
-
-
-
-# Voting Process
 @login_required
-
 def vote(request):
-    try:
-        # Fetch all elections with their related candidates
-        elections = Election.objects.prefetch_related('candidate_set').all()
+    if request.method == "POST":
+        candidate_id = request.POST.get("candidate")
+        
+        if not candidate_id:
+            messages.error(request, "Please select a candidate.")
+            return redirect("vote")
 
-        if request.method == "POST":
+        try:
+            candidate = Candidate.objects.get(id=candidate_id)
+            
+            # Save the vote
+            vote = Vote(candidate=candidate)
+            vote.save()
+
+            messages.success(request, "Your vote has been submitted successfully!")
+            return redirect("result")  # Redirect to results page
+        except Candidate.DoesNotExist:
+            messages.error(request, "Invalid candidate selected.")
+            return redirect("vote")
+    
+    # If GET request, render the voting page
+    candidates = Candidate.objects.all()
+    return render(request, "vote.html", {"candidates": candidates})
+
+
+# Handle vote submission
+@login_required
+def submit_vote(request):
+    if request.method == "POST":
+        try:
             election_id = request.POST.get("election_id")
             candidate_id = request.POST.get("candidate_id")
 
             if not election_id or not candidate_id:
-                messages.error(request, "Please select both election and candidate.")
+                messages.error(request, "Please select both an election and a candidate.")
                 return redirect("vote")
 
-            # Ensure election and candidate exist
-            election = Election.objects.filter(id=election_id).first()
-            candidate = Candidate.objects.filter(id=candidate_id, election=election).first()
+            election = get_object_or_404(Election, id=election_id)
+            candidate = get_object_or_404(Candidate, id=candidate_id, election=election)
 
-            if not election or not candidate:
-                messages.error(request, "Invalid election or candidate selected.")
+            # Check if the user has already voted in this election
+            if Vote.objects.filter(user=request.user, election=election).exists():
+                messages.error(request, "You have already voted in this election.")
                 return redirect("vote")
 
-            # Save vote
+            # Save the vote
             Vote.objects.create(user=request.user, election=election, candidate=candidate)
-            messages.success(request, "Your vote has been successfully submitted!")
+            messages.success(request, f"You have successfully voted for {candidate.name} in {election.name}.")
 
-            return redirect("view_results")  # Redirect to results page after voting
+            return redirect("results")
 
-    except Exception as e:
-        messages.error(request, f"An error occurred: {str(e)}")
-        return redirect("vote")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect("vote")
 
-    return render(request, "vote.html", {"elections": elections})
-
-def submit_vote(request):
-    if request.method == "POST":
-        election_id = request.POST.get("election_id")
-        candidate_id = request.POST.get("candidate_id")
-
-        if not election_id or not candidate_id:
-            return HttpResponse("Invalid vote. Election or candidate missing.", status=400)
-
-        # Ensure election and candidate exist
-        try:
-            election = Election.objects.get(id=election_id)
-            candidate = Candidate.objects.get(id=candidate_id, election=election)
-        except (Election.DoesNotExist, Candidate.DoesNotExist):
-            return HttpResponse("Invalid election or candidate.", status=400)
-
-        
-        Vote.objects.create(user=request.user, election=election, candidate=candidate)
-
-        return redirect("voter_dashboard")  
-
-    return HttpResponse("Invalid request method.", status=405)
-
-def view_result(request):
-    elections = Election.objects.all()
-    candidates = Candidate.objects.all()  # Get all candidates
-
-    return render(request, "view_result.html", {
-        "elections": elections,
-        "candidates": candidates
-    })
+    return redirect("vote")
 
 
 
@@ -556,5 +528,8 @@ def edit_profile(request):
         return redirect('profile')
     
     return render(request,'edit_profile.html')      
+
+
+
 
 

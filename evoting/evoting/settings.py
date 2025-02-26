@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # Your apps    
     'webapp',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
