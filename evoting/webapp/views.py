@@ -2,13 +2,22 @@ from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
 from django.contrib import messages
-from django.contrib.auth.models import User  # Import User model
+from django.contrib.auth.models import User 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .models import Candidate, Election, Post, Vote
+from .models import Post, Voter, Vote, Candidate, Election 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Vote  
+from .serializer import CandidateSerializer, LoginSerializer, PostSerializer, VoteSerializer  
+from .serializer import RegisterSerializer
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny 
 
 def home(request):
     return render(request, 'home.html')
@@ -214,9 +223,15 @@ def create_user(request):
         password = request.POST.get('password')
 
         try:
+            # Create the regular User
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
-            messages.success(request, "User created successfully.")
+
+            # Now create the associated Voter record
+            voter = Voter.objects.create(user=user, name=username)  # Assuming name is passed or can be set to username
+            voter.save()
+
+            messages.success(request, "User and Voter created successfully.")
             return redirect('man_users')
 
         except Exception as e:
@@ -224,72 +239,71 @@ def create_user(request):
 
     return render(request, 'create_user.html')
 
-
-
-
 @login_required
 def man_users(request):
-    """View to manage users."""
+    """View to manage voters."""
     try:
-        users = User.objects.all()  # Fetch all users
+        voters = Voter.objects.all()  # Fetch all voters
     except Exception as e:
         messages.error(request, f"Database error: {e}")
-        users = []
+        voters = []
     
-    return render(request, 'man_users.html', {'users': users})
-
-
-
+    return render(request, 'man_users.html', {'voters': voters})
 @login_required
 def edit_user(request):
-    user = get_object_or_404(User)
+    voter = get_object_or_404(Voter, user__id=request.user.id)
 
     if request.method == "POST":
-        user.username = request.POST.get('username')
-        user.email = request.POST.get('email')
+        voter.user.username = request.POST.get('username')
+        voter.user.email = request.POST.get('email')
         
         if request.POST.get('password'):
-            user.set_password(request.POST.get('password'))
+            voter.user.set_password(request.POST.get('password'))
 
-        user.save()
-        messages.success(request, "User updated successfully.")
+        voter.user.save()  # Save the associated User model
+        voter.save()  # Save the Voter model
+        messages.success(request, "Voter updated successfully.")
         return redirect('man_users')
 
-    return render(request, 'edit_user.html', {'user': user})
+    return render(request, 'edit_user.html', {'voter': voter})
+
+
 
 from django.http import HttpResponse
-
 def save_changes(request):
     if request.method == "POST":
-        user_id = request.POST.get("user_id")
+        voter_id = request.POST.get("voter_id")
         email = request.POST.get("email")
         phone_number = request.POST.get("phone_number")
 
         try:
-            # Fetch the user by ID and update their details
-            user = User.objects.get(id=user_id)
-            user.email = email
-            user.phone_number = phone_number
-            user.save()  # Save changes to the database
+            # Fetch the voter by ID and update their details
+            voter = Voter.objects.get(id=voter_id)
+            voter.user.email = email  # Update associated User model
+            voter.phone_number = phone_number
+            voter.user.save()  # Save the User model
+            voter.save()  # Save the Voter model
             return redirect('man_users')  # Redirect to user management page after saving changes
-        except User.DoesNotExist:
-            return HttpResponse("User not found.")
+        except Voter.DoesNotExist:
+            return HttpResponse("Voter not found.")
     return redirect('man_users')  # If it's not a POST request, just redirect
 
 
+
+@login_required
 @login_required
 def delete_user(request):
     if request.method == "POST":
-        user_id = request.POST.get("user_id")
+        voter_id = request.POST.get("voter_id")
         try:
-            # Find the user by ID and delete them
-            user = User.objects.get(id=user_id)
-            user.delete()  # Delete the user from the database
+            # Find the voter by ID and delete them
+            voter = Voter.objects.get(id=voter_id)
+            voter.delete()  # Delete the voter from the database
             return redirect('man_users')  # Redirect to the user management page
-        except User.DoesNotExist:
-            return HttpResponse("User not found.")
-    return redirect('man_users') 
-    return render(request, 'delete_user.html', {'user': user})
+        except Voter.DoesNotExist:
+            return HttpResponse("Voter not found.")
+    return redirect('man_users')
+
 
 
 # Create Candidate
@@ -396,51 +410,43 @@ def voter_dashboard(request):
 @login_required
 def result(request):
     try:
-        post_name = request.GET.get('name')
-        if not post_name:
-            messages.error(request, "No post specified.")
-            return redirect("vote")  
+        # Fetch all active elections
+        elections = Election.objects.filter(status='active')
 
-        post = Post.objects.get(name=post_name)
-    except Post.DoesNotExist:
-        messages.error(request, "Post not found.")
-        return redirect("vote")  
+        election_results = {}
+        for election in elections:
+            # Get the candidates for this election and their vote count
+            candidates = Candidate.objects.filter(election=election)
+            results = {}
+            for candidate in candidates:
+                vote_count = Vote.objects.filter(candidate=candidate).count()
+                results[candidate.name] = vote_count
+            election_results[election.name] = results
     except Exception as e:
-        messages.error(request, f"Error: {str(e)}")
-        return redirect("vote")
+        messages.error(request, f"An error occurred while fetching results: {str(e)}")
+        election_results = {}
 
-    # Fetch candidates related to the post
-    candidates = Candidate.objects.filter(position=post)  # Ensure 'position' is the correct field
-
-    return render(request, "view_result.html", {
-        "post": post,
-        "candidates": candidates
-    })
+    return render(request, 'results.html', {'election_results': election_results})
 @login_required
 def vote(request):
-    if request.method == "POST":
-        candidate_id = request.POST.get("candidate")
-        
-        if not candidate_id:
-            messages.error(request, "Please select a candidate.")
-            return redirect("vote")
+    """View for voters to cast their votes."""
+    try:
+        elections = Election.objects.filter(status='active')  # Only show active elections
+        election_id = request.GET.get('election_id')  # Get selected election ID
 
-        try:
-            candidate = Candidate.objects.get(id=candidate_id)
-            
-            # Save the vote
-            vote = Vote(candidate=candidate)
-            vote.save()
+        if election_id:
+            # If election is selected, filter candidates for that election
+            candidates = Candidate.objects.filter(election_id=election_id)
+        else:
+            candidates = []
 
-            messages.success(request, "Your vote has been submitted successfully!")
-            return redirect("result")  # Redirect to results page
-        except Candidate.DoesNotExist:
-            messages.error(request, "Invalid candidate selected.")
-            return redirect("vote")
-    
-    # If GET request, render the voting page
-    candidates = Candidate.objects.all()
-    return render(request, "vote.html", {"candidates": candidates})
+    except Exception as e:
+        messages.error(request, f"Error fetching elections or candidates: {e}")
+        elections = []
+        candidates = []
+
+    return render(request, 'vote.html', {'elections': elections, 'candidates': candidates})
+
 
 
 # Handle vote submission
@@ -451,6 +457,7 @@ def submit_vote(request):
             election_id = request.POST.get("election_id")
             candidate_id = request.POST.get("candidate_id")
 
+            # Check if both election and candidate are selected
             if not election_id or not candidate_id:
                 messages.error(request, "Please select both an election and a candidate.")
                 return redirect("vote")
@@ -466,9 +473,9 @@ def submit_vote(request):
             # Save the vote
             Vote.objects.create(user=request.user, election=election, candidate=candidate)
             messages.success(request, f"You have successfully voted for {candidate.name} in {election.name}.")
-
+            
+            # Redirect to results page after voting
             return redirect("results")
-
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
             return redirect("vote")
@@ -529,7 +536,70 @@ def edit_profile(request):
     
     return render(request,'edit_profile.html')      
 
+from rest_framework import viewsets
+from .models import Election
+from .serializer import ElectionSerializer
+
+# Define your API view
+class VoteList(APIView):
+    def get(self, request):
+        votes = Vote.objects.all()  # Fetch all votes from the database
+        serializer = VoteSerializer(votes, many=True)  # Serialize the data
+        return Response(serializer.data)  # Return serialized data as response
+
+    def post(self, request):
+        serializer = VoteSerializer(data=request.data)  # Get the data from the request
+        if serializer.is_valid():  # Validate the data
+            serializer.save()  # Save the data to the database
+            return Response(serializer.data, status=status.HTTP_201_CREATED)  # Return success response
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Handle validation errors
+
+
+class RegisterVoter(APIView):
+    permission_classes = [AllowAny]  # ✅ Fix: Allow anyone to register
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            voter = Voter.objects.create(user=user, name=request.data.get("name", ""))
+            return Response(
+                {"message": "Voter registered successfully!", "voter_id": voter.id},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+class LoginVoter(APIView):
+    permission_classes = [AllowAny]  # ✅ Fix: Allow login for all users
 
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data["user"]
+        token, created = Token.objects.get_or_create(user=user)
+
+        voter = Voter.objects.filter(user=user).first()
+        if not voter:
+            return Response({"error": "No voter profile found for this user."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            "token": token.key,
+            "voter_id": voter.id,
+            "voter_name": voter.name,
+            "message": "Login successful!"
+        }, status=status.HTTP_200_OK)
+
+class ElectionViewSet(viewsets.ModelViewSet):
+    queryset = Election.objects.all()
+    serializer_class = ElectionSerializer
+    
+class CandidateViewSet(viewsets.ModelViewSet):
+    queryset = Candidate.objects.all()
+    serializer_class = CandidateSerializer
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer   
