@@ -1,33 +1,18 @@
 from django.urls import path
 from . import views
-from . views import LoginVoter, user_profile
+
 from django.contrib.auth.views import LogoutView
 from django.conf.urls import handler404
-from .views import custom_404_view
 
-handler404 = custom_404_view
   # webapp/urls.py
-from .views import VoteList 
-from .views import RegisterVoter
-from rest_framework.authtoken.views import obtain_auth_token
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ElectionViewSet, PostViewSet, CandidateViewSet
-
-router = DefaultRouter()
-router.register(r'elections', ElectionViewSet)
-router.register(r'posts', PostViewSet)
-router.register(r'candidates', CandidateViewSet)
 
 
-
-
-     # This includes the generated URL paths for your API views
+   # This includes the generated URL paths for your API views
 
 
 urlpatterns = [
     
-    path('api/', include(router.urls)), 
+    
     path('', views.home, name='home'),  
     path('base', views.base, name='base'),
     path('login', views.user_login, name="login"), 
@@ -89,13 +74,20 @@ urlpatterns = [
     path('logout', LogoutView.as_view(next_page='login'), name='logout'),
 
    
-
-
-    path('api/votes/', VoteList.as_view(), name='vote-list'),  # Define the API endpoint    # webapp/urls.py
-
-    path('api/register/', RegisterVoter.as_view(), name='register'),
-    path('api/login/', LoginVoter.as_view(), name='login'),
    
 
     
+    
     ]
+# urls.py
+
+from django.urls import path
+from .views import CandidateListView, ElectionListView, RegisterView, VoteView
+from .views import LoginView, custom_404_view
+urlpatterns = [
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('api/vote/', VoteView.as_view(), name='vote'),
+    path('api/elections/', ElectionListView.as_view(), name='elections_list'),
+    path('api/elections/<int:election_id>/candidates/', CandidateListView.as_view(), name='candidates_list'),
+]

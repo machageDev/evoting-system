@@ -10,14 +10,7 @@ from .models import Post, Voter, Vote, Candidate, Election
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Vote  
-from .serializer import CandidateSerializer, LoginSerializer, PostSerializer, VoteSerializer  
-from .serializer import RegisterSerializer
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny 
+
 
 def home(request):
     return render(request, 'home.html')
@@ -534,72 +527,66 @@ def edit_profile(request):
             messages.success(request,"profile updated successfully!")
         return redirect('profile')
     
-    return render(request,'edit_profile.html')      
+    return render(request,'edit_profile.html')    
+from rest_framework import status, permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from .serializers import RegisterSerializer, LoginSerializer, VoteSerializer, ElectionSerializer, CandidateSerializer
+from .models import Vote, Election, Candidate
 
-from rest_framework import viewsets
-from .models import Election
-from .serializer import ElectionSerializer
+# Registration View
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
 
-# Define your API view
-class VoteList(APIView):
-    def get(self, request):
-        votes = Vote.objects.all()  # Fetch all votes from the database
-        serializer = VoteSerializer(votes, many=True)  # Serialize the data
-        return Response(serializer.data)  # Return serialized data as response
-
-    def post(self, request):
-        serializer = VoteSerializer(data=request.data)  # Get the data from the request
-        if serializer.is_valid():  # Validate the data
-            serializer.save()  # Save the data to the database
-            return Response(serializer.data, status=status.HTTP_201_CREATED)  # Return success response
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Handle validation errors
-
-
-class RegisterVoter(APIView):
-    permission_classes = [AllowAny]  # ✅ Fix: Allow anyone to register
-
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            voter = Voter.objects.create(user=user, name=request.data.get("name", ""))
-            return Response(
-                {"message": "Voter registered successfully!", "voter_id": voter.id},
-                status=status.HTTP_201_CREATED
-            )
+            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Login View
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
 
-class LoginVoter(APIView):
-    permission_classes = [AllowAny]  # ✅ Fix: Allow login for all users
-
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        user = serializer.validated_data["user"]
-        token, created = Token.objects.get_or_create(user=user)
 
-        voter = Voter.objects.filter(user=user).first()
-        if not voter:
-            return Response({"error": "No voter profile found for this user."}, status=status.HTTP_404_NOT_FOUND)
+# Vote View
+class VoteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-        return Response({
-            "token": token.key,
-            "voter_id": voter.id,
-            "voter_name": voter.name,
-            "message": "Login successful!"
-        }, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        serializer = VoteSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Vote cast successfully!"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ElectionViewSet(viewsets.ModelViewSet):
-    queryset = Election.objects.all()
-    serializer_class = ElectionSerializer
-    
-class CandidateViewSet(viewsets.ModelViewSet):
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateSerializer
 
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer   
+# Election List View
+class ElectionListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        elections = Election.objects.all()
+        serializer = ElectionSerializer(elections, many=True)
+        return Response(serializer.data)
+
+
+# Candidate List View
+class CandidateListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, election_id, *args, **kwargs):
+        candidates = Candidate.objects.filter(election__id=election_id)
+        serializer = CandidateSerializer(candidates, many=True)
+        return Response(serializer.data)
