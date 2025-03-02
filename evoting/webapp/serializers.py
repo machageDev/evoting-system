@@ -13,14 +13,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'password', 'phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            name=validated_data['name'],
-            password=validated_data['password'],
-            phone_number=validated_data.get('phone_number', None)
-        )
-        return user
+def create(self, validated_data):
+    if 'username' not in validated_data:
+        validated_data['username'] = validated_data['email'].split('@')[0]  # Generate a username from email
+
+    user = User.objects.create_user(
+        username=validated_data['username'],
+        email=validated_data['email'],
+        password=validated_data['password'],
+        phone_number=validated_data.get('phone_number', None)
+    )
+    return user
+
 
 
 # Login Serializer
