@@ -528,6 +528,10 @@ def edit_profile(request):
         return redirect('profile')
     
     return render(request,'edit_profile.html')    
+
+
+
+
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -551,7 +555,7 @@ class RegisterView(APIView):
 from rest_framework.permissions import AllowAny
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # Allow anyone to log in
+    permission_classes = [AllowAny]  
 
     def post(self, request):
         email = request.data.get("email")

@@ -9,21 +9,21 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = Voter
+        model = Voter  
         fields = ['name', 'email', 'password', 'phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
-def create(self, validated_data):
-    if 'username' not in validated_data:
-        validated_data['username'] = validated_data['email'].split('@')[0]  # Generate a username from email
+    def create(self, validated_data):
+        
+        user = Voter.objects.create(
+            name=validated_data['name'],
+            email=validated_data['email'],
+            phone_number=validated_data.get('phone_number', None)
+        )
+        user.set_password(validated_data['password'])  
+        user.save()
+        return user
 
-    user = User.objects.create_user(
-        username=validated_data['username'],
-        email=validated_data['email'],
-        password=validated_data['password'],
-        phone_number=validated_data.get('phone_number', None)
-    )
-    return user
 
 
 
