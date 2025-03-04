@@ -103,4 +103,6 @@ class Vote(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):
-        return f"{self.user.username} voted for {self.candidate.name} in {self.candidate.election.name}"
+        candidate_name = self.candidate.name if self.candidate else "Unknown Candidate"
+        election_name = self.candidate.election.name if self.candidate and self.candidate.election else "Unknown Election"
+        return f"{self.user.username} voted for {candidate_name} in {election_name}"

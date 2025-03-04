@@ -15,10 +15,9 @@
     {% endif %}
 
     <!-- Voting Form -->
-    <form method="POST" action="{% url 'submit_vote' %}" class="mt-3">
+    <form method="POST" action="{% url 'submit_vote' %}">
         {% csrf_token %}
-
-        <!-- Select Election -->
+    
         <div class="mb-3">
             <label for="election" class="form-label">Select Election</label>
             <select id="election" name="election_id" class="form-control" required>
@@ -28,19 +27,19 @@
                 {% endfor %}
             </select>
         </div>
-
-        <!-- Choose Candidate -->
+    
         <div class="mb-3">
             <label for="candidate" class="form-label">Choose Candidate</label>
             <select id="candidate" name="candidate_id" class="form-control" required>
                 <option value="" disabled selected>Select an election first</option>
             </select>
         </div>
-
+    
         <button type="submit" class="btn btn-primary w-100">
             <i class="fas fa-vote-yea"></i> Submit Vote
         </button>
     </form>
+    
 </div>
 
 <script>
@@ -48,25 +47,23 @@
         const electionSelect = document.getElementById("election");
         const candidateSelect = document.getElementById("candidate");
 
-        // Store the candidates for each election
-        const electionCandidates = {
+        const electionsData = {
             {% for election in elections %}
                 "{{ election.id }}": [
                     {% for candidate in election.candidate_set.all %}
-                        { id: "{{ candidate.id }}", name: "{{ candidate.name }}" },
+                        { "id": "{{ candidate.id }}", "name": "{{ candidate.name }}" }{% if not forloop.last %},{% endif %}
                     {% endfor %}
-                ],
+                ]{% if not forloop.last %},{% endif %}
             {% endfor %}
         };
 
         electionSelect.addEventListener("change", function () {
             // Clear previous candidates
-            candidateSelect.innerHTML = "<option value='' disabled selected>Select a candidate</option>";
+            candidateSelect.innerHTML = '<option value="" disabled selected>Select a candidate</option>';
 
-            let selectedElectionId = electionSelect.value;
-
-            if (electionCandidates[selectedElectionId] && electionCandidates[selectedElectionId].length > 0) {
-                electionCandidates[selectedElectionId].forEach(candidate => {
+            const selectedElectionId = electionSelect.value;
+            if (electionsData[selectedElectionId]) {
+                electionsData[selectedElectionId].forEach(candidate => {
                     let option = document.createElement("option");
                     option.value = candidate.id;
                     option.textContent = candidate.name;
@@ -81,5 +78,4 @@
         });
     });
 </script>
-
-{% endblock %}
+{% endblock content %}

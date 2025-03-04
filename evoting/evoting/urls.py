@@ -37,19 +37,12 @@ urlpatterns = [
     path('', include('webapp.urls')), 
     path('admin/', admin.site.urls),
     
-    path('api/', include(router.urls)),
-
-    
-    path('api-auth/', include('rest_framework.urls')),
-
-    
-    path('api/token/', obtain_auth_token, name='api_token_auth'),
-
-    #
-    path('api/register/', RegisterView.as_view(), name='register'),
-
-    #
+    path('api/', include(router.urls)),    
+    path('api-auth/', include('rest_framework.urls')),    
+    path('api/token/', obtain_auth_token, name='api_token_auth'),    
+    path('api/register/', RegisterView.as_view(), name='register'),    
     path('api/login/', LoginView.as_view(), name='login'),
+    
     path('api/elections/', ElectionViewSet.as_view({'get': 'list'}), name='election-list'),
     path('api/candidates/', CandidateViewSet.as_view({'get': 'list'}), name='candidate-list'),
 ]

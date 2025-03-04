@@ -421,7 +421,7 @@ def result(request):
         messages.error(request, f"An error occurred while fetching results: {str(e)}")
         election_results = {}
 
-    return render(request, 'results.html', {'election_results': election_results})
+    return render(request, 'view_result.html', {'election_results': election_results})
 @login_required
 def vote(request):
     """View for voters to cast their votes."""
@@ -434,7 +434,6 @@ def vote(request):
             candidates = Candidate.objects.filter(election_id=election_id)
         else:
             candidates = []
-
     except Exception as e:
         messages.error(request, f"Error fetching elections or candidates: {e}")
         elections = []
@@ -464,13 +463,12 @@ def submit_vote(request):
             if Vote.objects.filter(user=request.user, election=election).exists():
                 messages.error(request, "You have already voted in this election.")
                 return redirect("vote")
-
             # Save the vote
             Vote.objects.create(user=request.user, election=election, candidate=candidate)
             messages.success(request, f"You have successfully voted for {candidate.name} in {election.name}.")
             
             # Redirect to results page after voting
-            return redirect("results")
+            return redirect("result")
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
             return redirect("vote")
@@ -627,9 +625,37 @@ class VoterViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        # Custom logic to handle vote creation
+        user = request.user
+        candidate_id = request.data.get('candidate')
+
+        # Check if the user has already voted in the same election (optional)
+        if Vote.objects.filter(user=user, candidate__id=candidate_id).exists():
+            return Response({"detail": "You have already voted."}, status=400)
+
+        # If no prior vote exists, proceed to create the vote
+        return super().create(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Allow users to view their vote"""
+        # You can customize this if needed, e.g., by checking ownership of the vote
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        """Allow users to update their vote"""
+        # Optionally, you can restrict users from changing their vote after voting
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """Allow users to delete their vote"""
+        # Optionally, you can customize this method as well
+        return super().destroy(request, *args, **kwargs)
 
