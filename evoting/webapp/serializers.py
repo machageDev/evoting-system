@@ -6,7 +6,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-# Serializers
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
@@ -16,6 +15,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        # Check if username already exists
+        if Voter.objects.filter(email=validated_data['email']).exists():
+            raise serializers.ValidationError({"email": "This email is already in use."})
+
         user = Voter.objects.create(
             name=validated_data['name'],
             email=validated_data['email'],
@@ -24,6 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])  
         user.save()
         return user
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
