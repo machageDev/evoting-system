@@ -1,10 +1,12 @@
-from rest_framework import serializers
+from rest_framework import serializers, viewsets, permissions
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import get_user_model, authenticate
-from .models import Election, Candidate, Vote, Voter, Post
+from .models import Election, Post, Candidate, Vote, Voter
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-User = get_user_model()
-
-# Register Serializer
+# Serializers
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
@@ -14,7 +16,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        
         user = Voter.objects.create(
             name=validated_data['name'],
             email=validated_data['email'],
@@ -24,10 +25,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
-
-
-# Login Serializer
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -38,15 +35,16 @@ class LoginSerializer(serializers.Serializer):
             return {'user': user}
         raise serializers.ValidationError("Invalid credentials")
 
-
-# Election Serializer
 class ElectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Election
-        fields = ['id', 'name', 'date', 'status']
+        fields = '__all__'
 
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
 
-# Candidate Serializer
 class CandidateSerializer(serializers.ModelSerializer):
     election = ElectionSerializer(read_only=True)
 
@@ -54,8 +52,11 @@ class CandidateSerializer(serializers.ModelSerializer):
         model = Candidate
         fields = ['id', 'name', 'position', 'election', 'profile_picture']
 
+class VoterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'name', 'email', 'phone_number']
 
-# Vote Serializer
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
@@ -65,10 +66,3 @@ class VoteSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         vote = Vote.objects.create(user=user, **validated_data)
         return vote
-
-
-# Post Serializer
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = ['id', 'name']

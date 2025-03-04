@@ -81,13 +81,7 @@ urlpatterns = [
     ]
 # urls.py
 
-from django.urls import path
-from .views import CandidateListView, ElectionListView, RegisterView, VoteView
-from .views import LoginView, custom_404_view
-urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),
-    path('api/vote/', VoteView.as_view(), name='vote'),
-    path('api/elections/', ElectionListView.as_view(), name='elections_list'),
-    path('api/elections/<int:election_id>/candidates/', CandidateListView.as_view(), name='candidates_list'),
-]
+
+# Optional: To handle 404 errors globally in your project, you can set this in your settings:
+# handler404 = 'yourapp.views.custom_404_view'
+# handler500 = 'yourapp.views.custom_500_view'

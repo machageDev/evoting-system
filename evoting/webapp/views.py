@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+
+from .serializers import CandidateSerializer, ElectionSerializer, PostSerializer, RegisterSerializer, VoteSerializer, VoterSerializer
 from .models import Post, Voter, Vote, Candidate, Election 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
@@ -530,16 +532,48 @@ def edit_profile(request):
     return render(request,'edit_profile.html')    
 
 
-
-
-from rest_framework import status, permissions
+from rest_framework import serializers, viewsets, permissions, status
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth import get_user_model, authenticate
+from .models import Election, Post, Candidate, Vote, Voter
+from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from .serializers import RegisterSerializer, LoginSerializer, VoteSerializer, ElectionSerializer, CandidateSerializer
-from .models import Vote, Election, Candidate
 
-# Registration View
+
+# Register Serializer
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = Voter
+        fields = ['name', 'email', 'password', 'phone_number']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Voter.objects.create(
+            name=validated_data['name'],
+            email=validated_data['email'],
+            phone_number=validated_data.get('phone_number', None)
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+
+# Login Serializer
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(email=data['email'], password=data['password'])
+        if user:
+            return {'user': user}
+        raise serializers.ValidationError("Invalid credentials")
+
+
+# View for Registering a New User
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -547,59 +581,55 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Registration successful!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Login View
-from rest_framework.permissions import AllowAny
-
+# View for User Login and Token Generation
 class LoginView(APIView):
-    permission_classes = [AllowAny]  
-
-    def post(self, request):
-        email = request.data.get("email")
-        password = request.data.get("password")
-
-        if not email or not password:
-            return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(username=email, password=password)
-
-        if user is not None:
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# Vote View
-class VoteView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = VoteSerializer(data=request.data, context={'request': request})
+        serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Vote cast successfully!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Election List View
-class ElectionListView(APIView):
+# ViewSets for CRUD operations on Election, Post, Candidate, Vote, and Voter
+class ElectionViewSet(viewsets.ModelViewSet):
+    queryset = Election.objects.all()
+    serializer_class = ElectionSerializer
+    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        elections = Election.objects.all()
-        serializer = ElectionSerializer(elections, many=True)
-        return Response(serializer.data)
 
-
-# Candidate List View
-class CandidateListView(APIView):
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, election_id, *args, **kwargs):
-        candidates = Candidate.objects.filter(election__id=election_id)
-        serializer = CandidateSerializer(candidates, many=True)
-        return Response(serializer.data)
+
+class CandidateViewSet(viewsets.ModelViewSet):
+    queryset = Candidate.objects.all()
+    serializer_class = CandidateSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class VoterViewSet(viewsets.ModelViewSet):
+    queryset = Voter.objects.all()
+    serializer_class = VoterSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class VoteViewSet(viewsets.ModelViewSet):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
