@@ -218,12 +218,12 @@ def create_user(request):
         password = request.POST.get('password')
 
         try:
-            # Create the regular User
+            
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
 
-            # Now create the associated Voter record
-            voter = Voter.objects.create(user=user, name=username)  # Assuming name is passed or can be set to username
+            
+            voter = Voter.objects.create(user=user, name=username)  
             voter.save()
 
             messages.success(request, "User and Voter created successfully.")
