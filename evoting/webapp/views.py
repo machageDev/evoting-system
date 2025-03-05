@@ -293,8 +293,8 @@ def delete_user(request):
         try:
             # Find the voter by ID and delete them
             voter = Voter.objects.get(id=voter_id)
-            voter.delete()  # Delete the voter from the database
-            return redirect('man_users')  # Redirect to the user management page
+            voter.delete()  
+            return redirect('man_users')  
         except Voter.DoesNotExist:
             return HttpResponse("Voter not found.")
     return redirect('man_users')
@@ -402,6 +402,7 @@ def voter_dashboard(request):
 
 
 # View Election Result (for a Post)
+from django.db.models import Count
 @login_required
 def result(request):
     try:
@@ -409,19 +410,21 @@ def result(request):
         elections = Election.objects.filter(status='active')
 
         election_results = {}
+
         for election in elections:
-            # Get the candidates for this election and their vote count
-            candidates = Candidate.objects.filter(election=election)
-            results = {}
-            for candidate in candidates:
-                vote_count = Vote.objects.filter(candidate=candidate).count()
-                results[candidate.name] = vote_count
-            election_results[election.name] = results
+            # Get candidates and their vote count in one query (optimized)
+            candidates = Candidate.objects.filter(election=election).annotate(vote_count=Count('vote'))
+
+            # Store results in a dictionary
+            results = {candidate.name: candidate.vote_count for candidate in candidates}
+
+            election_results[election.name] = results  # Store each election's results
     except Exception as e:
         messages.error(request, f"An error occurred while fetching results: {str(e)}")
         election_results = {}
 
     return render(request, 'view_result.html', {'election_results': election_results})
+
 @login_required
 def vote(request):
     """View for voters to cast their votes."""
@@ -445,11 +448,14 @@ def vote(request):
 
 # Handle vote submission
 @login_required
-def submit_vote(request):
+def submit_vote(request): 
     if request.method == "POST":
         try:
+            print("🔹 submit_vote view called!")  # Debugging
+
             election_id = request.POST.get("election_id")
             candidate_id = request.POST.get("candidate_id")
+            print(f"Received election_id: {election_id}, candidate_id: {candidate_id}")  # Debugging
 
             # Check if both election and candidate are selected
             if not election_id or not candidate_id:
@@ -458,22 +464,35 @@ def submit_vote(request):
 
             election = get_object_or_404(Election, id=election_id)
             candidate = get_object_or_404(Candidate, id=candidate_id, election=election)
+            print(f"Election: {election}, Candidate: {candidate}")  # Debugging
+
+            # Check if the user is authenticated
+            if not request.user.is_authenticated:
+                messages.error(request, "You must be logged in to vote.")
+                return redirect("login")
 
             # Check if the user has already voted in this election
-            if Vote.objects.filter(user=request.user, election=election).exists():
+            if Vote.objects.filter(user=request.user, candidate__election=election).exists():
                 messages.error(request, "You have already voted in this election.")
-                return redirect("vote")
+                return redirect("voter_dashboard")
+
             # Save the vote
-            Vote.objects.create(user=request.user, election=election, candidate=candidate)
+            vote = Vote.objects.create(user=request.user, election=election, candidate=candidate)
+            print(f"✅ Vote saved: {vote}")  # Debugging
+
             messages.success(request, f"You have successfully voted for {candidate.name} in {election.name}.")
-            
+
             # Redirect to results page after voting
             return redirect("result")
+
         except Exception as e:
+            print(f"❌ Error: {e}")  # Debugging
             messages.error(request, f"An error occurred: {str(e)}")
             return redirect("vote")
 
     return redirect("vote")
+
+
 
 
 

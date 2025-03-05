@@ -100,6 +100,7 @@ class Voter(AbstractUser):
 class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE) 
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)  
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True) 
     timestamp = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):

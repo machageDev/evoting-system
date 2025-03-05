@@ -1,44 +1,48 @@
 {% extends 'base.html' %}
+
 {% block title %}All Election Results{% endblock %}
 
 {% block content %}
-<a href="{% url 'result'  %}" class="btn btn-info">View Results</a>
-
-<div class="container mt-5 p-4 shadow-lg bg-white rounded" style="margin: 20px;">
+<div class="container mt-5 p-4 shadow-lg bg-white rounded">
     <h2 class="text-center text-primary mb-4">
-        <i class="fas fa-chart-bar"></i> Election Results for {{ post.name }}
+        <i class="fas fa-chart-bar"></i> Election Results
     </h2>
 
-    <!-- Chart Container -->
-    <div style="height: 400px; widthzz: 600px; padding: 20px;">
-        <canvas id="voteChart"></canvas>
-    </div>
+    {% for election, results in election_results.items %}
+        <h3 class="text-info">{{ election }}</h3>
+        
+        <!-- Chart Container -->
+        <div style="height: 400px; width: 600px; padding: 20px;">
+            <canvas id="voteChart_{{ election }}"></canvas>
+        </div>
 
-    <!-- Display Candidates List -->
-    <div class="mt-4">
-        <h4 class="text-center text-info mb-3"><i class="fas fa-users"></i> Candidate Votes</h4>
         <ul class="list-group list-group-flush">
-            {% for candidate in candidates %}
+            {% for candidate, votes in results.items %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <strong>{{ candidate.name }}</strong>
-                    <span class="badge bg-success rounded-pill">{{ candidate.votes }} votes</span>
+                    <strong>{{ candidate }}</strong>
+                    <span class="badge bg-success rounded-pill">{{ votes }} votes</span>
                 </li>
+            {% empty %}
+                <li class="list-group-item text-muted">No candidates or votes available.</li>
             {% endfor %}
         </ul>
-    </div>
+    {% empty %}
+        <p class="text-muted text-center">No active elections or results to display.</p>
+    {% endfor %}
 </div>
 
 <!-- Chart.js Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    var ctx = document.getElementById('voteChart').getContext('2d');
+    {% for election, results in election_results.items %}
+    var ctx = document.getElementById('voteChart_{{ election }}').getContext('2d');
     var voteChart = new Chart(ctx, {
-        type: 'pie',  
+        type: 'pie',  // Chart type
         data: {
-            labels: [{% for candidate in candidates %}"{{ candidate.name }}",{% endfor %}],  
+            labels: [{% for candidate, votes in results.items %}"{{ candidate }}",{% endfor %}],
             datasets: [{
                 label: 'Votes',
-                data: [{% for candidate in candidates %}{{ candidate.votes }},{% endfor %}],  
+                data: [{% for candidate, votes in results.items %}{{ votes }},{% endfor %}],
                 backgroundColor: ['#ff5733', '#33ff57', '#3357ff', '#ff33a8', '#f2f233'],
                 borderColor: '#fff',
                 borderWidth: 1
@@ -60,6 +64,7 @@
             }
         }
     });
+    {% endfor %}
 </script>
 
 {% endblock %}
