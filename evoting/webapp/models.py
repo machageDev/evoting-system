@@ -31,8 +31,8 @@ class Candidate(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.position}"
-from django.contrib.auth.models import AbstractUser, UserManager
-
+    
+# Custom Manager for Voter
 class VoterManager(UserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -46,26 +46,8 @@ class VoterManager(UserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
+        
         return self.create_user(email, password, **extra_fields)
-
-
-class VoterManager(UserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("The Email field must be set")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        return self.create_user(email, password, **extra_fields)
-
 
 # Custom Voter model extending AbstractUser
 class Voter(AbstractUser):
@@ -76,25 +58,28 @@ class Voter(AbstractUser):
     USERNAME_FIELD = 'email'  # Email is used as the unique identifier
     REQUIRED_FIELDS = ['name']  # 'name' must be provided as part of the registration
 
-    objects = VoterManager()  # Using custom manager
+    # Add custom manager to the custom Voter model
+    objects = VoterManager()
 
-    # Add custom related_name to avoid clash with User model's groups and permissions
+    # Remove the username field (optional)
+    username = None
+
+    # Avoid reverse relation clashes with the default User model
     groups = models.ManyToManyField(
         "auth.Group",
-        related_name="voter_set",  # Avoiding conflict with auth.User.groups
+        related_name="voter_set",  # Custom related_name for the groups field
         blank=True
     )
     
     user_permissions = models.ManyToManyField(
         "auth.Permission",
-        related_name="voter_set",  # Avoiding conflict with auth.User.user_permissions
+        related_name="voter_permissions",  # Custom related_name for the user_permissions field
         blank=True
     )
 
     def __str__(self):
         return self.email
 
-   
 
 
 class Vote(models.Model):

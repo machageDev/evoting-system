@@ -238,7 +238,7 @@ def create_user(request):
 def man_users(request):
     """View to manage voters."""
     try:
-        voters = Voter.objects.all()  # Fetch all voters
+        voters = Voter.objects.all()  
     except Exception as e:
         messages.error(request, f"Database error: {e}")
         voters = []
@@ -556,6 +556,13 @@ from .models import Election, Post, Candidate, Vote, Voter
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView  # Import the default view
+from .serializers import CustomTokenObtainPairSerializer  # Import the custom serializer
+
+# Create your custom view
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 
 # Register Serializer

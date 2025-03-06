@@ -21,6 +21,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
+from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView  # Token refresh view
+from webapp.views import CustomTokenObtainPairView 
 
 from webapp.views import RegisterView, LoginView, CandidateViewSet, ElectionViewSet, PostViewSet, VoteViewSet, VoterViewSet
 
@@ -45,6 +48,8 @@ urlpatterns = [
     
     path('api/elections/', ElectionViewSet.as_view({'get': 'list'}), name='election-list'),
     path('api/candidates/', CandidateViewSet.as_view({'get': 'list'}), name='candidate-list'),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),  # Custom login endpoint
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Refresh token
 ]
 
 # Serve media files in development mode

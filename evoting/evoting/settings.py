@@ -147,12 +147,32 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'machagefranklyn@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'qazxsw21'  # Use an app password, not your real password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# settings.py
+
+AUTHENTICATION_BACKENDS = (
+    'webapp.backends.EmailAuthBackend',  # Add the path to your custom backend
+    'django.contrib.auth.backends.ModelBackend',  # Fallback to the default backend
+)
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+# CELERY_BROKER_URL = 'amqp://localhost'
+# Configure JWT to accept 'email' instead of 'username'
+from datetime import timedelta
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'TOKEN_OBTAIN_SERIALIZER': 'webapp.serializers.CustomTokenObtainPairSerializer',
 }
