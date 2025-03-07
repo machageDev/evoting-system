@@ -11,6 +11,23 @@ from .serializers import CandidateSerializer, ElectionSerializer, PostSerializer
 from .models import Post, Voter, Vote, Candidate, Election 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import serializers, viewsets, permissions, status
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth import get_user_model, authenticate
+from .models import Election, Post, Candidate, Vote, Voter
+from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from django.http import HttpResponse
 
 
 
@@ -246,6 +263,7 @@ def man_users(request):
     return render(request, 'man_users.html', {'voters': voters})
 @login_required
 def edit_user(request):
+
     voter = get_object_or_404(Voter, user__id=request.user.id)
 
     if request.method == "POST":
@@ -255,16 +273,106 @@ def edit_user(request):
         if request.POST.get('password'):
             voter.user.set_password(request.POST.get('password'))
 
-        voter.user.save()  # Save the associated User model
-        voter.save()  # Save the Voter model
+        voter.user.save()  
+        voter.save()  
         messages.success(request, "Voter updated successfully.")
         return redirect('man_users')
 
     return render(request, 'edit_user.html', {'voter': voter})
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def apiregister(request):
+    try:
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        phone_number=request.data.get('phone_number')
+        if not all ([username, email, password,phone_number]):
+            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(username=username, password=password, email=email)
+        voter = Voter.objects.create(user=user,phone_number=phone_number)
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({"message": "User registered successfully.", "token": token.key}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_elections(request):
+    try:
+        user_id = request.GET.get('id')
+        print(id)
+        elections = Election.objects.all()
+        serialized_elections = ElectionSerializer(elections, many=True)
+        return Response(serialized_elections.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])  
+def create_election(request):
+    try:
+        name = request.data.get('name')    
+        date = request.data.get('date')      
+        election_status = request.data.get('status')        
+        if not all([name, date,  status]):
+            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)        
+        if Election.objects.filter(name=name).exists():
+            return Response({"error": "Election already exists"}, status=status.HTTP_400_BAD_REQUEST)        
+        election = Election.objects.create(
+            name=name,
+            date=date,            
+            status=election_status
+        )
+
+        return Response({"message": "Election created successfully."}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:    
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['DELETE'])
+@permission_classes([AllowAny])  
+def delete_election(request):
+    election_id = request.GET.get('id')
+    if not election_id:
+        return Response({"error": "Please provide election id"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        election = Election.objects.get(id=election_id)
+        election.delete()
+        return Response({"message": "Election deleted successfully"}, status=status.HTTP_200_OK)
+    except Election.DoesNotExist:
+        return Response({"error": "Election not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 
-from django.http import HttpResponse
+@api_view(['POST'])
+@permission_classes([AllowAny])  
+def apilogin(request):
+    try:
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not all([username,password]):
+            return Response({"error":"Incomplete data"},status=status.HTTP_400_BAD_REQUEST)
+        user = authenticate(username = username,password = password)
+        if user is not None:
+            token,created = Token.objects.get_or_create(user = user)
+            return Response({"message":"success","token":token.key},status=status.HTTP_200_OK)
+        return Response({"error":"Invalid credentials"},status = status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 def save_changes(request):
     if request.method == "POST":
         voter_id = request.POST.get("voter_id")
@@ -285,7 +393,7 @@ def save_changes(request):
 
 
 
-@login_required
+
 @login_required
 def delete_user(request):
     if request.method == "POST":
@@ -548,140 +656,4 @@ def edit_profile(request):
     
     return render(request,'edit_profile.html')    
 
-
-from rest_framework import serializers, viewsets, permissions, status
-from rest_framework.authentication import TokenAuthentication
-from django.contrib.auth import get_user_model, authenticate
-from .models import Election, Post, Candidate, Vote, Voter
-from rest_framework.authtoken.models import Token
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView  # Import the default view
-from .serializers import CustomTokenObtainPairSerializer  # Import the custom serializer
-
-# Create your custom view
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
-
-
-
-# Register Serializer
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
-
-    class Meta:
-        model = Voter
-        fields = ['name', 'email', 'password', 'phone_number']
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = Voter.objects.create(
-            name=validated_data['name'],
-            email=validated_data['email'],
-            phone_number=validated_data.get('phone_number', None)
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
-
-
-# Login Serializer
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        user = authenticate(email=data['email'], password=data['password'])
-        if user:
-            return {'user': user}
-        raise serializers.ValidationError("Invalid credentials")
-
-
-# View for Registering a New User
-class RegisterView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({"message": "Registration successful!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# View for User Login and Token Generation
-class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({"token": token.key}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ViewSets for CRUD operations on Election, Post, Candidate, Vote, and Voter
-class ElectionViewSet(viewsets.ModelViewSet):
-    queryset = Election.objects.all()
-    serializer_class = ElectionSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class CandidateViewSet(viewsets.ModelViewSet):
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class VoterViewSet(viewsets.ModelViewSet):
-    queryset = Voter.objects.all()
-    serializer_class = VoterSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-
-
-class VoteViewSet(viewsets.ModelViewSet):
-    queryset = Vote.objects.all()
-    serializer_class = VoteSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        # Custom logic to handle vote creation
-        user = request.user
-        candidate_id = request.data.get('candidate')
-
-        # Check if the user has already voted in the same election (optional)
-        if Vote.objects.filter(user=user, candidate__id=candidate_id).exists():
-            return Response({"detail": "You have already voted."}, status=400)
-
-        # If no prior vote exists, proceed to create the vote
-        return super().create(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        """Allow users to view their vote"""
-        # You can customize this if needed, e.g., by checking ownership of the vote
-        return super().retrieve(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """Allow users to update their vote"""
-        # Optionally, you can restrict users from changing their vote after voting
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        """Allow users to delete their vote"""
-        # Optionally, you can customize this method as well
-        return super().destroy(request, *args, **kwargs)
 

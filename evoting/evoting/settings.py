@@ -44,9 +44,16 @@ INSTALLED_APPS = [
 
     # Your apps    
     'webapp',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken'
+
 
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.athentication.TokenAuthentication',
+    ]
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -149,10 +156,7 @@ EMAIL_HOST_PASSWORD = 'qazxsw21'  # Use an app password, not your real password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # settings.py
 
-AUTHENTICATION_BACKENDS = (
-    'webapp.backends.EmailAuthBackend',  # Add the path to your custom backend
-    'django.contrib.auth.backends.ModelBackend',  # Fallback to the default backend
-)
+
 
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 

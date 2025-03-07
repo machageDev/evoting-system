@@ -21,9 +21,11 @@ urlpatterns = [
     path('dashboard',views.dashboard,name="dashboard"),
     
     path('logout', LogoutView.as_view(), name='logout'),
-
-    
-
+    path("apilogin",views.apilogin,name ="apilogin"),
+    path("apiregister",views.apiregister,name="apiregister"),
+    path("apielections",views.get_elections,name = "apielections"),
+    path("delete_election",views.delete_election,name="delete_election"),
+    path("create_election",views.create_election,name="create_election"),
 
     
     

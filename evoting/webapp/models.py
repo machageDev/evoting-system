@@ -50,33 +50,12 @@ class VoterManager(UserManager):
         return self.create_user(email, password, **extra_fields)
 
 # Custom Voter model extending AbstractUser
-class Voter(AbstractUser):
+class Voter(models.Model):
     name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True, max_length=254)
 
-    USERNAME_FIELD = 'email'  # Email is used as the unique identifier
-    REQUIRED_FIELDS = ['name']  # 'name' must be provided as part of the registration
-
-    # Add custom manager to the custom Voter model
-    objects = VoterManager()
-
-    # Remove the username field (optional)
-    username = None
-
-    # Avoid reverse relation clashes with the default User model
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="voter_set",  # Custom related_name for the groups field
-        blank=True
-    )
-    
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="voter_permissions",  # Custom related_name for the user_permissions field
-        blank=True
-    )
-
+    user = models.ForeignKey(User,on_delete=models.CASCADE,default = None)
     def __str__(self):
         return self.email
 
