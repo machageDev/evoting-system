@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['*']
 
                  # Application definition
 LOGIN_URL = '/login'
-# settings.py
+
 LOGOUT_REDIRECT_URL = '/'
 
 

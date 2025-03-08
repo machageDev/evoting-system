@@ -81,9 +81,3 @@ urlpatterns = [
     
     
     ]
-# urls.py
-
-
-# Optional: To handle 404 errors globally in your project, you can set this in your settings:
-# handler404 = 'yourapp.views.custom_404_view'
-# handler500 = 'yourapp.views.custom_500_view'
