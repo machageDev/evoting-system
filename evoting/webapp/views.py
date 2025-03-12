@@ -304,7 +304,7 @@ def apiregister(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@api_view
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def apiforgot_password(request):
     try:
@@ -330,7 +330,50 @@ def apiforgot_password(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def apicreate_candidate(request):
+    try:
+        required_fields = ["election", "name", "profile_picture", "position"]
+        missing_fields = [field for field in required_fields if not request.data.get(field)]
+
+        if missing_fields:
+            return Response({"error": f"Please fill all fields: {', '.join(missing_fields)}"}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
         
+        election_id = request.data.get("election")
+        name = request.data.get("name")
+        profile_picture = request.data.get("profile_picture")
+        position = request.data.get("position")  # Fixed spelling
+
+        # Validate election existence
+        try:
+            election = Election.objects.get(id=election_id)
+        except Election.DoesNotExist:
+            return Response({"error": "Election not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create a candidate object
+        candidate_data = {
+            "election": election.id,
+            "name": name,
+            "profile_picture": profile_picture,
+            "position": position
+        }
+
+        serializer = CandidateSerializer(data=candidate_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Candidate created successfully", "data": serializer.data}, 
+                            status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
