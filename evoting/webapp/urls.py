@@ -4,11 +4,6 @@ from . import views
 from django.contrib.auth.views import LogoutView
 from django.conf.urls import handler404
 
-  # webapp/urls.py
-
-
-   # This includes the generated URL paths for your API views
-
 
 urlpatterns = [
     
@@ -26,6 +21,7 @@ urlpatterns = [
     path("apielections",views.get_elections,name = "apielections"),
     path("delete_election",views.delete_election,name="delete_election"),
     path("create_election",views.create_election,name="create_election"),
+    path('apiforgot_password',views.apiforgot_password,name="apiforgot_password"),
 
     
     

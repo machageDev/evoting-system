@@ -20,15 +20,15 @@ from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import get_user_model, authenticate
 from .models import Election, Post, Candidate, Vote, Voter
 from rest_framework.authtoken.models import Token
-from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-
 from django.http import HttpResponse
-
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.urls import reverse
 
 
 def home(request):
@@ -303,6 +303,33 @@ def apiregister(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view
+@permission_classes([AllowAny])
+def apiforgot_password(request):
+    try:
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)
+        if not User.objects.filter(email=email).exists():
+            return Response({"error": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.get(email=email)
+         # Generate password reset token
+        token = default_token_generator.make_token(user)
+        reset_url = request.build_absolute_uri(reverse('password-reset-confirm', kwargs={'token': token, 'uidb64': user.pk}))
+
+        # Send password reset email
+        send_mail(
+            subject="Password Reset Request",
+            message=f"Click the link below to reset your password:\n{reset_url}",
+            from_email="no-reply@yourdomain.com",
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         
 
 @api_view(['GET'])
