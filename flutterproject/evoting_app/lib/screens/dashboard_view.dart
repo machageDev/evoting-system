@@ -18,6 +18,7 @@ class DashboardView extends StatelessWidget {
             _buildDashboardItem(context, "Results", Icons.bar_chart, "/results"),
             _buildDashboardItem(context, "Profile", Icons.person, "/profile"),
             _buildDashboardItem(context, "Settings", Icons.settings, "/settings"),
+            _buildDashboardItem(context,"vote",Icons.person,"vote"),
           ],
         ),
       ),

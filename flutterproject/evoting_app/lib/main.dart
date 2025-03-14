@@ -1,5 +1,7 @@
 
 
+import 'manage/create_candidate_view.dart';
+import '/manage/create_elections_view.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_view.dart';
 import 'screens/register_view.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterView(),
         '/forgot-password': (context) => const ForgotPasswordView(),
         '/dashboard': (context) => DashboardView(),
+        '/create-candidate': (context) => const CreateCandidateView(),
+        '/create_candidate':(context)=>CreateElectionsView(),
       },
     );
   }

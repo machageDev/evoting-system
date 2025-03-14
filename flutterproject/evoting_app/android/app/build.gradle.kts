@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "com.example.evoting_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion.set("27.0.12077973")
+
+    
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

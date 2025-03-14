@@ -3,13 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key}); // ✅ Added super.key
+  const LoginView({super.key});
 
   @override
-  LoginViewState createState() => LoginViewState(); // ✅ Removed `_`
+  LoginViewState createState() => LoginViewState();
 }
 
-class LoginViewState extends State<LoginView> { // ✅ Removed `_`
+class LoginViewState extends State<LoginView> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -23,28 +23,30 @@ class LoginViewState extends State<LoginView> { // ✅ Removed `_`
 
     try {
       final response = await http.post(
-        Uri.parse('https://your-backend.com/api/login/'), // 🔹 Replace with your Django API URL
+        Uri.parse('http://192.168.0.170:8000/apilogin/'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "username": _usernameController.text, // 🔹 Match Django username field
+          "username": _usernameController.text,
           "password": _passwordController.text,
         }),
       );
+      print(response.body);
+      if (!mounted) return; 
 
       setState(() {
         _isLoading = false;
       });
 
       if (response.statusCode == 200) {
-        // ✅ Successful login, navigate to dashboard
-        Navigator.pushReplacementNamed(context, "/dashboard");
+        Navigator.pushReplacementNamed(context, "/dashboard"); 
       } else {
-        // ❌ Login failed, show an error
         setState(() {
           _errorMessage = "Invalid username or password. Please try again.";
         });
       }
     } catch (e) {
+      if (!mounted) return; 
+      print("An error occured: ${e.toString()}");
       setState(() {
         _isLoading = false;
         _errorMessage = "Network error. Please try again.";
