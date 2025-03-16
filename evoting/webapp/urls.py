@@ -22,7 +22,8 @@ urlpatterns = [
     path("delete_election",views.delete_election,name="delete_election"),
     path("create_election",views.create_election,name="create_election"),
     path('apiforgot_password',views.apiforgot_password,name="apiforgot_password"),
-    path('apicreate_password',views.apicreate_candidate,name="apicreate_candidate"),
+    path('apicreate_candidate',views.apicreate_candidate,name="apicreate_candidate"),
+    path('apidelete_candidate',views.delete_candidate,name="apidelete_candidate"),
 
     
     

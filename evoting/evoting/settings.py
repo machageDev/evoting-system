@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-0*(0-+2)3i-^st%6n4gui!)ri%)y&+kf1q_l2!ug2#52$_lfft
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ["http://192.168.0.170:8000"]
+
 
                  # Application definition
 LOGIN_URL = '/login'
