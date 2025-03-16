@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class CreateElectionsView extends StatefulWidget {
   const CreateElectionsView({super.key});
@@ -9,7 +8,7 @@ class CreateElectionsView extends StatefulWidget {
   CreateElectionsViewState createState() => CreateElectionsViewState();
 }
 
-  class CreateElectionsViewState extends State<CreateElectionsView> {
+class CreateElectionsViewState extends State<CreateElectionsView> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   String _status = 'pending';
@@ -24,33 +23,7 @@ class CreateElectionsView extends StatefulWidget {
       );
       return;
     }
-
-    final url = Uri.parse("http://192.168.0.170:80000/create_elections"); 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "name": name,
-        "date": date,
-        "status": _status,
-      }),
-    );
-
-if (!mounted) return; 
-
-if (response.statusCode == 201) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Election Created Successfully")),
-  );
-  _nameController.clear();
-  _dateController.clear();
-} else {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Failed to create election: ${response.body}")),
-  );
-}
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

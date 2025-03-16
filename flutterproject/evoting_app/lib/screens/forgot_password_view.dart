@@ -3,13 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ForgotPasswordView extends StatefulWidget {
-  const ForgotPasswordView({super.key});  // ✅ Added super.key
+  const ForgotPasswordView({super.key});  
 
   @override
-  ForgotPasswordViewState createState() => ForgotPasswordViewState(); // ✅ Removed `_`
+  ForgotPasswordViewState createState() => ForgotPasswordViewState(); 
 }
 
-class ForgotPasswordViewState extends State<ForgotPasswordView> { // ✅ Removed `_`
+class ForgotPasswordViewState extends State<ForgotPasswordView> { 
   final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
   String? _message;
@@ -22,7 +22,7 @@ class ForgotPasswordViewState extends State<ForgotPasswordView> { // ✅ Removed
 
     try {
       final response = await http.post(
-        Uri.parse('https://your-backend.com/api/forgot-password/'),
+        Uri.parse('https://your-backend.com/api/forgot-password'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"email": _emailController.text}),
       );

@@ -5,7 +5,7 @@ import 'package:evoting_app/screens/dashboard_view.dart';
 void main() {
   testWidgets('Dashboard UI and Navigation Test', (WidgetTester tester) async {
     // Build the DashboardView
-    await tester.pumpWidget(MaterialApp(home: DashboardView()));
+    await tester.pumpWidget(MaterialApp(home: Dashboard()));
 
     // Check if key UI elements exist
     expect(find.text('Dashboard'), findsOneWidget);

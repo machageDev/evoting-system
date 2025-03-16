@@ -1,17 +1,18 @@
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../api/api_service.dart'; // Adjust import path as needed
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
-  LoginViewState createState() => LoginViewState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class LoginViewState extends State<LoginView> {
+class _LoginViewState extends State<LoginView> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -21,35 +22,30 @@ class LoginViewState extends State<LoginView> {
       _errorMessage = null;
     });
 
-    try {
-      final response = await http.post(
-        Uri.parse('http://192.168.0.170:8000/apilogin/'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "username": _usernameController.text,
-          "password": _passwordController.text,
-        }),
-      );
-      print(response.body);
-      if (!mounted) return; 
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
 
+    if (username.isEmpty || password.isEmpty) {
       setState(() {
         _isLoading = false;
+        _errorMessage = 'Please enter both username and password.';
       });
+      return;
+    }
 
-      if (response.statusCode == 200) {
-        Navigator.pushReplacementNamed(context, "/dashboard"); 
-      } else {
-        setState(() {
-          _errorMessage = "Invalid username or password. Please try again.";
-        });
-      }
-    } catch (e) {
-      if (!mounted) return; 
-      print("An error occured: ${e.toString()}");
+    final result = await ApiService.login(username, password);
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result['success']) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
       setState(() {
-        _isLoading = false;
-        _errorMessage = "Network error. Please try again.";
+        _errorMessage = result['message'];
       });
     }
   }
@@ -57,20 +53,22 @@ class LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("eVoting Login")),
-      body: Padding(
+      appBar: AppBar(title: const Text('eVoting Login')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Login", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text(
+              'Login',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
 
             // Username Field
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
-              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
             const SizedBox(height: 10),
 
@@ -78,8 +76,7 @@ class LoginViewState extends State<LoginView> {
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "Password"),
-              keyboardType: TextInputType.visiblePassword,
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 10),
 
@@ -93,31 +90,46 @@ class LoginViewState extends State<LoginView> {
                 ),
               ),
 
-            // Login Button
+            // Login Button or Loader
             _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _login,
-                    child: const Text("Log In"),
+                ? const Center(child: CircularProgressIndicator())
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      child: const Text('Log In'),
+                    ),
                   ),
 
             const SizedBox(height: 10),
 
             // Forgot Password Link
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/forgot-password");
-              },
-              child: const Text("Forgot Password?", style: TextStyle(color: Colors.red)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/forgot-password');
+                },
+                child: const Text(
+                  'Forgot Password?',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             ),
 
-            // Register Link
-            const Text("Don't have an account?"),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/register");
-              },
-              child: const Text("Register"),
+            // Register Section
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Don't have an account?"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: const Text('Register'),
+                ),
+              ],
             ),
           ],
         ),

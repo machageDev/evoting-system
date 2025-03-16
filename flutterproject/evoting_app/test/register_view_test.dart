@@ -10,6 +10,7 @@ void main() {
     expect(find.byType(TextField), findsNWidgets(2)); // Username & Password
     expect(find.text("Username"), findsOneWidget);
     expect(find.text("Password"), findsOneWidget);
+    
 
     // Verify Register button exists
     expect(find.text("Register"), findsOneWidget);
