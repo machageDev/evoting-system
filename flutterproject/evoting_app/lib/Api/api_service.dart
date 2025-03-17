@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.122:8000';
+  static const String baseUrl = 'http://192.168.137.1:8000';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String registerUrl = '$baseUrl/apiregister';
 
@@ -12,7 +12,7 @@ class ApiService {
   static Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.0.122:8000/apilogin'),
+        Uri.parse('http://192.168.137.1:8000/apilogin'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -35,7 +35,7 @@ class ApiService {
   static Future<Map<String, dynamic>> register(String name, String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('http://127.168.0.122:8000/apiregister'), // ✅ Corrected URL
+        Uri.parse('http://127.168.137.1:8000/apiregister'), // ✅ Corrected URL
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,
@@ -58,7 +58,7 @@ class ApiService {
 
   // API function to create election
   Future<bool> createElection(String name, String date, String status) async {
-    final url = Uri.parse('http://192.168.0.122:8000/apielections'); // Add your endpoint here
+    final url = Uri.parse('http://192.168.137.1:8000/apielections'); // Add your endpoint here
 
     try {
       final response = await http.post(
