@@ -424,6 +424,35 @@ def create_election(request):
     except Exception as e:    
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def api_delete_candidate(request,candidate_id):
+    try:
+        candidate = Candidate.objects.get(id=candidate_id)
+        if candidate.profile_picture:
+            candidate.profile_picture.delete(save=False)
+            candidate.delete()
+            return Response({
+               "status": "success",
+            "message": f"Candidate {candidate.name} deleted successfully." 
+            },status=200)
+        else:
+            return Response({"error": "Candidate does not exist"}, status=status.HTTP_404_NOT_FOUND)
+                
+    except Candidate.DoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Candidate not found."
+        }, status=404)
+
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
+    
+    
 @api_view(['DELETE'])
 @permission_classes([AllowAny])  
 def delete_election(request):
@@ -440,6 +469,151 @@ def delete_election(request):
         return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Requires login/authentication
+def api_vote(request):
+    user = request.user  # Authenticated user
+    candidate_id = request.data.get('candidate_id')
+    election_id = request.data.get('election_id')
+
+    # Validate input data
+    if not candidate_id or not election_id:
+        return Response({
+            "status": "error",
+            "message": "Candidate ID and Election ID are required."
+        }, status=400)
+
+    # Check if user has already voted in this election
+    if Vote.objects.filter(user=user, election_id=election_id).exists():
+        return Response({
+            "status": "error",
+            "message": "You have already voted in this election."
+        }, status=403)
+
+    try:
+        # Validate the election and candidate
+        election = Election.objects.get(id=election_id)
+        candidate = Candidate.objects.get(id=candidate_id, election=election)
+
+        # Create the vote
+        vote = Vote.objects.create(user=user, candidate=candidate, election=election)
+
+        return Response({
+            "status": "success",
+            "message": f"Vote cast successfully for {candidate.name}.",
+            "vote_id": vote.id
+        }, status=201)
+
+    except Election.DoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Election not found."
+        }, status=404)
+
+    except Candidate.DoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Candidate not found in this election."
+        }, status=404)
+
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": str(e)
+        }, status=500)    
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def api_edit_vote(request, election_id):
+    user = request.user
+    candidate_id = request.data.get('candidate_id')
+
+    # Step 1: Validate candidate ID is provided
+    if not candidate_id:
+        return Response({
+            "status": "error",
+            "message": "Candidate ID is required."
+        }, status=400)
+
+    try:
+        # Step 2: Fetch the vote by user and election
+        vote = Vote.objects.get(user=user, election_id=election_id)
+
+        # Step 3: Check if the new candidate exists and belongs to the election
+        try:
+            candidate = Candidate.objects.get(id=candidate_id, election_id=election_id)
+        except Candidate.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Candidate not found in this election."
+            }, status=404)
+
+        # Step 4: Update the candidate in the vote
+        vote.candidate = candidate
+        vote.save()
+
+        return Response({
+            "status": "success",
+            "message": "Vote updated successfully."
+        }, status=200)
+
+    except Vote.DoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Vote not found for this election."
+        }, status=404)
+
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
+    
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])  
+def api_edit_candidate(request, candidate_id):
+    try:
+        candidate = Candidate.objects.get(id=candidate_id)
+
+        
+        name = request.data.get('name')
+        position = request.data.get('position')
+        election_id = request.data.get('election_id')
+        profile_picture = request.FILES.get('profile_picture')
+
+    
+        if name:
+            candidate.name = name
+        if position:
+            candidate.position = position
+        if election_id:
+            candidate.election_id = election_id
+        if profile_picture:
+            candidate.profile_picture = profile_picture
+
+        
+        candidate.save()
+
+        return Response({
+            "status": "success",
+            "message": "Candidate updated successfully!"
+        }, status=200)
+
+    except ObjectDoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Candidate not found."
+        }, status=404)
+
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  

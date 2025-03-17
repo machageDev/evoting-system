@@ -24,6 +24,7 @@ urlpatterns = [
     path('apiforgot_password',views.apiforgot_password,name="apiforgot_password"),
     path('apicreate_candidate',views.apicreate_candidate,name="apicreate_candidate"),
     path('apidelete_candidate',views.delete_candidate,name="apidelete_candidate"),
+    path('api_vote',views.api_vote,name="api_vote"),
 
     
     
@@ -64,7 +65,7 @@ urlpatterns = [
     path("voter_dashboard", views.voter_dashboard, name='voter_dashboard'),
     path('vote',views.vote,name="vote"),
     path('submit_vote', views.submit_vote, name='submit_vote'),
-
+    
      
 
     
