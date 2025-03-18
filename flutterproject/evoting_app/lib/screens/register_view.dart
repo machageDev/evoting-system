@@ -12,6 +12,7 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController(); // Phone number controller
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -25,9 +26,10 @@ class _RegisterViewState extends State<RegisterView> {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final phoneNumber = _phoneNumberController.text.trim(); // Phone number input
 
     // Basic validation
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || phoneNumber.isEmpty) {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Please fill in all fields.';
@@ -35,23 +37,30 @@ class _RegisterViewState extends State<RegisterView> {
       return;
     }
 
-    final result = await ApiService.register(name, email, password);
+    try {
+      final result = await ApiService.register(name, email, password,phoneNumber);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (result['success']) {
-      // Option 1: Redirect to login
-      Navigator.pushReplacementNamed(context, '/login');
-
-      // Option 2: Redirect directly to dashboard (if you prefer)
-      // Navigator.pushReplacementNamed(context, '/dashboard');
-    } else {
       setState(() {
-        _errorMessage = result['message'];
+        _isLoading = false;
+      });
+
+      if (result['success']) {
+        // Registration successful
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        // Registration failed - show error from server
+        setState(() {
+          _errorMessage = result['message'] ?? 'Registration failed. Please try again.';
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Something went wrong. Please try again.';
       });
     }
   }
@@ -91,6 +100,14 @@ class _RegisterViewState extends State<RegisterView> {
               controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(labelText: 'Password'),
+            ),
+            const SizedBox(height: 10),
+
+            // Phone Number Field
+            TextField(
+              controller: _phoneNumberController, // Correct controller for phone number
+              decoration: const InputDecoration(labelText: 'Phone Number'),
+              keyboardType: TextInputType.phone, // Ensure keyboard is appropriate for phone number
             ),
             const SizedBox(height: 10),
 

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.137.1:8000';
+  static const String baseUrl = 'http://192.168.0.54:8000';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String registerUrl = '$baseUrl/apiregister';
 
@@ -12,7 +12,7 @@ class ApiService {
   static Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.137.1:8000/apilogin'),
+        Uri.parse('http://192.168.0.54:8000/apilogin'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -32,15 +32,17 @@ class ApiService {
   }
 
   // ✅ REGISTER FUNCTION
-  static Future<Map<String, dynamic>> register(String name, String email, String password) async {
+ static Future<Map<String, dynamic>> register(
+      String name, String email, String password, String phoneNumber) async {
     try {
       final response = await http.post(
-        Uri.parse('http://127.168.137.1:8000/apiregister'), // ✅ Corrected URL
+        Uri.parse('http://192.168.0.54:8000/apiregister'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,
           'email': email,
           'password': password,
+          'phone_number': phoneNumber, // Include phone number in request body
         }),
       );
 
@@ -48,9 +50,12 @@ class ApiService {
         final data = jsonDecode(response.body);
         return {'success': true, 'data': data};
       } else {
-        return {'success': false, 'message': 'Registration failed. Please try again.'};
+        // Handle unsuccessful responses
+        final errorMessage = jsonDecode(response.body)['message'] ?? 'Registration failed. Please try again.';
+        return {'success': false, 'message': errorMessage};
       }
     } catch (e) {
+      // Catch and handle any network or other errors
       return {'success': false, 'message': 'Network error: $e'};
     }
   }
@@ -58,7 +63,7 @@ class ApiService {
 
   // API function to create election
   Future<bool> createElection(String name, String date, String status) async {
-    final url = Uri.parse('http://192.168.137.1:8000/apielections'); // Add your endpoint here
+    final url = Uri.parse('http://192.168.0.54:8000/apielections'); 
 
     try {
       final response = await http.post(
@@ -85,7 +90,7 @@ class ApiService {
    Future<bool> uploadCandidate(
       String name, String position, File? image) async {
     var request = http.MultipartRequest(
-        "POST", Uri.parse("http://127.168.0.122:8000/apicreate_candidate"));
+        "POST", Uri.parse("http://192.168.0.54:8000/apicreate_candidate"));
 
     // Attach Form Data
     request.fields["name"] = name;

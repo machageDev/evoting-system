@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
@@ -630,6 +631,14 @@ def apilogin(request):
         return Response({"error":"Invalid credentials"},status = status.HTTP_403_FORBIDDEN)
     except Exception as e:
         return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def active_elections(request):
+    now = timezone.now()
+    elections = Election.objects.filter(start_date__lte=now, end_date__gte=now)
+    serializer = ElectionSerializer(elections, many=True)
+    return Response(serializer.data)
 
 
 def save_changes(request):
