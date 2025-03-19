@@ -12,7 +12,7 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController(); // Phone number controller
+  final TextEditingController _phoneNumberController = TextEditingController(); 
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -26,9 +26,8 @@ class _RegisterViewState extends State<RegisterView> {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    final phoneNumber = _phoneNumberController.text.trim(); // Phone number input
-
-    // Basic validation
+    final phoneNumber = _phoneNumberController.text.trim(); 
+    
     if (name.isEmpty || email.isEmpty || password.isEmpty || phoneNumber.isEmpty) {
       setState(() {
         _isLoading = false;
@@ -51,6 +50,7 @@ class _RegisterViewState extends State<RegisterView> {
         Navigator.pushReplacementNamed(context, '/login');
       } else {
         // Registration failed - show error from server
+         debugPrint('Registration failed with message: ${result['message']}');
         setState(() {
           _errorMessage = result['message'] ?? 'Registration failed. Please try again.';
         });

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:evoting_app/screens/dashboard_view.dart';  
+import 'package:evoting_app/home/dashboard_view.dart';  
 
 void main() {
   testWidgets('Dashboard UI and Navigation Test', (WidgetTester tester) async {

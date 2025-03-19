@@ -1,17 +1,15 @@
-
-
+import 'package:flutter/material.dart';
+import '/Api/api_service.dart';
 import 'manage/create_candidate_view.dart';
 import '/manage/create_elections_view.dart';
-import 'package:flutter/material.dart';
 import 'screens/login_view.dart';
 import 'screens/register_view.dart';
 import 'screens/forgot_password_view.dart';
-// ignore: unused_import
-import 'screens/dashboard_view.dart';
-import 'screens/homepage_view.dart';
+import 'home/dashboard_view.dart';
+import 'home/homepage_view.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,9 +28,51 @@ class MyApp extends StatelessWidget {
         '/forgot-password': (context) => const ForgotPasswordView(),
         '/dashboard': (context) => Dashboard(),
         '/create-candidate': (context) => const CreateCandidateView(),
-        '/create_candidate':(context)=>CreateElectionsView(),
-        '/homepage_view':(context)=>HomePage(),
+        '/create_elections': (context) => CreateElectionsView(),
+        '/homepage_view': (context) => HomePage(),
       },
+      home: HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ApiService apiService = ApiService(); // ✅ Create an instance
+
+  late Future<String> futureData; // ✅ Define future variable
+
+  @override
+  void initState() {
+    super.initState();
+    futureData = apiService.fetchData(); // ✅ Call API in initState()
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("API Example")),
+      body: Center(
+        child: FutureBuilder<String>(
+          future: futureData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(); // Show loading indicator
+            } else if (snapshot.hasError) {
+              return Text("Error: ${snapshot.error}");
+            } else {
+              return Text("Data: ${snapshot.data}");
+            }
+          },
+        ),
+      ),
     );
   }
 }
