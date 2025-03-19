@@ -76,3 +76,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: Colors.blue,
+  scaffoldBackgroundColor: Colors.white,
+  appBarTheme: AppBarTheme(
+    backgroundColor: Colors.blue,
+    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+    iconTheme: IconThemeData(color: Colors.white),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blue,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  ),
+  textTheme: TextTheme(
+    bodyLarge: TextStyle(fontSize: 18, color: Colors.black),
+    bodyMedium: TextStyle(fontSize: 16, color: Colors.black54),
+  ),
+);
+
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primaryColor: Colors.teal,
+  scaffoldBackgroundColor: Colors.black,
+  appBarTheme: AppBarTheme(
+    backgroundColor: Colors.teal,
+    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+    iconTheme: IconThemeData(color: Colors.white),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.teal,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  ),
+  textTheme: TextTheme(
+    bodyLarge: TextStyle(fontSize: 18, color: Colors.white),
+    bodyMedium: TextStyle(fontSize: 16, color: Colors.white70),
+  ),
+);

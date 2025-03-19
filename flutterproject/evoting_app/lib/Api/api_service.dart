@@ -7,10 +7,12 @@ import 'package:http_parser/http_parser.dart';
 class ApiService {
   static const String baseUrl = 'http://192.168.0.54:8000';
   static const String loginUrl = '$baseUrl/api/login';
+  static const String registerUrl = 'http://192.168.0.54:8000/apiregister';
+
 
   Future<String> fetchData() async {
   try {
-    final response = await http.get(Uri.parse('http://192.168.0.54:8000/api/some_endpoint'));
+    final response = await http.get(Uri.parse('http://192.168.0.54:8000/api/register'));
 
     if (response.statusCode == 200) {
       return response.body; 
