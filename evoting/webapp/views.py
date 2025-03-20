@@ -26,7 +26,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -390,7 +390,6 @@ def api_get_candidates(request, election_id):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_elections(request):
@@ -424,8 +423,22 @@ def create_election(request):
 
     except Exception as e:    
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+@api_view(['GET']) 
+def api_result(request):
+    elections = Election.objects.all()
+    election_results = {}
 
+    for election in elections:
+        results = {}
+        candidates = Candidate.objects.filter(election=election)
+        
+        for candidate in candidates:
+            vote_count = Vote.objects.filter(candidate=candidate).count()
+            results[candidate.name] = vote_count
+
+        election_results[election.name] = results
+
+    return JsonResponse({"election_results": election_results})
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def api_delete_candidate(request,candidate_id):

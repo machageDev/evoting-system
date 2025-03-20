@@ -25,6 +25,7 @@ urlpatterns = [
     path('apicreate_candidate',views.apicreate_candidate,name="apicreate_candidate"),
     path('apidelete_candidate',views.delete_candidate,name="apidelete_candidate"),
     path('api_vote',views.api_vote,name="api_vote"),
+    path('api/elections/results/', views.api_result, name="api_result"),
 
     
     

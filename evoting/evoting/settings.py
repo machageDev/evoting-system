@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'webapp',
     'rest_framework',
     'rest_framework.authtoken'
+    
 
 
 ]
@@ -58,6 +59,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+   
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -137,6 +139,7 @@ APPEND_SLASH = True
 
 
 
+
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'staticfiles']
@@ -157,8 +160,6 @@ EMAIL_HOST_USER = 'machagefranklyn@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'qazxsw21'  # Use an app password, not your real password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # settings.py
-
-
 
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4' 
