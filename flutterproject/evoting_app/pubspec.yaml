@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    fl_chart: ^0.64.0 
 
  
   cupertino_icons: ^1.0.8
@@ -30,6 +31,9 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+
+   # Check for latest version on pub.dev
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

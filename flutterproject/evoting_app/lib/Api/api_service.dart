@@ -11,6 +11,7 @@ class ApiService {
   static const String electionUrl = '$baseUrl/apielections';
   static const String candidateUrl = '$baseUrl/apicandidates';
   static const String voteUrl = '$baseUrl/apivote';
+  static const String resultUrl = '$baseUrl/api_result';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -161,3 +162,13 @@ class ApiService {
 
   static getVoterDashboard() {}
 }
+
+   Future<Map<String, dynamic>> getElectionResults(int electionId, dynamic baseUrl) async {
+    final response = await http.get(Uri.parse("$baseUrl/api_result/"));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load election results");
+    }
+  }

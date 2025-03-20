@@ -39,7 +39,7 @@ class _LoginViewState extends State<LoginView> {
       
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()), 
+        MaterialPageRoute(builder: (context) => const HomePageView()), 
       );
     } else {
       // ❌ Show error message if login fails

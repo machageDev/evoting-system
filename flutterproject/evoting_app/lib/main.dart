@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => Dashboard(),
         '/create-candidate': (context) => const CreateCandidateView(),
         '/create_elections': (context) => CreateElectionsView(),
-        '/homepage_view': (context) => HomePage(),
+        '/homepage_view': (context) => HomePageView(),
       },
       home: const HomeScreen(),
     );
