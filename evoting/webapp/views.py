@@ -389,6 +389,35 @@ def api_get_candidates(request, election_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_user_profile(request):
+    user = request.user
+
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(user, context={"request": request})
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = UserProfileSerializer(user, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Profile updated successfully", "data": serializer.data})
+        return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_profile_picture(request):
+    user = request.user
+    parser_classes = (MultiPartParser, FormParser)
+
+    if "profile_picture" not in request.FILES:
+        return Response({"error": "No image file uploaded"}, status=400)
+
+    user.profile_picture = request.FILES["profile_picture"]
+    user.save()
+
+    return Response({"message": "Profile picture updated successfully", "profile_picture": request.build_absolute_uri(user.profile_picture.url)})
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

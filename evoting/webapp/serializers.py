@@ -110,3 +110,15 @@ class VoteSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         vote = Vote.objects.create(user=user, **validated_data)
         return vote
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile_picture_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email", "phone_number", "profile_picture_url", "last_login", "date_joined"]
+
+    def get_profile_picture_url(self, obj):
+        request = self.context.get("request")
+        if obj.profile_picture:
+            return request.build_absolute_uri(obj.profile_picture.url)
+        return None
