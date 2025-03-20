@@ -32,7 +32,7 @@ class ProfileView extends StatelessWidget {
               SizedBox(height: 10),
               Text(
                 "${user["first_name"]} ${user["last_name"]}",
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               Text(
                 user["username"],
