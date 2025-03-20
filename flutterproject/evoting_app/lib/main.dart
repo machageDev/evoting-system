@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/create_elections',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginView(),
         '/register': (context) => const RegisterView(),
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    futureData = apiService.fetchData(); // ✅ Call API in initState()
+    futureData = apiService.fetchData(); 
   }
 
   @override

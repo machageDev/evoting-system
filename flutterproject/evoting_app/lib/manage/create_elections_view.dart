@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class CreateElectionsView extends StatefulWidget {
@@ -56,11 +58,11 @@ class CreateElectionsViewState extends State<CreateElectionsView> {
     }
 
     // Simulate API call (Replace this with actual API request)
-    print("Election Created!");
-    print("Name: $name");
-    print("Date: $date");
-    print("Time: $time");
-    print("Status: $_status");
+    log("Election Created!" as num);
+    log("Name: $name" as num);
+    log("Date: $date" as num);
+    log("Time: $time" as num);
+    log("Status: $_status" as num);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Election '$name' created successfully!")),
