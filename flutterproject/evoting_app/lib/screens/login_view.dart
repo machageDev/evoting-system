@@ -1,10 +1,56 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
+import 'dart:math';
+
+import 'package:evoting_app/Api/api_service.dart';
+import 'package:evoting_app/home/homepage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LoginView extends StatelessWidget {
+
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> loginUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await ApiService.loginUser(
+      _usernameController.text,
+      _passwordController.text,
+    );
+    log("API Response: $response" as num);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response["success"] == true || response.containsKey('token')) {
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()), 
+      );
+    } else {
+      // ❌ Show error message if login fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response["message"] ?? "Login failed!"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +99,9 @@ class LoginView extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // username
+                  // Username
                   TextField(
+                    controller: _usernameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Enter your username",
@@ -71,6 +118,7 @@ class LoginView extends StatelessWidget {
 
                   // Password Field
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
@@ -90,7 +138,7 @@ class LoginView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: _isLoading ? null : loginUser,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
@@ -99,23 +147,14 @@ class LoginView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.black)
+                          : const Text(
+                              "Login",
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Social Login
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildSocialButton(Icons.facebook, "Facebook"),
-                      const SizedBox(width: 10),
-                      _buildSocialButton(Icons.g_mobiledata, "Google"),
-                    ],
                   ),
 
                   const SizedBox(height: 16),
@@ -137,24 +176,6 @@ class LoginView extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // Social Button Widget
-  Widget _buildSocialButton(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 20),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: Colors.white)),
         ],
       ),
     );

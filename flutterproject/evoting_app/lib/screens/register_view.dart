@@ -1,8 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:evoting_app/api/api_service.dart';
+
+
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
