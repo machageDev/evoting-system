@@ -34,7 +34,7 @@ urlpatterns = [
     path('man_elections', views.manage_elections, name='man_elections'),
     path('edit_election', views.edit_election, name='edit_election'),
     path('delete_election', views.delete_election, name='delete_election'),
-  
+    path('dashboard', views.dashboard_data, name='dashboard-data'),
     
 
 

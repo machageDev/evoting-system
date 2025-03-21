@@ -1,4 +1,5 @@
 from datetime import timezone
+from select import POLLOUT
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
@@ -8,7 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from .serializers import CandidateSerializer, ElectionSerializer, PostSerializer, RegisterSerializer, VoteSerializer, VoterSerializer
+from .serializers import CandidateSerializer, ElectionSerializer, PostSerializer, RegisterSerializer, UserProfileSerializer, VoteSerializer, VoterSerializer
 from .models import Post, Voter, Vote, Candidate, Election 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
@@ -409,8 +410,7 @@ def api_user_profile(request):
 @permission_classes([IsAuthenticated])
 def api_profile_picture(request):
     user = request.user
-    parser_classes = (MultiPartParser, FormParser)
-
+   
     if "profile_picture" not in request.FILES:
         return Response({"error": "No image file uploaded"}, status=400)
 
@@ -495,6 +495,42 @@ def api_delete_candidate(request,candidate_id):
             "message": str(e)
         }, status=500)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # Optional: Add authentication
+def dashboard_data(request):
+    user = request.user
+    current_time = timezone.now()
+
+    # Active polls: end_date is in the future
+    active_polls = POLLOUT.objects.filter(end_date__gte=current_time)
+
+    # Closed polls: end_date is in the past
+    closed_polls = Poll.objects.filter(end_date__lt=current_time)
+
+    # Prepare the response
+    data = {
+        "username": user.username,
+        "active_polls": [
+            {
+                "id": poll.id,
+                "question": poll.question,
+                "end_date": poll.end_date.strftime("%Y-%m-%d")
+            }
+            for poll in active_polls
+        ],
+        "closed_polls": [
+            {
+                "id": poll.id,
+                "question": poll.question,
+                "winner_option": poll.get_winner_option()  # Make sure this method exists
+            }
+            for poll in closed_polls
+        ]
+    }
+
+    return Response(data)
+
+
     
 @api_view(['DELETE'])
 @permission_classes([AllowAny])  
