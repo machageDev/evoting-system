@@ -61,6 +61,24 @@ class HomePageView extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
+                    const SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, "/dashboard"); // Navigate to Dashboard
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Go to Dashboard",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
                   ],
                 ),
               ),

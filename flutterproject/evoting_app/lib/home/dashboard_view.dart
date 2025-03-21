@@ -1,132 +1,133 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Dashboard extends StatelessWidget {
-  const Dashboard({super.key});
+class DashboardView extends StatefulWidget {
+  @override
+  _DashboardViewState createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  String username = '';
+  List activePolls = [];
+  List closedPolls = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDashboardData();
+  }
+
+  Future<void> fetchDashboardData() async {
+    final url = Uri.parse('http://yourdomain/api/dashboard/'); // Replace with your API URL
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          username = data['username'];
+          activePolls = data['active_polls'];
+          closedPolls = data['closed_polls'];
+          isLoading = false;
+        });
+      } else {
+        print('Failed to load dashboard data');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("E-Voting Dashboard"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to settings
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              // Handle logout
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome message or dashboard overview
-            const Text(
-              "Welcome to the E-Voting Dashboard",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      appBar: AppBar(title: Text('Dashboard | E-Voting')),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Welcome, $username!',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Text('Ready to cast your vote? See active elections below.'),
+                  SizedBox(height: 20),
+
+                  // Active Polls
+                  Text('🗳️ Active Polls',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  activePolls.isEmpty
+                      ? Text('No active polls at the moment.')
+                      : Column(
+                          children: activePolls.map((poll) {
+                            return Card(
+                              margin: EdgeInsets.only(bottom: 10),
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(poll['question'],
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 5),
+                                    Text('Ends on: ${poll['end_date']}'),
+                                    SizedBox(height: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        // Navigate to voting page (implement this!)
+                                        print('Vote on Poll ID: ${poll['id']}');
+                                      },
+                                      child: Text('Vote Now'),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                  SizedBox(height: 20),
+
+                  // Closed Polls
+                  Text('🏆 Election Results',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  closedPolls.isEmpty
+                      ? Text('No closed elections yet.')
+                      : Column(
+                          children: closedPolls.map((poll) {
+                            return Card(
+                              margin: EdgeInsets.only(bottom: 10),
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(poll['question'],
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 5),
+                                    Text('Winner: ${poll['winner_option']}',
+                                        style: TextStyle(
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-
-            // Stats Overview (e.g., Elections, Voters, Votes)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _dashboardCard("Elections", "3 Active", Icons.event),
-                _dashboardCard("Voters", "500", Icons.group),
-                _dashboardCard("Votes Cast", "300", Icons.check_circle),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Quick Actions Section
-            const Text(
-              "Quick Actions",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _actionButton("Create Election", Icons.add),
-                _actionButton("Add Candidate", Icons.person_add),
-                _actionButton("Register Voter", Icons.person_outline),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Recent Activity Section
-            const Text(
-              "Recent Activity",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _recentActivity("Election '2025' created", "March 15, 2025"),
-            _recentActivity("Candidate 'John Doe' added", "March 14, 2025"),
-            _recentActivity("Voter 'Jane Doe' registered", "March 13, 2025"),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Dashboard Card for Stats Overview
-  Widget _dashboardCard(String title, String value, IconData icon) {
-    return Card(
-      color: Colors.blue.shade100,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 40, color: Colors.blue),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 5),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Quick Action Button
-  Widget _actionButton(String title, IconData icon) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        // Navigate to corresponding page
-      },
-      icon: Icon(icon),
-      label: Text(title),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        textStyle: const TextStyle(fontSize: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-  }
-
-  // Recent Activity Item
-  Widget _recentActivity(String description, String date) {
-    return ListTile(
-      leading: const Icon(Icons.notifications),
-      title: Text(description),
-      subtitle: Text(date),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // Navigate to the detailed activity page
-      },
     );
   }
 }

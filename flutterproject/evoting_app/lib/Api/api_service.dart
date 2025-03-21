@@ -12,6 +12,7 @@ class ApiService {
   static const String candidateUrl = '$baseUrl/apicandidates';
   static const String voteUrl = '$baseUrl/apivote';
   static const String resultUrl = '$baseUrl/api_result';
+  static const String dashboardUrl ='$baseUrl/api_dashboars';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -170,5 +171,29 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception("Failed to load election results");
+    }
+  }
+
+ Future<Map<String, dynamic>> fetchDashboardData(String token, dynamic baseUrl) async {
+   
+    final url = Uri.parse('$baseUrl/dashboard/');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token', // If you use token auth, otherwise remove this
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Failed to load dashboard data: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching dashboard data: $e');
     }
   }
