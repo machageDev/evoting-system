@@ -13,6 +13,7 @@ class ApiService {
   static const String voteUrl = '$baseUrl/apivote';
   static const String resultUrl = '$baseUrl/api_result';
   static const String dashboardUrl ='$baseUrl/api_dashboars';
+  static const String homepageUrl = '$baseUrl/api_home';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -195,5 +196,23 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error fetching dashboard data: $e');
+    }
+  }
+
+   Future<Map<String, dynamic>> apiHome(String baseUrl) async {
+    try {
+      final response = await http.get(Uri.parse(baseUrl));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data};
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed with status: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }

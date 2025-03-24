@@ -14,7 +14,7 @@ class ResultView extends StatelessWidget {
     }
   };
 
-  ResultView({Key? key}) : super(key: key);
+  ResultView({super.key});
 
   @override
   Widget build(BuildContext context) {

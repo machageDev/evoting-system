@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DashboardView extends StatefulWidget {
+  const DashboardView({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _DashboardViewState createState() => _DashboardViewState();
 }
 
@@ -33,10 +38,10 @@ class _DashboardViewState extends State<DashboardView> {
           isLoading = false;
         });
       } else {
-        print('Failed to load dashboard data');
+        log('Failed to load dashboard data' as num);
       }
     } catch (e) {
-      print('Error: $e');
+      log('Error: $e' as num);
     }
   }
 
