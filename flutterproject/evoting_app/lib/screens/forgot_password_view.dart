@@ -1,18 +1,25 @@
+
+import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class ForgotPasswordView extends StatefulWidget {
-  const ForgotPasswordView({super.key});  
+  const ForgotPasswordView({super.key});
 
   @override
-  ForgotPasswordViewState createState() => ForgotPasswordViewState(); 
+  ForgotPasswordViewState createState() => ForgotPasswordViewState();
 }
 
-class ForgotPasswordViewState extends State<ForgotPasswordView> { 
+class ForgotPasswordViewState extends State<ForgotPasswordView> {
   final TextEditingController _emailController = TextEditingController();
-  bool _isLoading = false;
   String? _message;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   Future<void> _resetPassword() async {
     setState(() {
@@ -20,25 +27,21 @@ class ForgotPasswordViewState extends State<ForgotPasswordView> {
       _message = null;
     });
 
-    try {
-      final response = await http.post(
-        Uri.parse('https://your-backend.com/api/forgot-password'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": _emailController.text}),
-      );
-
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
       setState(() {
         _isLoading = false;
-        _message = response.statusCode == 200
-            ? "Check your email for reset link."
-            : "Error sending reset link.";
+        _message = "Email cannot be empty.";
       });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _message = "Network error. Please try again.";
-      });
+      return;
     }
+
+    final response = await ApiService.forgot_Password(email);
+
+    setState(() {
+      _isLoading = false;
+      _message = response['message'];
+    });
   }
 
   @override
@@ -48,6 +51,7 @@ class ForgotPasswordViewState extends State<ForgotPasswordView> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: _emailController,

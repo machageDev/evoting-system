@@ -7,6 +7,7 @@ import 'package:http_parser/http_parser.dart';
 class ApiService {
   static const String baseUrl = 'http://192.168.0.54:8000';
   static const String loginUrl = '$baseUrl/apilogin';
+  static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
   static const String registerUrl = '$baseUrl/apiregister';
   static const String electionUrl = '$baseUrl/apielections';
   static const String candidateUrl = '$baseUrl/apicandidates';
@@ -163,6 +164,8 @@ class ApiService {
   }
 
   static getVoterDashboard() {}
+
+  static forgot_Password(String email) {}
 }
 
    Future<Map<String, dynamic>> getElectionResults(int electionId, dynamic baseUrl) async {
@@ -199,4 +202,71 @@ class ApiService {
     }
   }
 
-  
+Future<Map<String, dynamic>> fetchHome(String token, dynamic baseurl) async {
+  try {
+    final url = Uri.parse('$baseurl/home/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Success - parse JSON response body
+      final data = json.decode(response.body);
+      return {
+        'status': true,
+        'data': data,
+      };
+    } else {
+      // Failed response
+      return {
+        'status': false,
+        'message': 'Failed to load home data',
+        'error': response.body, // Optional: to help debugging
+      };
+    }
+  } catch (error) {
+    // Exception handling (network issues, server errors, etc.)
+    return {
+      'status': false,
+      'message': 'An error occurred',
+      'error': error.toString(),
+    };
+  }
+}
+
+Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async {
+    final url = Uri.parse('$baseUrl/forgot_password');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'status': true,
+          'message': 'Check your email for reset link.',
+        };
+      } else {
+        // If your API returns an error message in the body
+        final data = json.decode(response.body);
+        return {
+          'status': false,
+          'message': data['error'] ?? 'Failed to send reset email.',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': false,
+        'message': 'Something went wrong. Please try again later.',
+      };
+    }
+  }

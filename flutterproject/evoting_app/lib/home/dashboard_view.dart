@@ -87,7 +87,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     ElevatedButton(
                                       onPressed: () {
                                         // Navigate to voting page (implement this!)
-                                        print('Vote on Poll ID: ${poll['id']}');
+                                        log('Vote on Poll ID: ${poll['id']}' as num);
                                       },
                                       child: Text('Vote Now'),
                                     )
