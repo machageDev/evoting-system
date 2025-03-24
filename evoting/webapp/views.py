@@ -1,4 +1,5 @@
 from datetime import timezone
+from multiprocessing import Pool
 #from select import poll
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
@@ -508,16 +509,16 @@ def api_delete_candidate(request,candidate_id):
             "status": "error",
             "message": str(e)
         }, status=500)
-    '''permission_classes([IsAuthenticated])  # Optional: Add authentication
-def dashboard_data(request):
+@permission_classes([IsAuthenticated])  # Optional: Add authentication
+def dashboard(request):
     user = request.user
     current_time = timezone.now()
 
     # Active polls: end_date is in the future
-    active_polls = Poll.objects.filter(end_date__gte=current_time)
+    active_polls = Pool.objects.filter(end_date__gte=current_time)
 
     # Closed polls: end_date is in the past
-    closed_polls = Poll.objects.filter(end_date__lt=current_time)
+    closed_polls = Pool.objects.filter(end_date__lt=current_time)
 
     # Prepare the response
     data = {
@@ -541,7 +542,6 @@ def dashboard_data(request):
     }
 
     return Response(data) 
-'''
 
     
 @api_view(['DELETE'])
