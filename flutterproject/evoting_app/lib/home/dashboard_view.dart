@@ -25,7 +25,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Future<void> fetchDashboardData() async {
-    final url = Uri.parse('http://yourdomain/api/dashboard/'); // Replace with your API URL
+    final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); // Replace with your API URL
 
     try {
       final response = await http.get(url);

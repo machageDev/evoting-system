@@ -199,20 +199,4 @@ class ApiService {
     }
   }
 
-   Future<Map<String, dynamic>> apihome(String baseUrl) async {
-    try {
-      final response = await http.get(Uri.parse(baseUrl));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {'success': true, 'data': data};
-      } else {
-        return {
-          'success': false,
-          'message': 'Failed with status: ${response.statusCode}'
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'message': e.toString()};
-    }
-  }
+  
