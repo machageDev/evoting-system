@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -34,20 +35,20 @@ class _HomePageViewState extends State<HomePageView> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print("API response: $data");
+        log("API response: $data" as num);
 
         setState(() {
           // Assuming your API returns {"message": "Some welcome text"}
           welcomeMessage = data['message'] ?? "Welcome to the eVoting System";
         });
       } else {
-        print("Failed to load data: ${response.statusCode}");
+        log("Failed to load data: ${response.statusCode}" as num);
         setState(() {
           welcomeMessage = "Failed to load welcome message";
         });
       }
     } catch (error) {
-      print("Error fetching data: $error");
+      log("Error fetching data: $error" as num);
       setState(() {
         welcomeMessage = "An error occurred. Please try again later.";
       });
