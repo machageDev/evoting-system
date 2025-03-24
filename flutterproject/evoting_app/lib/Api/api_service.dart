@@ -13,7 +13,7 @@ class ApiService {
   static const String candidateUrl = '$baseUrl/apicandidates';
   static const String voteUrl = '$baseUrl/apivote';
   static const String resultUrl = '$baseUrl/api_result';
-  static const String dashboardUrl ='$baseUrl/api_dashboars';
+  static const String dashboardUrl ='$baseUrl/api_dashboad';
   static const String homepageUrl = '$baseUrl/api_home';
 
   // ✅ FETCH DATA FUNCTION
@@ -178,7 +178,7 @@ class ApiService {
     }
   }
 
- Future<Map<String, dynamic>> fetchDashboardData(String token, dynamic baseUrl) async {
+ Future<Map<String, dynamic>> fetchDashboard(String token, dynamic baseUrl) async {
    
     final url = Uri.parse('$baseUrl/dashboard/');
 
