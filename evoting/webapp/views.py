@@ -1,5 +1,5 @@
 from datetime import timezone
-from select import POLLOUT
+#from select import poll
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
 from django.core.mail import send_mail
@@ -71,6 +71,20 @@ def navbar(request):
 @login_required
 def dashboard(request):
     return render(request, 'dashboard.html')
+
+@api_view(['GET']) 
+@permission_classes([AllowAny])  
+def api_home(request):
+    return Response({
+        "message": "Welcome to the eVoting System API!",
+        "status": "success",
+        "endpoints": {
+            "login": "/api/login/",
+            "register": "/api/register/",
+            "vote": "/api/vote/",
+            "results": "/api/results/"
+        }
+    })
 
 
 # Create Election
@@ -494,15 +508,13 @@ def api_delete_candidate(request,candidate_id):
             "status": "error",
             "message": str(e)
         }, status=500)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  # Optional: Add authentication
+    '''permission_classes([IsAuthenticated])  # Optional: Add authentication
 def dashboard_data(request):
     user = request.user
     current_time = timezone.now()
 
     # Active polls: end_date is in the future
-    active_polls = POLLOUT.objects.filter(end_date__gte=current_time)
+    active_polls = Poll.objects.filter(end_date__gte=current_time)
 
     # Closed polls: end_date is in the past
     closed_polls = Poll.objects.filter(end_date__lt=current_time)
@@ -528,8 +540,8 @@ def dashboard_data(request):
         ]
     }
 
-    return Response(data)
-
+    return Response(data) 
+'''
 
     
 @api_view(['DELETE'])

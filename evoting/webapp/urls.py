@@ -26,6 +26,7 @@ urlpatterns = [
     path('apidelete_candidate',views.delete_candidate,name="apidelete_candidate"),
     path('api_vote',views.api_vote,name="api_vote"),
     path('api/elections/results/', views.api_result, name="api_result"),
+    path('api_home',views.api_home,name="api_home"),
 
     
     
@@ -34,7 +35,7 @@ urlpatterns = [
     path('man_elections', views.manage_elections, name='man_elections'),
     path('edit_election', views.edit_election, name='edit_election'),
     path('delete_election', views.delete_election, name='delete_election'),
-    path('dashboard', views.dashboard_data, name='dashboard-data'),
+    #path('dashboard', views.dashboard, name='dashboard'),
     
 
 
