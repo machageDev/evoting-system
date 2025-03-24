@@ -1,17 +1,70 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class HomePageView extends StatelessWidget {
+class HomePageView extends StatefulWidget {
   const HomePageView({super.key});
+
+  @override
+  State<HomePageView> createState() => _HomePageViewState();
+}
+
+class _HomePageViewState extends State<HomePageView> {
+  String welcomeMessage = "Welcome to the eVoting System"; // Default message
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWelcomeMessage(); // Call the API when the widget loads
+  }
+
+  // Function to call your API
+  Future<void> fetchWelcomeMessage() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    const String apiUrl = 'http://192.168.0.54:8000/api/home/'; // Change this to your actual endpoint
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("API response: $data");
+
+        setState(() {
+          // Assuming your API returns {"message": "Some welcome text"}
+          welcomeMessage = data['message'] ?? "Welcome to the eVoting System";
+        });
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+        setState(() {
+          welcomeMessage = "Failed to load welcome message";
+        });
+      }
+    } catch (error) {
+      print("Error fetching data: $error");
+      setState(() {
+        welcomeMessage = "An error occurred. Please try again later.";
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/voting_background.jpg"), // Ensure the image exists in assets
+            image: AssetImage("assets/images/voting_background.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -27,26 +80,34 @@ class HomePageView extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      "Welcome to the eVoting System",
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    isLoading
+                        ? const CircularProgressIndicator(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          )
+                        : Text(
+                            welcomeMessage,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            textAlign: TextAlign.center,
                           ),
-                      textAlign: TextAlign.center,
-                    ),
                     const SizedBox(height: 10),
                     Text(
                       "Your secure and efficient platform for online voting.",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white70,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Colors.white70,
+                              ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, "/login"); // Navigate to Login Page
+                        Navigator.pushNamed(context, "/login");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
@@ -64,7 +125,7 @@ class HomePageView extends StatelessWidget {
                     const SizedBox(height: 15),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, "/dashboard"); // Navigate to Dashboard
+                        Navigator.pushNamed(context, "/dashboard");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,

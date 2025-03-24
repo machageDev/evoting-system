@@ -199,7 +199,7 @@ class ApiService {
     }
   }
 
-   Future<Map<String, dynamic>> apiHome(String baseUrl) async {
+   Future<Map<String, dynamic>> apihome(String baseUrl) async {
     try {
       final response = await http.get(Uri.parse(baseUrl));
 
