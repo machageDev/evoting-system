@@ -13,7 +13,6 @@ void main() {
     expect(find.text('Results'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
-
     // Simulate tapping on "Candidates"
     await tester.tap(find.text('Candidates'));
     await tester.pumpAndSettle();

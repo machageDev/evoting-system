@@ -31,6 +31,9 @@ dev_dependencies:
 flutter:
 
   uses-material-design: true
+  assets:
+    - assets/images/
+
 
    # Check for latest version on pub.dev
 

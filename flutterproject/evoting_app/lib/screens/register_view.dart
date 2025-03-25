@@ -33,7 +33,7 @@ class _RegisterViewState extends State<RegisterView> {
     final password = _passwordController.text.trim();
     final phoneNumber = _phoneNumberController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || phoneNumber.isEmpty) {
+    if (name.isEmpty || phoneNumber.isEmpty || email.isEmpty || password.isEmpty) {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Please fill in all fields.';
@@ -42,7 +42,7 @@ class _RegisterViewState extends State<RegisterView> {
     }
 
     try {
-      final result = await ApiService.register(name, email, password, phoneNumber);
+      final result = await ApiService.register(name,  email,password, phoneNumber);
 
       if (!mounted) return;
 
