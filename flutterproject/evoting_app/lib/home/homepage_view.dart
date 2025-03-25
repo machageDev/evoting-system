@@ -28,7 +28,7 @@ class _HomePageViewState extends State<HomePageView> {
       isLoading = true;
     });
 
-    const String apiUrl = 'http://192.168.0.54:8000/api/home/'; // Change this to your actual endpoint
+    const String apiUrl = 'http://192.168.0.54:8000/api_home/'; 
 
     try {
       final response = await http.get(Uri.parse(apiUrl));

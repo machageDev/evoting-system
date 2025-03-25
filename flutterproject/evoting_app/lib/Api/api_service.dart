@@ -178,33 +178,12 @@ class ApiService {
     }
   }
 
- Future<Map<String, dynamic>> fetchDashboard(String token, dynamic baseUrl) async {
-   
-    final url = Uri.parse('$baseUrl/dashboard/');
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token', // If you use token auth, otherwise remove this
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data;
-      } else {
-        throw Exception('Failed to load dashboard data: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error fetching dashboard data: $e');
-    }
-  }
+ 
+  // Cast a vote in an election
 
 Future<Map<String, dynamic>> fetchHome(String token, dynamic baseurl) async {
   try {
-    final url = Uri.parse('$baseurl/home/');
+    final url = Uri.parse('$baseurl/home');
     final response = await http.get(
       url,
       headers: {
@@ -267,6 +246,30 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
       return {
         'status': false,
         'message': 'Something went wrong. Please try again later.',
+      };
+    }
+
+}  
+  // Fetch dashboard data (Active & Pending Elections)
+ Future<Map<String, dynamic>> fetchDashboardData(dynamic baseUrl) async {
+    final url = Uri.parse("$baseUrl/api_dashboard");
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {
+          'status': false,
+          'message': 'Failed to load dashboard data',
+          'error': response.body
+        };
+      }
+    } catch (e) {
+      return {
+        'status': false,
+        'message': 'An error occurred',
+        'error': e.toString()
       };
     }
   }

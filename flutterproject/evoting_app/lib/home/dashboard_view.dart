@@ -1,22 +1,22 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _DashboardViewState createState() => _DashboardViewState();
 }
 
 class _DashboardViewState extends State<DashboardView> {
   String username = '';
-  List activePolls = [];
-  List closedPolls = [];
+  List activeElections = [];
+  List pendingElections = [];
   bool isLoading = true;
 
   @override
@@ -26,16 +26,16 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Future<void> fetchDashboardData() async {
-    final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); // Replace with your API URL
+    final url = Uri.parse('http://192.168.0.54:8000/api_dashboard'); 
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          username = data['username'];
-          activePolls = data['active_polls'];
-          closedPolls = data['closed_polls'];
+          username = data['user']['username'];
+          activeElections = data['active_elections'];
+          pendingElections = data['pending_elections'];
           isLoading = false;
         });
       } else {
@@ -60,17 +60,17 @@ class _DashboardViewState extends State<DashboardView> {
                   Text('Welcome, $username!',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  Text('Ready to cast your vote? See active elections below.'),
+                  Text('Ready to participate in elections? See active and pending elections below.'),
                   SizedBox(height: 20),
 
-                  // Active Polls
-                  Text('🗳️ Active Polls',
+                  // Active Elections
+                  Text('🗳️ Active Elections',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  activePolls.isEmpty
-                      ? Text('No active polls at the moment.')
+                  activeElections.isEmpty
+                      ? Text('No active elections at the moment.')
                       : Column(
-                          children: activePolls.map((poll) {
+                          children: activeElections.map((election) {
                             return Card(
                               margin: EdgeInsets.only(bottom: 10),
                               child: Padding(
@@ -78,17 +78,16 @@ class _DashboardViewState extends State<DashboardView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(poll['question'],
+                                    Text(election['title'],
                                         style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold)),
                                     SizedBox(height: 5),
-                                    Text('Ends on: ${poll['end_date']}'),
+                                    Text('Ends on: ${election['end_date']}'),
                                     SizedBox(height: 10),
                                     ElevatedButton(
                                       onPressed: () {
-                                        // Navigate to voting page (implement this!)
-                                        log('Vote on Poll ID: ${poll['id']}' as num);
+                                        log('Vote in Election ID: ${election['id']}' as num);
                                       },
                                       child: Text('Vote Now'),
                                     )
@@ -101,14 +100,14 @@ class _DashboardViewState extends State<DashboardView> {
 
                   SizedBox(height: 20),
 
-                  // Closed Polls
-                  Text('🏆 Election Results',
+                  // Pending Elections
+                  Text('⏳ Pending Elections',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 10),
-                  closedPolls.isEmpty
-                      ? Text('No closed elections yet.')
+                  pendingElections.isEmpty
+                      ? Text('No pending elections at the moment.')
                       : Column(
-                          children: closedPolls.map((poll) {
+                          children: pendingElections.map((election) {
                             return Card(
                               margin: EdgeInsets.only(bottom: 10),
                               child: Padding(
@@ -116,15 +115,12 @@ class _DashboardViewState extends State<DashboardView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(poll['question'],
+                                    Text(election['title'],
                                         style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold)),
                                     SizedBox(height: 5),
-                                    Text('Winner: ${poll['winner_option']}',
-                                        style: TextStyle(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold)),
+                                    Text('Starts on: ${election['start_date']}'),
                                   ],
                                 ),
                               ),
