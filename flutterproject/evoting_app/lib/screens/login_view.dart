@@ -1,12 +1,7 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
-
-import 'dart:math';
-
 import 'package:evoting_app/Api/api_service.dart';
 import 'package:evoting_app/home/homepage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -29,20 +24,20 @@ class _LoginViewState extends State<LoginView> {
       _usernameController.text,
       _passwordController.text,
     );
-    log("API Response: $response" as num);
+
+    print("API Response: $response"); // ✅ Use print instead of log
 
     setState(() {
       _isLoading = false;
     });
 
-    if (response["success"] == true || response.containsKey('token')) {
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePageView()), 
-      );
+    if ((response["success"] == true || response.containsKey('token'))) {
+      if (mounted) {  // ✅ Prevent context issues
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePageView()),
+        );
+      }
     } else {
-      // ❌ Show error message if login fails
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response["message"] ?? "Login failed!"),
@@ -57,7 +52,6 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -69,8 +63,6 @@ class _LoginViewState extends State<LoginView> {
               ),
             ),
           ),
-
-          // Login Form
           Center(
             child: Container(
               width: 380,
@@ -98,8 +90,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Username
                   TextField(
                     controller: _usernameController,
                     style: const TextStyle(color: Colors.white),
@@ -115,8 +105,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Password Field
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
@@ -133,8 +121,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Login Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -156,10 +142,7 @@ class _LoginViewState extends State<LoginView> {
                             ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Register Link
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/register');
