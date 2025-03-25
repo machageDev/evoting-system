@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-
+from django.utils.timezone import now
 from .serializers import CandidateSerializer, ElectionSerializer, PostSerializer, RegisterSerializer, UserProfileSerializer, VoteSerializer, VoterSerializer
 from .models import Post, Voter, Vote, Candidate, Election 
 from django.core.exceptions import ObjectDoesNotExist
@@ -404,6 +404,27 @@ def api_get_candidates(request, election_id):
         },status=200)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsADirectoryError])   
+def api_dashboard(request):
+    user=request.user
+    today = now().date()
+    active_elections= Election.objects.filter(is_active=True)
+    pending_elections = Election.objects.filter(created_at_date=today)
+
+    active_elections_data = ElectionSerializer(active_elections,many=True).data
+    pending_elections_data = ElectionSerializer(pending_elections,many=True).data
+    return Response ({
+        'user':{
+            'username': user.username,
+            'password':user.password,
+        },
+        'actuve_elections':active_elections_data,
+        'pending_elections':pending_elections_data
+    })
+    
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
