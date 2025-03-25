@@ -40,7 +40,7 @@ class _DashboardViewState extends State<DashboardView> {
           isLoading = false;
         });
       } else {
-        log('Failed to load dashboard data' as num);
+        print('Failed to load dashboard data');
       }
     } catch (e) {
       print('Error: $e');
