@@ -1,10 +1,11 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -42,7 +43,7 @@ class _DashboardViewState extends State<DashboardView> {
         log('Failed to load dashboard data' as num);
       }
     } catch (e) {
-      log('Error: $e' as num);
+      print('Error: $e');
     }
   }
 
