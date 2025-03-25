@@ -1,9 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:convert';
-import 'dart:math';
+import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
 
 class HomePageView extends StatefulWidget {
   const HomePageView({super.key});
@@ -22,41 +21,20 @@ class _HomePageViewState extends State<HomePageView> {
     fetchWelcomeMessage(); // Call the API when the widget loads
   }
 
-  // Function to call your API
+  // Function to call your API via ApiService
   Future<void> fetchWelcomeMessage() async {
     setState(() {
       isLoading = true;
     });
 
-    const String apiUrl = 'http://192.168.0.54:8000/api_home/'; 
+    // Fetch welcome message from ApiService
+    ApiService apiService = ApiService();
+    String message = await apiService.fetchWelcomeMessage();
 
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        log("API response: $data" as num);
-
-        setState(() {
-          // Assuming your API returns {"message": "Some welcome text"}
-          welcomeMessage = data['message'] ?? "Welcome to the eVoting System";
-        });
-      } else {
-        log("Failed to load data: ${response.statusCode}" as num);
-        setState(() {
-          welcomeMessage = "Failed to load welcome message";
-        });
-      }
-    } catch (error) {
-      log("Error fetching data: $error" as num);
-      setState(() {
-        welcomeMessage = "An error occurred. Please try again later.";
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    setState(() {
+      welcomeMessage = message;
+      isLoading = false;
+    });
   }
 
   @override

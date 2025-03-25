@@ -134,7 +134,7 @@ class ApiService {
 
   // Cast a vote
   static Future<Map<String, dynamic>> castVote(int voterId, int electionId, int candidateId) async {
-    Uri url = Uri.parse('$baseUrl/vote/');
+    Uri url = Uri.parse('$baseUrl/vote');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -177,45 +177,22 @@ class ApiService {
       throw Exception("Failed to load election results");
     }
   }
+Future<String> fetchWelcomeMessage(dynamic home, dynamic baseUrl) async {
+    try {
+      final String apiUrl = '$baseUrl$home';  
 
- 
-  // Cast a vote in an election
+      final response = await http.get(Uri.parse(apiUrl));
 
-Future<Map<String, dynamic>> fetchHome(String token, dynamic baseurl) async {
-  try {
-    final url = Uri.parse('$baseurl/home');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      // Success - parse JSON response body
-      final data = json.decode(response.body);
-      return {
-        'status': true,
-        'data': data,
-      };
-    } else {
-      // Failed response
-      return {
-        'status': false,
-        'message': 'Failed to load home data',
-        'error': response.body, // Optional: to help debugging
-      };
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['message'] ?? "Welcome to the eVoting System";  
+      } else {
+        throw Exception("Failed to load data");
+      }
+    } catch (e) {
+      throw Exception("Error fetching data: $e");
     }
-  } catch (error) {
-    // Exception handling (network issues, server errors, etc.)
-    return {
-      'status': false,
-      'message': 'An error occurred',
-      'error': error.toString(),
-    };
   }
-}
 
 Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async {
     final url = Uri.parse('$baseUrl/forgot_password');
