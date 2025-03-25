@@ -1,8 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:math';
+
 import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
-
 
 class HomePageView extends StatefulWidget {
   const HomePageView({super.key});
@@ -14,27 +15,40 @@ class HomePageView extends StatefulWidget {
 class _HomePageViewState extends State<HomePageView> {
   String welcomeMessage = "Welcome to the eVoting System"; // Default message
   bool isLoading = false;
+  String pageTitle = "Loading..."; // Title of the home page
+  String aboutSystem = "Loading..."; // About system text
 
   @override
   void initState() {
     super.initState();
-    fetchWelcomeMessage(); // Call the API when the widget loads
+    fetchHomePageData(); // Call the API when the widget loads
   }
 
   // Function to call your API via ApiService
-  Future<void> fetchWelcomeMessage() async {
+  Future<void> fetchHomePageData() async {
     setState(() {
       isLoading = true;
     });
 
-    // Fetch welcome message from ApiService
+    // Fetch home page data from ApiService
     ApiService apiService = ApiService();
-    String message = await apiService.fetchWelcomeMessage();
+    try {
+      Map<String, dynamic> homePageData = await apiService.fetchHomePageData();
 
-    setState(() {
-      welcomeMessage = message;
-      isLoading = false;
-    });
+      setState(() {
+        // Update the UI with the fetched data
+        welcomeMessage = homePageData['welcome_message'] ?? 'Welcome to the eVoting System';
+        pageTitle = homePageData['home_page_title'] ?? 'Home Page';
+        aboutSystem = homePageData['about_system'] ?? 'Information not available';
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        welcomeMessage = 'Failed to load home page data';
+        isLoading = false;
+      });
+      log("Error fetching home page data: $e" as num);
+    }
   }
 
   @override
@@ -140,7 +154,7 @@ class _HomePageViewState extends State<HomePageView> {
                 child: Column(
                   children: [
                     Text(
-                      "About Our System",
+                      pageTitle,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -149,7 +163,7 @@ class _HomePageViewState extends State<HomePageView> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      "Our eVoting system offers a secure and user-friendly platform for conducting elections and polls online. With advanced encryption and real-time results, we ensure transparency and trust in the voting process.",
+                      aboutSystem,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.black87,
                             fontSize: 16,
@@ -165,4 +179,8 @@ class _HomePageViewState extends State<HomePageView> {
       ),
     );
   }
+}
+
+extension on ApiService {
+  fetchHomePageData() {}
 }

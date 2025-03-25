@@ -15,11 +15,13 @@ class ApiService {
   static const String resultUrl = '$baseUrl/api_result';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String homepageUrl = '$baseUrl/api_home';
+  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
+
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/api/register'));
+      final response = await http.get(Uri.parse('$baseUrl/apiregister'));
 
       if (response.statusCode == 200) {
         return response.body;
@@ -248,5 +250,21 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
         'message': 'An error occurred',
         'error': e.toString()
       };
+    }
+  }
+   //Function to fetch home page data
+  Future<Map<String, dynamic>> fetchHomePageData(dynamic baseUrl) async {
+    const String apiUrl = 'api_home'; // Your home page data endpoint
+    try {
+      final response = await http.get(Uri.parse(baseUrl + apiUrl));
+
+      if (response.statusCode == 200) {
+        // Assuming the response is in JSON format
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load home page data');
+      }
+    } catch (e) {
+      throw Exception('Error fetching data: $e');
     }
   }
