@@ -8,7 +8,10 @@ import 'screens/register_view.dart';
 import 'screens/forgot_password_view.dart';
 import 'home/dashboard_view.dart';
 import 'home/homepage_view.dart';
-
+import 'home/voterdashboard_view.dart';
+import 'view/result_view.dart';
+import 'view/vote_view.dart';
+import 'manage/manageelection_view.dart'
 void main() {
   runApp(const MyApp());
 }
@@ -41,10 +44,16 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterView(),
         '/forgot-password': (context) => const ForgotPasswordView(),
         '/dashboard': (context) => DashboardView(),
-        '/create-candidate': (context) => const CreateCandidateView(),
+        '/create_candidate': (context) => const CreateCandidateView(),
         '/create_elections': (context) => CreateElectionsView(),
         '/homepage_view': (context) => HomePageView(),
+        '/voterdashboard_view':(context) => VoterDashboardView(),
+        '/result_view': (context) => ResultView(),
+        '/vote_view': (context) => VoteView(),
+        '/manageelection_view': (context) => ManageElectionView(),
+
       },
+
       home: const HomeScreen(),
     );
   }

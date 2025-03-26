@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
 
@@ -24,34 +23,69 @@ class _DashboardViewState extends State<DashboardView> {
     fetchDashboardData();
   }
 
-Future<void> fetchDashboardData() async {
-  final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); 
+  Future<void> fetchDashboardData() async {
+    final url = Uri.parse('http://192.168.0.54:8000/api/dashboard');
 
-  try {
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      print("API Response: $data"); // Debugging step
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print("API Response: $data"); // Debugging step
 
-      setState(() {
-        username = data['user'] != null ? data['user']['username'] : "Guest";
-        activeElections = data['active_elections'] ?? [];
-        pendingElections = data['pending_elections'] ?? [];
-        isLoading = false;
-      });
-    } else {
-      print('Failed to load dashboard data: ${response.statusCode}');
+        setState(() {
+          username = data['user'] != null ? data['user']['username'] : "Guest";
+          activeElections = data['active_elections'] ?? [];
+          pendingElections = data['pending_elections'] ?? [];
+          isLoading = false;
+        });
+      } else {
+        print('Failed to load dashboard data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching dashboard data: $e');
     }
-  } catch (e) {
-    print('Error fetching dashboard data: $e');
   }
-}
+
+  void _onMenuSelected(String value) {
+    switch (value) {
+      case 'election_results':
+        Navigator.pushNamed(context, '/manage_election');
+        break;
+      case 'voter_dashboard':
+        Navigator.pushNamed(context, '/voterDashboard');
+        break;
+      case 'view_candidates':
+        Navigator.pushNamed(context, '/manage_candidate');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Dashboard | E-Voting')),
+      appBar: AppBar(
+        title: Text('Dashboard | E-Voting'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: _onMenuSelected,
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'election_results', child: Text('Election Results')),
+              PopupMenuItem(value: 'voter_dashboard', child: Text('Voter Dashboard')),
+              PopupMenuItem(value: 'view_candidates', child: Text('View Candidates')),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Text("Home", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
