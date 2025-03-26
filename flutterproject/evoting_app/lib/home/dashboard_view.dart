@@ -1,8 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -27,7 +25,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Future<void> fetchDashboardData() async {
-    final url = Uri.parse('http://192.168.0.54:8000/api_dashboard'); 
+    final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); 
 
     try {
       final response = await http.get(url);
@@ -88,7 +86,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     SizedBox(height: 10),
                                     ElevatedButton(
                                       onPressed: () {
-                                        log('Vote in Election ID: ${election['id']}' as num);
+                                        print('Vote in Election ID: ${election['id']}');
                                       },
                                       child: Text('Vote Now'),
                                     )

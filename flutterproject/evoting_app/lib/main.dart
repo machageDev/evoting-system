@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginView(),
         '/register': (context) => const RegisterView(),
         '/forgot-password': (context) => const ForgotPasswordView(),
-        '/dashboard_view': (context) => DashboardView(),
+        '/dashboard': (context) => DashboardView(),
         '/create-candidate': (context) => const CreateCandidateView(),
         '/create_elections': (context) => CreateElectionsView(),
         '/homepage_view': (context) => HomePageView(),
