@@ -32,6 +32,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.utils import timezone
 
 
 def home(request):
@@ -406,23 +407,36 @@ def api_get_candidates(request, election_id):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@permission_classes([IsADirectoryError])   
+@permission_classes([AllowAny])   
 def api_dashboard(request):
-    user=request.user
-    today = now().date()
-    active_elections= Election.objects.filter(is_active=True)
-    pending_elections = Election.objects.filter(created_at_date=today)
+    user = request.user  # Get the user object
+    today = now().date()  # Get today's date
 
-    active_elections_data = ElectionSerializer(active_elections,many=True).data
-    pending_elections_data = ElectionSerializer(pending_elections,many=True).data
-    return Response ({
-        'user':{
+    # Get active elections
+    active_elections = Election.objects.filter(status='active')
+
+    # Get pending elections (Filter by date, not full timestamp)
+    pending_elections = Election.objects.filter(created_at__date=today)
+
+    # Serialize elections
+    active_elections_data = ElectionSerializer(active_elections, many=True).data
+    pending_elections_data = ElectionSerializer(pending_elections, many=True).data
+
+    # Prepare user data (Only if authenticated)
+    user_data = None
+    if user.is_authenticated:
+        user_data = {
             'username': user.username,
-            'password':user.password,
-        },
-        'actuve_elections':active_elections_data,
-        'pending_elections':pending_elections_data
+            'email': user.email  # Sending email instead of password
+        }
+
+    # Return response
+    return Response({
+        'user': user_data,  # Can be None if not authenticated
+        'active_elections': active_elections_data,
+        'pending_elections': pending_elections_data
     })
+
     
 
 
