@@ -24,26 +24,29 @@ class _DashboardViewState extends State<DashboardView> {
     fetchDashboardData();
   }
 
-  Future<void> fetchDashboardData() async {
-    final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); 
+Future<void> fetchDashboardData() async {
+  final url = Uri.parse('http://192.168.0.54:8000/api/dashboard'); 
 
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          username = data['user']['username'];
-          activeElections = data['active_elections'];
-          pendingElections = data['pending_elections'];
-          isLoading = false;
-        });
-      } else {
-        print('Failed to load dashboard data');
-      }
-    } catch (e) {
-      print('Error: $e');
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print("API Response: $data"); // Debugging step
+
+      setState(() {
+        username = data['user'] != null ? data['user']['username'] : "Guest";
+        activeElections = data['active_elections'] ?? [];
+        pendingElections = data['pending_elections'] ?? [];
+        isLoading = false;
+      });
+    } else {
+      print('Failed to load dashboard data: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error fetching dashboard data: $e');
   }
+}
 
   @override
   Widget build(BuildContext context) {

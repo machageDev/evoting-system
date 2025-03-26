@@ -231,7 +231,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
 }  
   // Fetch dashboard data (Active & Pending Elections)
  Future<Map<String, dynamic>> fetchDashboardData(dynamic baseUrl) async {
-    final url = Uri.parse("$baseUrl/api_dashboard");
+    final url = Uri.parse("$baseUrl/api/dashboard");
 
     try {
       final response = await http.get(url);
