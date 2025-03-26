@@ -268,3 +268,45 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
       throw Exception('Error fetching data: $e');
     }
   }
+
+ 
+
+  // Fetch all elections
+   Future<List<dynamic>> fetchElections(dynamic baseUrl) async {
+    final response = await http.get(Uri.parse('$baseUrl/elections'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load elections');
+    }
+  }
+
+  // Create a new election
+   Future<bool> createElection(Map<String, String> electionData, dynamic baseUrl) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/create_election'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(electionData),
+    );
+    return response.statusCode == 201;
+  }
+
+  // Edit an election
+   Future<bool> editElection(Map<String, String> electionData, dynamic baseUrl) async {
+    
+    final response = await http.put(
+      Uri.parse('$baseUrl/edit_election/${electionData['id']}'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(electionData),
+    );
+    return response.statusCode == 200;
+  }
+
+  // Delete an election
+   Future<bool> deleteElection(String electionId, dynamic baseUrl) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/delete_election/$electionId'),
+    );
+    return response.statusCode == 204;
+  }
+

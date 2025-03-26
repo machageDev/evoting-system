@@ -11,7 +11,7 @@ import 'home/homepage_view.dart';
 import 'home/voterdashboard_view.dart';
 import 'view/result_view.dart';
 import 'view/vote_view.dart';
-import 'manage/manageelection_view.dart'
+import 'manage/manageelection_view.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/voterdashboard_view':(context) => VoterDashboardView(),
         '/result_view': (context) => ResultView(),
         '/vote_view': (context) => VoteView(),
-        '/manageelection_view': (context) => ManageElectionView(),
+        '/manageelection_view': (context) => ManageElectionsView(),
 
       },
 
