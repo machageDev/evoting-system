@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.54:8000';
+  static const String baseUrl = 'http://192.168.0.102:8000';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
   static const String registerUrl = '$baseUrl/apiregister';
@@ -15,7 +15,8 @@ class ApiService {
   static const String resultUrl = '$baseUrl/api_result';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String homepageUrl = '$baseUrl/api_home';
-  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
+  static const String homeUrl = 'http://192.168.0.102:8000/api_home'; 
+  static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
 
 
   // ✅ FETCH DATA FUNCTION
@@ -121,8 +122,8 @@ class ApiService {
   }
 
    // Fetch voter details
-  static Future<Map<String, dynamic>> getVoterDetails(int voterId) async {
-    Uri url = Uri.parse('$baseUrl/voter/$voterId/');
+  static Future<Map<String, dynamic>> getUserDetails(int UserId) async {
+    Uri url = Uri.parse('$baseUrl/voter/$UserId/');
     final response = await http.get(url);
     return _processResponse(response);
   }
@@ -168,6 +169,8 @@ class ApiService {
   static getVoterDashboard() {}
 
   static forgot_Password(String email) {}
+
+  static fetchCandidates() {}
 }
 
    Future<Map<String, dynamic>> getElectionResults(int electionId, dynamic baseUrl) async {
@@ -254,9 +257,9 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
   }
    //Function to fetch home page data
   Future<Map<String, dynamic>> fetchHomePageData(dynamic baseUrl) async {
-    const String apiUrl = 'api_home'; // Your home page data endpoint
+    const String homeUrl = 'api_home'; // Your home page data endpoint
     try {
-      final response = await http.get(Uri.parse(baseUrl + apiUrl));
+      final response = await http.get(Uri.parse(baseUrl + homeUrl));
 
       if (response.statusCode == 200) {
         // Assuming the response is in JSON format
@@ -269,44 +272,31 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
     }
   }
 
- 
-
-  // Fetch all elections
-   Future<List<dynamic>> fetchElections(dynamic baseUrl) async {
-    final response = await http.get(Uri.parse('$baseUrl/elections'));
+  Future<List<Map<String, dynamic>>> getCandidates(dynamic baseUrl) async {
+    final response = await http.get(Uri.parse('$baseUrl/candidates/'));
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return List<Map<String, dynamic>>.from(json.decode(response.body));
     } else {
-      throw Exception('Failed to load elections');
+      throw Exception('Failed to load candidates');
     }
   }
 
-  // Create a new election
-   Future<bool> createElection(Map<String, String> electionData, dynamic baseUrl) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/create_election'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(electionData),
-    );
-    return response.statusCode == 201;
-  }
-
-  // Edit an election
-   Future<bool> editElection(Map<String, String> electionData, dynamic baseUrl) async {
-    
+  // Update candidate
+   Future<void> updateCandidate(int id, String name, String position, dynamic baseUrl) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/edit_election/${electionData['id']}'),
+      Uri.parse('$baseUrl/candidates/$id/'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(electionData),
+      body: jsonEncode({'name': name, 'position': position}),
     );
-    return response.statusCode == 200;
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update candidate');
+    }
   }
 
-  // Delete an election
-   Future<bool> deleteElection(String electionId, dynamic baseUrl) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/delete_election/$electionId'),
-    );
-    return response.statusCode == 204;
+  // Delete candidate
+   Future<void> deleteCandidate(int id, dynamic baseUrl) async {
+    final response = await http.delete(Uri.parse('$baseUrl/candidates/$id/'));
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete candidate');
+    }
   }
-
