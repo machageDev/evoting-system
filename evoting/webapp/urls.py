@@ -30,6 +30,7 @@ urlpatterns = [
     path('apimanage_candidates',views.apimanage_candidate, name='manage-candidates'),
     path('apimanage_elections',views.apimanage_election, name='manage_election'),
     path('apicreate_election',views.apicreate_election , name='apicreate_election'),
+    path('apiget_election',views.apiget_election,name='apiget_election'),
 
     
     

@@ -544,8 +544,17 @@ def apicreate_election(request):
     
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def  apiget_election(request):
+    try:
+        id = request.GET.get('id')
+        election = Election.objects.get(id=id)
+        serialized_election = ElectionSerializer(election)
+        return Response(serialized_election.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 @api_view(['GET']) 
 def api_result(request):
