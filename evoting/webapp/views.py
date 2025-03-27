@@ -391,7 +391,20 @@ def apicreate_candidate(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET', 'POST'])
+def apimanage_candidate(request):
+   
+    if request.method == 'GET':
+        candidates = Candidate.objects.all()
+        serializer = CandidateSerializer(candidates, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+    elif request.method == 'POST':
+        serializer = CandidateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -437,7 +450,19 @@ def api_dashboard(request):
         'pending_elections': pending_elections_data
     })
 
+@api_view(['GET']) 
+@permission_classes([])
+def apimanage_election(request):
+    try:
+        election_id = request.GET.get('election_id')
+        election = Election.objects.get(id=election_id)
+        election.status = 'active'
+        election.save()
+        return Response({"status":"success"},status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+   
 
 
 @api_view(['POST'])

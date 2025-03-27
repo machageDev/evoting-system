@@ -27,6 +27,7 @@ urlpatterns = [
     path('api_vote',views.api_vote,name="api_vote"),
     path('api/elections/results/', views.api_result, name="api_result"),
     path('api_home',views.api_home,name="api_home"),
+     path('apimanage_candidates',views.apimanage_candidate, name='manage-candidates'),
 
     
     
