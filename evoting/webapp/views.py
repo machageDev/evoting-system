@@ -527,6 +527,26 @@ def create_election(request):
 
     except Exception as e:    
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def apicreate_election(request):
+    try:
+        name = request.data.get('name')
+        date = request.data.get('date')
+        election_status = request.data.get('status')
+        if not all([name, date,  status]):
+            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)
+        election = Election.objects.create(name=name, date=date, status=election_status)
+        
+        return Response({"message": "Election created successfully", "id": election.id}, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+
 @api_view(['GET']) 
 def api_result(request):
     elections = Election.objects.all()
