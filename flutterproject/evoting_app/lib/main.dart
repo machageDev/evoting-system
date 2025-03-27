@@ -76,29 +76,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     futureData = apiService.fetchData(); 
   }
-
+  
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
-      
-      body: Center(
-        child: FutureBuilder<String>(
-          future: futureData,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator(); // Show loading indicator
-            } else if (snapshot.hasError) {
-              return Text("Error: ${snapshot.error}");
-            } else {
-              return Text("Data: ${snapshot.data}");
-            }
-          },
-        ),
-      ),
-    );
+    // TODO: implement build
+    throw UnimplementedError();
   }
+
 }
+ 
+
 
 // ✅ Theme Data for Light and Dark Mode
 final ThemeData lightTheme = ThemeData(

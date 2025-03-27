@@ -1,8 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api
+
 
 import 'dart:convert';
+import 'package:evoting_app/manage/manageelection_view.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+//import 'package:evoting_app/manage/manage_candidate_view.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -47,33 +49,35 @@ class _DashboardViewState extends State<DashboardView> {
     }
   }
 
-  void _onMenuSelected(String value) {
-    switch (value) {
-      case 'manageelection':
-        Navigator.pushNamed(context, '/manageelection');
-        break;
-      case 'VoterDashboard':
-        Navigator.pushNamed(context, '/voterDashboard');
-        break;
-      case 'manage_candidate':
-        Navigator.pushNamed(context, '/manage_candidate');
-        break;
-    }
+void _onMenuSelected(String value) {
+  switch (value) {
+    case 'manageelection':
+      // Navigator.pushNamed(context, '/manageelection');
+      Navigator.pushReplacement(context,
+      MaterialPageRoute(builder: (context) => const ManageElectionsView()));
+      break;
+    case 'voter_dashboard':  
+      Navigator.pushNamed(context, '/voterDashboard');
+      break;
+    case 'manage_candidates': 
+      Navigator.pushNamed(context, '/manage_candidate');
+      break;
   }
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard | E-Voting'),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: _onMenuSelected,
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'manageelection', child: Text('Election')),
-              PopupMenuItem(value: 'voter_dashboard', child: Text('VoterDashboard')),
-              PopupMenuItem(value: 'manage_candidates', child: Text('manage_Candidates')),
-            ],
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Dashboard | E-Voting'),
+      actions: [
+        PopupMenuButton<String>(
+          onSelected: _onMenuSelected,
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 'manageelection', child: Text('Manage Election')),
+            const PopupMenuItem(value: 'voterdd', child: Text('Voter Dashboard')),
+            const PopupMenuItem(value: 'manage_candidate', child: Text('Manage Candidates')),
+          ],
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(

@@ -6,18 +6,20 @@ import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.0.54:8000';
-  static const String loginUrl = '$baseUrl/apilogin';
-  static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
-  static const String registerUrl = '$baseUrl/apiregister';
-  static const String electionUrl = '$baseUrl/apielections';
-  static const String candidateUrl = '$baseUrl/apicandidates';
-  static const String voteUrl = '$baseUrl/apivote';
-  static const String resultUrl = '$baseUrl/api_result';
-  static const String dashboardUrl ='$baseUrl/api/dashboard';
-  static const String homepageUrl = '$baseUrl/api_home';
-  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
   static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
-
+  static const String candidateUrl = '$baseUrl/apicandidates';
+  static const String dashboardUrl ='$baseUrl/api/dashboard';
+  static const String electionUrl = '$baseUrl/api/elections/results';
+  static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
+  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
+  static const String homepageUrl = '$baseUrl/api_home';
+  static const String loginUrl = '$baseUrl/apilogin';
+  static const String managecandidateUrl ='$baseUrl/apimanage_candidate';
+  static const String manageelctionUrl ='$baseUrl/apimanage_election';
+  static const String registerUrl = '$baseUrl/apiregister';
+  static const String resultUrl = '$baseUrl/api_result';
+  static const String voteUrl = '$baseUrl/apivote';
+  static const  String CreateElctionUrl='$baseUrl/apicreate_election';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -157,6 +159,12 @@ class ApiService {
     return _processResponse(response);
   }
 
+  static getVoterDashboard() {}
+
+  static forgot_Password(String email) {}
+
+  static fetchCandidates() {}
+
   // Common response handler
   static dynamic _processResponse(http.Response response) {
     if (response.statusCode == 200) {
@@ -165,12 +173,6 @@ class ApiService {
       return {"success": false, "error": "Failed to fetch data"};
     }
   }
-
-  static getVoterDashboard() {}
-
-  static forgot_Password(String email) {}
-
-  static fetchCandidates() {}
 }
 
    Future<Map<String, dynamic>> getElectionResults(int electionId, dynamic baseUrl) async {
