@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.102:8000';
+  static const String baseUrl = 'http://192.168.0.54:8000';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
   static const String registerUrl = '$baseUrl/apiregister';
@@ -15,7 +15,7 @@ class ApiService {
   static const String resultUrl = '$baseUrl/api_result';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String homepageUrl = '$baseUrl/api_home';
-  static const String homeUrl = 'http://192.168.0.102:8000/api_home'; 
+  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
   static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
 
 
@@ -272,7 +272,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
     }
   }
 
-  Future<List<Map<String, dynamic>>> getCandidates(dynamic baseUrl) async {
+Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
     final response = await http.get(Uri.parse('$baseUrl/candidates/'));
     if (response.statusCode == 200) {
       return List<Map<String, dynamic>>.from(json.decode(response.body));
@@ -281,8 +281,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
     }
   }
 
-  // Update candidate
-   Future<void> updateCandidate(int id, String name, String position, dynamic baseUrl) async {
+  Future<void> updateCandidate(int id, String name, String position, String baseUrl) async {
     final response = await http.put(
       Uri.parse('$baseUrl/candidates/$id/'),
       headers: {'Content-Type': 'application/json'},
@@ -293,8 +292,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
     }
   }
 
-  // Delete candidate
-   Future<void> deleteCandidate(int id, dynamic baseUrl) async {
+  Future<void> deleteCandidate(int id, String baseUrl) async {
     final response = await http.delete(Uri.parse('$baseUrl/candidates/$id/'));
     if (response.statusCode != 204) {
       throw Exception('Failed to delete candidate');

@@ -49,13 +49,13 @@ class _DashboardViewState extends State<DashboardView> {
 
   void _onMenuSelected(String value) {
     switch (value) {
-      case 'election_results':
-        Navigator.pushNamed(context, '/manage_election');
+      case 'manageelection':
+        Navigator.pushNamed(context, '/manageelection');
         break;
-      case 'voter_dashboard':
+      case 'VoterDashboard':
         Navigator.pushNamed(context, '/voterDashboard');
         break;
-      case 'view_candidates':
+      case 'manage_candidate':
         Navigator.pushNamed(context, '/manage_candidate');
         break;
     }
@@ -70,15 +70,15 @@ class _DashboardViewState extends State<DashboardView> {
           PopupMenuButton<String>(
             onSelected: _onMenuSelected,
             itemBuilder: (context) => [
-              PopupMenuItem(value: 'election_results', child: Text('Election Results')),
-              PopupMenuItem(value: 'voter_dashboard', child: Text('Voter Dashboard')),
-              PopupMenuItem(value: 'view_candidates', child: Text('View Candidates')),
+              PopupMenuItem(value: 'manageelection', child: Text('Election')),
+              PopupMenuItem(value: 'voter_dashboard', child: Text('VoterDashboard')),
+              PopupMenuItem(value: 'manage_candidates', child: Text('manage_Candidates')),
             ],
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Text("Home", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text("", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   Icon(Icons.arrow_drop_down),
                 ],
               ),

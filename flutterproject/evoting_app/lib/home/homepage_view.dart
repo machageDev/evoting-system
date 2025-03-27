@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:math';
+
 
 import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +39,7 @@ class _HomePageViewState extends State<HomePageView> {
         // Update the UI with the fetched data
         welcomeMessage = homePageData['welcome_message'] ?? 'Welcome to the eVoting System';
         pageTitle = homePageData['home_page_title'] ?? 'Home Page';
-        aboutSystem = homePageData['about_system'] ?? 'Information not available';
+        aboutSystem = homePageData['about_system'] ?? '';
         isLoading = false;
       });
     } catch (e) {
@@ -47,7 +47,7 @@ class _HomePageViewState extends State<HomePageView> {
         welcomeMessage = 'Failed to load home page data';
         isLoading = false;
       });
-      log("Error fetching home page data: $e" as num);
+      print("Error fetching home page data: $e" );
     }
   }
 
@@ -129,7 +129,7 @@ class _HomePageViewState extends State<HomePageView> {
                         ),
                       ),
                       child: const Text(
-                        "Go to Dashboard",
+                        "Dashboard",
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),

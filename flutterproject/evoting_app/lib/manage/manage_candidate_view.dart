@@ -1,5 +1,11 @@
-import 'package:flutter/material.dart';
+
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:evoting_app/Api/api_service.dart';
+import 'package:flutter/material.dart';
+
+
+
 
 class ManageCandidatesView extends StatefulWidget {
   const ManageCandidatesView({super.key});
@@ -9,7 +15,13 @@ class ManageCandidatesView extends StatefulWidget {
 }
 
 class _ManageCandidatesViewState extends State<ManageCandidatesView> {
+  // ignore: unused_field
+  final ApiService _apiService = ApiService();  
   late Future<List<Map<String, dynamic>>> _candidatesFuture;
+
+  final String baseUrl = "https://192.168.0.54:8000";
+  
+  get _ApiService => null; 
 
   @override
   void initState() {
@@ -19,7 +31,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
 
   void _fetchCandidates() {
     setState(() {
-      _candidatesFuture = ApiService.getCandidates();
+      _candidatesFuture = _ApiService.getCandidates(baseUrl); 
     });
   }
 
@@ -48,12 +60,12 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final updatedData = {
-                  'name': nameController.text,
-                  'position': positionController.text,
-                };
-
-                await ApiService.updateCandidate(candidate['id'], updatedData);
+                await _ApiService.updateCandidate(  
+                  candidate['id'],
+                  nameController.text,
+                  positionController.text,
+                  baseUrl,
+                );
                 _fetchCandidates();
                 Navigator.pop(context);
               },
@@ -79,7 +91,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await ApiService.deleteCandidate(candidateId);
+                await _ApiService.deleteCandidate(candidateId, baseUrl);  // ✅ Use instance method
                 _fetchCandidates();
                 Navigator.pop(context);
               },
