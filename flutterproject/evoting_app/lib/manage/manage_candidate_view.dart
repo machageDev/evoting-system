@@ -19,7 +19,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   final ApiService _apiService = ApiService();  
   late Future<List<Map<String, dynamic>>> _candidatesFuture;
 
-  final String baseUrl = "https://192.168.0.54:8000";
+  final String baseUrl = "https://192.168.0.28:8000";
   
   get _ApiService => null; 
 

@@ -22,7 +22,7 @@ class _ManageElectionsViewState extends State<ManageElectionsView> {
   }
 
   Future<void> fetchElections() async {
-    final url = Uri.parse('http://192.168.0.54:8000/api/elections/results');
+    final url = Uri.parse('http://192.168.0.54:8000/apiget_election');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.54:8000';
+  static const String baseUrl = 'http://192.168.0.28:8000';
   static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
   static const String candidateUrl = '$baseUrl/apicandidates';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String electionUrl = '$baseUrl/api/elections/results';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
-  static const String homeUrl = 'http://192.168.0.54:8000/api_home'; 
+  static const String homeUrl = 'http://192.168.0.28:8000/api_home'; 
   static const String homepageUrl = '$baseUrl/api_home';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String managecandidateUrl ='$baseUrl/apimanage_candidate';
@@ -20,6 +20,7 @@ class ApiService {
   static const String resultUrl = '$baseUrl/api_result';
   static const String voteUrl = '$baseUrl/apivote';
   static const  String CreateElctionUrl='$baseUrl/apicreate_election';
+  static const String  ProfileViewUrl = '$baseUrl/apicreate_profile';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -298,5 +299,21 @@ Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
     final response = await http.delete(Uri.parse('$baseUrl/candidates/$id/'));
     if (response.statusCode != 204) {
       throw Exception('Failed to delete candidate');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserProfile(String token, dynamic baseUrl) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/apicreate_profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return null;
     }
   }
