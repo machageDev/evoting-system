@@ -658,7 +658,42 @@ def dashboard(request):
 
     return Response(data) 
 
-    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_voter_dashboard(request):
+    user = request.User
+    try:
+        voter = Vote.objects.get(user=user)
+        voter_data = {
+            'name': voter.name,
+            'username': voter.username,
+            'age': voter.age,
+        }
+        return Response(voter_data, status=200)
+    except vote.DoesNotExit:
+         voter_data = {
+            'name': user.first_name + " " + user.last_name,
+            'username': user.username,
+            'age': None,  # Default to None if no age is recorded
+        }
+
+    elections = Election.objects.all()  # Adjust query based on your model
+    election_data = [
+        {
+            'id': election.id,
+            'name': election.name,
+            'date': election.election_date.strftime('%Y-%m-%d'),
+            'status': election.status,
+        }
+        for election in elections
+    ]
+
+    return Response({
+        'voter': voter_data,
+        'elections': election_data,
+    })
+
+
 @api_view(['DELETE'])
 @permission_classes([AllowAny])  
 def delete_election(request):

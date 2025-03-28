@@ -32,6 +32,7 @@ urlpatterns = [
     path('apicreate_election',views.apicreate_election , name='apicreate_election'),
     path('apiget_election',views.apiget_election,name='apiget_election'),
     path('apicreate_profile',views.apicreate_profile,name='apicreate_profile'),
+    path('api_voter_dashboard',views.api_voter_dashboard,name='api_voter_dashboard'),
 
     
     
