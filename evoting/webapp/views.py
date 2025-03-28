@@ -495,17 +495,21 @@ def api_profile_picture(request):
     return Response({"message": "Profile picture updated successfully", "profile_picture": request.build_absolute_uri(user.profile_picture.url)})
 
 
-@api_view(['post'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def apicreate_profile(request):
-    first_name = request.data.get('first name')
-    last_name = request.data.get('last name')
+    first_name = request.data.get('first_name')  
+    last_name = request.data.get('last_name')    
     email = request.data.get('email')
     username = request.data.get('username')
-    password = request.data.get('password')
+    password = request.data.get('password')   
     
     if not all([first_name, last_name, email, username, password]):
-        return Response({'error': 'All fields are required'}, status=400)
+        return Response({'message': 'Invalid request: All fields are required'}, status=400)    
+    if User.objects.filter(username=username).exists():
+        return Response({'message': 'Username already taken'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return Response({'message': 'Email already registered'}, status=400)    
     user = User.objects.create_user(
         username=username,
         first_name=first_name,
@@ -513,9 +517,7 @@ def apicreate_profile(request):
         email=email,
         password=password
     )
-    
-    return Response({'message': 'Profile created successfully', 'user_id': user.id})
-  
+    return Response({'message': 'Profile created successfully', 'user_id': user.id}, status=201)    
 
 
 @api_view(['GET'])
