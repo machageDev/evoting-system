@@ -424,6 +424,18 @@ def api_get_candidates(request, election_id):
         },status=200)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_get_election(request):
+    try:
+        election = Election.objects.get(election)
+        serializer = ElectionSerializer(election)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Election.DoesNotExist:
+        return Response({"error": "Election not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     
 @api_view(['GET'])
 @permission_classes([AllowAny])   
