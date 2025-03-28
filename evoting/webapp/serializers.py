@@ -20,7 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Voter
-        fields = ['name', 'email', 'password', 'phone_number']
+        fields = ['username', 'email', 'password', 'phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

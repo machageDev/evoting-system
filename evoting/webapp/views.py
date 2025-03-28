@@ -33,6 +33,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils import timezone
+from django.db import transaction
 
 
 def home(request):
@@ -301,26 +302,31 @@ def edit_user(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def apiregister(request):
-    try:
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-        phone_number=request.data.get('phone_number')
-        if not all ([username, email, password,phone_number]):
-            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(email=email).exists():
-            return Response({"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(username=username).exists():
-            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = RegisterSerializer(data=request.data)
+    
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.create_user(username=username, password=password, email=email)
-        voter = Voter.objects.create(user=user,phone_number=phone_number)
-        token, created = Token.objects.get_or_create(user=user)
+    try:
+        with transaction.atomic():  # Ensures atomicity
+            username = serializer.validated_data['username'].strip()
+            email = serializer.validated_data['email'].strip().lower()
+            password = serializer.validated_data['password']
+            phone_number = serializer.validated_data['phone_number'].strip()
+
+            if User.objects.filter(email=email).exists():
+                return Response({"error": "User with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(username=username).exists():
+                return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+            user = User.objects.create_user(username=username, password=password, email=email)
+            Voter.objects.create(user=user, phone_number=phone_number)
+            token, _ = Token.objects.get_or_create(user=user)
 
         return Response({"message": "User registered successfully.", "token": token.key}, status=status.HTTP_201_CREATED)
-
+    
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": f"Registration failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['POST'])
 @permission_classes([AllowAny])
