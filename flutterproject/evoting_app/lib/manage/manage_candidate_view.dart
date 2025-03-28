@@ -157,7 +157,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          Navigator.pushNamed(context, '/createCandidate');
+          Navigator.pushNamed(context, '/create_candidate');
         },
       ),
     );

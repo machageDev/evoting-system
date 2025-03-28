@@ -87,7 +87,7 @@ Future<void> fetchVoterDashboard() async {
                   // Voting Section
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/vote');
+                      Navigator.pushNamed(context, '/vote_view');
                     },
                     icon: const Icon(Icons.how_to_vote),
                     label: const Text("Cast Your Vote"),
@@ -99,7 +99,7 @@ Future<void> fetchVoterDashboard() async {
                   // View Results Section
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/results');
+                      Navigator.pushNamed(context, '/result_view');
                     },
                     icon: const Icon(Icons.bar_chart),
                     label: const Text("View Results"),

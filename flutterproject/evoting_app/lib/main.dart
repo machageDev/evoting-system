@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
         '/create_elections': (context) => CreateElectionsView(),
         '/homepage_view': (context) => HomePageView(),
         '/voterdashboard_view':(context) => VoterDashboardView(),
-        '/result_view': (context) => ResultView(),
+        '/result_view': (context) => ResultView(electionResults: {},),
         '/vote_view': (context) => VoteView(),
         '/manageelection_view': (context) => ManageElectionsView(),
 
@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    
     throw UnimplementedError();
   }
 

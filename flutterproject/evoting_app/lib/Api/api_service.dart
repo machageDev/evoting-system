@@ -22,6 +22,7 @@ class ApiService {
   static const  String CreateElctionUrl='$baseUrl/apicreate_election';
   static const String  ProfileViewUrl = '$baseUrl/apicreate_profile';
   static const String  getVoterDashboardUrl = 'baseUrl/api_voter_dashboard';
+  static const String getelectionUrl = '$baseUrl/api_get_election';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
