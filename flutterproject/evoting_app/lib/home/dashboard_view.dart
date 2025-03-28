@@ -13,25 +13,17 @@ class DashboardView extends StatefulWidget {
 class _DashboardViewState extends State<DashboardView> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _widgetOptions = <Widget>[
     VoterDashboardView(),
     ManageElectionsView(),
     ManageCandidatesView(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   void _onSettingsSelected() {
-    // Navigate to the settings page
     Navigator.pushNamed(context, '/settings');
   }
 
   void _onProfileSelected() {
-    // Navigate to the profile page
     Navigator.pushNamed(context, '/profile');
   }
 
@@ -40,6 +32,7 @@ class _DashboardViewState extends State<DashboardView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard | E-Voting'),
+        automaticallyImplyLeading: false, 
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -48,11 +41,10 @@ class _DashboardViewState extends State<DashboardView> {
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: _onProfileSelected,
-            
           ),
         ],
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _widgetOptions[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -70,7 +62,14 @@ class _DashboardViewState extends State<DashboardView> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          // Prevent reloading when tapping the same tab
+          if (_selectedIndex != index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
+        },
       ),
     );
   }

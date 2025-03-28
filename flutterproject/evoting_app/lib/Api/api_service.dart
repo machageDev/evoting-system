@@ -21,6 +21,7 @@ class ApiService {
   static const String voteUrl = '$baseUrl/apivote';
   static const  String CreateElctionUrl='$baseUrl/apicreate_election';
   static const String  ProfileViewUrl = '$baseUrl/apicreate_profile';
+  static const String  getVoterDashboardUrl = 'baseUrl/api_voter_dashboard';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -235,29 +236,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
     }
 
 }  
-  // Fetch dashboard data (Active & Pending Elections)
- Future<Map<String, dynamic>> fetchDashboardData(dynamic baseUrl) async {
-    final url = Uri.parse("$baseUrl/api/dashboard");
 
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {
-          'status': false,
-          'message': 'Failed to load dashboard data',
-          'error': response.body
-        };
-      }
-    } catch (e) {
-      return {
-        'status': false,
-        'message': 'An error occurred',
-        'error': e.toString()
-      };
-    }
-  }
    //Function to fetch home page data
   Future<Map<String, dynamic>> fetchHomePageData(dynamic baseUrl) async {
     const String homeUrl = 'api_home'; // Your home page data endpoint
@@ -317,3 +296,19 @@ Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
       return null;
     }
   }
+   Future<Map<String, dynamic>?> getVoterDashboard(dynamic baseUrl) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api_voter_dashboard'));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print("Error: ${response.statusCode} - ${response.body}");
+        return null;
+      }
+    } catch (error) {
+      print("Exception: $error");
+      return null;
+    }
+  }
+

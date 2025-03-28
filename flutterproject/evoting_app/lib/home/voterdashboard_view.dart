@@ -19,14 +19,37 @@ class _VoterDashboardViewState extends State<VoterDashboardView> {
     fetchVoterDashboard();
   }
 
-  Future<void> fetchVoterDashboard() async {
+Future<void> fetchVoterDashboard() async {
+  try {
     final response = await ApiService.getVoterDashboard();
-    setState(() {
-      voterInfo = response['voter'] ?? {};
-      elections = response['elections'] ?? [];
-      isLoading = false;
-    });
+
+    if (response == null) {
+      // Handle null response gracefully
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        voterInfo = response['voter'] ?? {};  // Ensure voterInfo is never null
+        elections = response['elections'] ?? [];
+        isLoading = false;
+      });
+    }
+  } catch (error) {
+    print("Error fetching voter dashboard: $error");
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
