@@ -88,6 +88,7 @@ def api_home(request):
             "results": "/api/results/"
         }
     })
+    
 
 
 # Create Election
@@ -480,6 +481,15 @@ def apimanage_election(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+@api_view(['GET']) 
+@permission_classes([AllowAny])
+def apiactive_elections(request):
+    try:
+        active_elections = Election.objects.filter(status='active')
+        serializer = ElectionSerializer(active_elections, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
    
 
 
