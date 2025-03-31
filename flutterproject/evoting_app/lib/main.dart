@@ -1,3 +1,4 @@
+import 'package:evoting_app/screens/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/Api/api_service.dart';
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
         '/result_view': (context) => ResultView(electionResults: {},),
         '/vote_view': (context) => VoteView(),
         '/manageelection_view': (context) => ManageElectionsView(),
+        '/profile':(context) =>  const ProfileView(user: {},),
 
       },
 

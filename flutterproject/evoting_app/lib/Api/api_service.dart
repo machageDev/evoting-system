@@ -5,13 +5,13 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.28:8000';
+  static const String baseUrl = 'http://192.168.0.102:8000';
   static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
   static const String candidateUrl = '$baseUrl/apicandidates';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String electionUrl = '$baseUrl/api/elections/results';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
-  static const String homeUrl = 'http://192.168.0.28:8000/api_home'; 
+  static const String homeUrl = 'http://192.168.0.102:8000/api_home'; 
   static const String homepageUrl = '$baseUrl/api_home';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String managecandidateUrl ='$baseUrl/apimanage_candidate';
@@ -313,3 +313,25 @@ Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
     }
   }
 
+   Future<bool> updateElection(int id, String name, String date, String status) async {
+    try {
+      final response = await http.post(
+        Uri.parse('\$baseUrl/edit_election'),
+        body: {'name': name, 'election_date': date, 'status': status},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Error updating election: \$e");
+      return false;
+    }
+  }
+
+   Future<bool> deleteElection(int id) async {
+    try {
+      final response = await http.delete(Uri.parse('\$baseUrl/delete_electionP'));
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Error deleting election: \$e");
+      return false;
+    }
+  }
