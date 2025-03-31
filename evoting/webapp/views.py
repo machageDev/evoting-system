@@ -481,21 +481,31 @@ def apimanage_election(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@api_view(['GET']) 
+logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def apiactive_elections(request):
     try:
         active_elections = Election.objects.filter(status='active')
+        
+        if not active_elections.exists():
+            return Response({"message": "No active elections found"}, status=status.HTTP_200_OK)
+
         serializer = ElectionSerializer(active_elections, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
+        logger.error(f"Error fetching active elections: {e}")
+        return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
    
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def apipending_elections(request):
     try:
         pending_elections = Election.objects.filter(status='pending')
+        if not pending_elections.exists():
+            return Response({"message": "No pending elections found"}, status=status.HTTP_200_OK)
         serializer = ElectionSerializer(pending_elections, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
