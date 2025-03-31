@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 # Serializers
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
@@ -24,21 +23,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # Set 'username' to email if it's not provided
-        validated_data['username'] = validated_data.get('email')  
-
         user = Voter.objects.create_user(
             name=validated_data['name'],
             email=validated_data['email'],
             phone_number=validated_data.get('phone_number', None),
-            username=validated_data['username'], 
+            password=validated_data['password'],  # create_user handles hashing
         )
-
-        user.set_password(validated_data['password']) 
-        user.save()  
-
         return user
-   
+  
 
 
 # Get the custom user model (Voter)

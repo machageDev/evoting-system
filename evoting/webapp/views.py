@@ -416,9 +416,9 @@ def apimanage_candidate(request):
     
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def api_get_candidates(request, election_id):
+def api_get_candidates(request, election):
     try:
-        candidates = Candidate.object.filter(election_id=election_id)
+        candidates = Candidate.object.filter(election_id=election)
         serializer = CandidateSerializer(candidates, many=True)
         return Response({
             "status":"success",
