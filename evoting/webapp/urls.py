@@ -25,7 +25,7 @@ urlpatterns = [
     path('apicreate_candidate',views.apicreate_candidate,name="apicreate_candidate"),
     path('apidelete_candidate',views.delete_candidate,name="apidelete_candidate"),
     path('api_vote',views.api_vote,name="api_vote"),
-    path('api/elections/results', views.api_result, name="api_result"),
+    path('apiresults', views.api_result, name="api_result"),
     path('api_home',views.api_home,name="api_home"),
     path('apimanage_candidates',views.apimanage_candidate, name='manage-candidates'),
     path('apimanage_elections',views.apimanage_election, name='manage_election'),
@@ -33,7 +33,10 @@ urlpatterns = [
     path('apiget_election',views.apiget_election,name='apiget_election'),
     path('apicreate_profile',views.apicreate_profile,name='apicreate_profile'),
     path('api_voter_dashboard',views.api_voter_dashboard,name='api_voter_dashboard'),
-    path('api_get_election',views.api_get_election,name='api_get_election'),
+    path('apiget_candidates',views.api_get_candidates,name='api_get_candidate'),
+    path('apiactive_elections',views.apiactive_elections,name='apiactive_elections'),
+    path('apipending_elections',views.apipending_elections,name='apipending_elections'),
+   
 
     
     

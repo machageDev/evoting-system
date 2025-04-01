@@ -418,14 +418,15 @@ def apimanage_candidate(request):
 @permission_classes([AllowAny])
 def api_get_candidates(request, election):
     try:
-        candidates = Candidate.object.filter(election_id=election)
+        candidates = Candidate.objects.filter(election_id=election)  # Fixed `.objects`
         serializer = CandidateSerializer(candidates, many=True)
         return Response({
-            "status":"success",
-            "candidats": serializer.data
-        },status=200)
+            "status": "success",
+            "candidates": serializer.data  
+        }, status=status.HTTP_200_OK)  
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_get_election(request):
