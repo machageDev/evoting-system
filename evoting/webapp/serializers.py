@@ -19,12 +19,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Voter
-        fields = ['name', 'email', 'password', 'phone_number']
+        fields = ['username', 'email', 'password', 'phone_number']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = Voter.objects.create_user(
-            name=validated_data['name'],
+            username=validated_data['username'],
             email=validated_data['email'],
             phone_number=validated_data.get('phone_number', None),
             password=validated_data['password'],  # create_user handles hashing

@@ -52,7 +52,7 @@ class VoterManager(UserManager):
 
 # Custom Voter model extending AbstractUser
 class Voter(models.Model):
-    name = models.CharField(max_length=200)
+    username = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True, max_length=254)
 
