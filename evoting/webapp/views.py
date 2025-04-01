@@ -1,6 +1,7 @@
 from datetime import timezone
 import logging
 from multiprocessing import Pool
+import token
 #from select import poll
 from django.shortcuts import render ,redirect, get_object_or_404
 import random
@@ -301,34 +302,34 @@ def edit_user(request):
 
     return render(request, 'edit_user.html', {'voter': voter})
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def apiregister(request):
     serializer = RegisterSerializer(data=request.data)
-    
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        with transaction.atomic():  # Ensures atomicity
-            username = serializer.validated_data['username'].strip()
-            email = serializer.validated_data['email'].strip().lower()
-            password = serializer.validated_data['password']
-            phone_number = serializer.validated_data['phone_number'].strip()
+    if serializer.is_valid():
+        username = serializer.validated_data['username'].strip()
+        email = serializer.validated_data['email'].strip().lower()
+        password = serializer.validated_data['password']
+        phone_number = serializer.validated_data['phone_number'].strip()
 
-            if User.objects.filter(email=email).exists():
-                return Response({"error": "User with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
-            if User.objects.filter(username=username).exists():
-                return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        # Check if the user already exists
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "User with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = User.objects.create_user(username=username, password=password, email=email)
-            Voter.objects.create(user=user, phone_number=phone_number)
-            token, _ = Token.objects.get_or_create(user=user)
+        # Register the user inside a transaction to ensure atomicity
+        with transaction.atomic():
+            user = User.objects.create_user(username=username, email=email, password=password)
+            
+            # Create authentication token for the user
+            token, created = Token.objects.get_or_create(user=user)
 
         return Response({"message": "User registered successfully.", "token": token.key}, status=status.HTTP_201_CREATED)
-    
-    except Exception as e:
-        return Response({"error": f"Registration failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['POST'])
 @permission_classes([AllowAny])

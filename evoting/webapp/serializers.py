@@ -27,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             phone_number=validated_data.get('phone_number', None),
-            password=validated_data['password'],  # create_user handles hashing
+            password=validated_data['password'],  
         )
         return user
   
