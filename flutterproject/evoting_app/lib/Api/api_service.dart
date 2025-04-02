@@ -5,13 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.102:8000';
-  static const String candidateDetailUrl = '$baseUrl/api_get_candidate';  
-  static const String candidateUrl = '$baseUrl/apicandidates';
+  static const String baseUrl = 'http://192.168.0.27:8000';  
+  static const String candidateUrl = '$baseUrl/apiget_candidates';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String electionUrl = '$baseUrl/api/elections/results';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
-  static const String homeUrl = 'http://192.168.0.102:8000/api_home'; 
+  static const String homeUrl = 'http://192.168.0.27:8000/api_home'; 
   static const String homepageUrl = '$baseUrl/api_home';
   static const String loginUrl = '$baseUrl/apilogin';
   static const String managecandidateUrl ='$baseUrl/apimanage_candidate';
@@ -22,7 +21,7 @@ class ApiService {
   static const  String CreateElctionUrl='$baseUrl/apicreate_election';
   static const String  ProfileViewUrl = '$baseUrl/apicreate_profile';
   static const String  getVoterDashboardUrl = 'baseUrl/api_voter_dashboard';
-  static const String getelectionUrl = '$baseUrl/api_get_election';
+  static const String getelectionUrl = '$baseUrl/apielection';
 
   // ✅ FETCH DATA FUNCTION
   Future<String> fetchData() async {
@@ -256,7 +255,7 @@ Future<Map<String, dynamic>> forgotPassword(String email, dynamic baseUrl) async
   }
 
 Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
-    final response = await http.get(Uri.parse('$baseUrl/candidates/'));
+    final response = await http.get(Uri.parse('$baseUrl/candidates/<str:election>'));
     if (response.statusCode == 200) {
       return List<Map<String, dynamic>>.from(json.decode(response.body));
     } else {

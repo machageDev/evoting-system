@@ -23,7 +23,7 @@ class _VoteViewState extends State<VoteView> {
   }
 
   Future<void> fetchActiveElections() async {
-    final url = Uri.parse('http://192.168.0.102:8000/api/active_elections');
+    final url = Uri.parse('http://192.168.0.27:8000/apiactive_elections');
 
     try {
       final response = await http.get(url);
@@ -40,7 +40,7 @@ class _VoteViewState extends State<VoteView> {
   }
 
   Future<void> fetchCandidates(int electionId) async {
-    final url = Uri.parse('http://127.168.0.102:8000/api/get_candidates/$electionId');
+    final url = Uri.parse('http://127.168.0.27:8000/apiget_candidate');
 
     try {
       final response = await http.get(url);
@@ -66,8 +66,8 @@ class _VoteViewState extends State<VoteView> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://127.168.0.102:8000/api/vote/');
-    final token = 'YOUR_USER_TOKEN'; // Replace with token (e.g., SharedPreferences)
+    final url = Uri.parse('http://127.168.0.27:8000/api_vote');
+    final token = 'YOUR_USER_TOKEN'; 
 
     try {
       final response = await http.post(
@@ -158,7 +158,7 @@ class _VoteViewState extends State<VoteView> {
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(
                                 candidate['profile_picture'].isNotEmpty
-                                    ? 'http://127.168.0.54:8000${candidate['profile_picture']}'
+                                    ? 'http://127.168.0.27:8000${candidate['profile_picture']}'
                                     : 'https://via.placeholder.com/150',
                               ),
                             ),

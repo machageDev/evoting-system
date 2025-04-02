@@ -10,7 +10,7 @@ class ManageElectionsView extends StatefulWidget {
 }
 
 class _ManageElectionsViewState extends State<ManageElectionsView> {
-  List elections = [];
+  List<Map<String, dynamic>> elections = [];
   bool isLoading = true;
 
   @override
@@ -20,57 +20,34 @@ class _ManageElectionsViewState extends State<ManageElectionsView> {
   }
 
   Future<void> fetchElections() async {
-    final url = Uri.parse('http://192.168.0.102:8000/api_get_election');
+    final url = Uri.parse('http://192.168.0.27:8000/apielection');
     try {
       final response = await http.get(url);
+
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
         setState(() {
-          elections = json.decode(response.body);
+          if (responseData is Map<String, dynamic> && responseData.containsKey('elections')) {
+            elections = List<Map<String, dynamic>>.from(responseData['elections']);
+          } else if (responseData is List) {
+            elections = List<Map<String, dynamic>>.from(responseData);
+          } else {
+            showSnackBar('Unexpected response format: ${response.body}');
+          }
           isLoading = false;
         });
       } else {
-        print('Failed to load elections: ${response.statusCode}');
+        showSnackBar('Failed to load elections');
       }
     } catch (e) {
-      print('Error fetching elections: $e');
+      print('Error: $e');
+      showSnackBar('Error fetching elections');
     }
-  } 
+  }
 
-  void showEditDialog(Map election) {
-    TextEditingController nameController = TextEditingController(text: election['name']);
-    TextEditingController dateController = TextEditingController(text: election['election_date']);
-    String status = election['status'];
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Edit Election"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Election Name"),
-              ),
-              TextField(
-                controller: dateController,
-                decoration: const InputDecoration(labelText: "Election Date"),
-              ),
-              DropdownButtonFormField(
-                value: status,
-                items: ['pending', 'active', 'completed'].map((s) {
-                  return DropdownMenuItem(value: s, child: Text(s.capitalize()));
-                }).toList(),
-                onChanged: (value) => setState(() => status = value!),
-              )
-            ],
-          ),      
-            
-          
-        );
-      },
-    );
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -80,37 +57,25 @@ class _ManageElectionsViewState extends State<ManageElectionsView> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/create_elections'),
-                    child: const Text("Create New Election"),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: elections.length,
-                      itemBuilder: (context, index) {
-                        final election = elections[index];
-                        return Card(
-                          child: ListTile(
-                            title: Text(election['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text("Date: ${election['election_date']}, Status: ${election['status']}"),
-                           
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Allows horizontal scrolling
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Election Name', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                  ],
+                  rows: elections.map((election) {
+                    return DataRow(cells: [
+                      DataCell(Text(election['name'] ?? 'N/A')),
+                      DataCell(Text(election['election_date'] ?? 'N/A')),
+                      DataCell(Text(election['status'] ?? 'N/A')),
+                    ]);
+                  }).toList(),
+                ),
               ),
             ),
     );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return this[0].toUpperCase() + substring(1);
   }
 }

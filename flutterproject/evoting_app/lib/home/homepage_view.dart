@@ -21,7 +21,7 @@ class _HomePageViewState extends State<HomePageView> {
   @override
   void initState() {
     super.initState();
-    fetchHomePageData(); // Call the API when the widget loads
+    fetchHomePageData(); 
   }
 
   // Function to call your API via ApiService
