@@ -30,13 +30,15 @@ urlpatterns = [
     path('apimanage_candidates',views.apimanage_candidate, name='manage-candidates'),
     path('apimanage_elections',views.apimanage_election, name='manage_election'),
     path('apicreate_election',views.apicreate_election , name='apicreate_election'),
-    path('apielection', views.api_get_election, name='api_get_election'),
+    path('apielection', views.apiget_election, name='api_get_election'),
 
     path('apicreate_profile',views.apicreate_profile,name='apicreate_profile'),
     path('api_voter_dashboard',views.api_voter_dashboard,name='api_voter_dashboard'),
-    path('apiget_candidates',views.api_get_candidates,name='api_get_candidate'),
+   
+   
     path('apiactive_elections',views.apiactive_elections,name='apiactive_elections'),
     path('apipending_elections',views.apipending_elections,name='apipending_elections'),
+    
    
 
     

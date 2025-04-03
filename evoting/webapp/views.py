@@ -415,30 +415,6 @@ def apimanage_candidate(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def api_get_candidates(request, election):
-    try:
-        candidates = Candidate.objects.filter(election=election)  # Fixed `.objects`
-        serializer = CandidateSerializer(candidates, many=True)
-        return Response({
-            "status": "success",
-            "candidates": serializer.data  
-        }, status=status.HTTP_200_OK)  
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def api_get_election(request):
-    try:
-        election = Election.objects.latest('id')  
-        serializer = ElectionSerializer(election)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    except Election.DoesNotExist:
-        return Response({"error": "No elections found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
     
@@ -581,28 +557,7 @@ def get_elections(request):
         return Response(serialized_elections.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error":e},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['POST'])
-@permission_classes([AllowAny])  
-def create_election(request):
-    try:
-        name = request.data.get('name')    
-        date = request.data.get('date')      
-        election_status = request.data.get('status')        
-        if not all([name, date,  status]):
-            return Response({"error": "Please fill all fields"}, status=status.HTTP_400_BAD_REQUEST)        
-        if Election.objects.filter(name=name).exists():
-            return Response({"error": "Election already exists"}, status=status.HTTP_400_BAD_REQUEST)        
-        election = Election.objects.create(
-            name=name,
-            date=date,            
-            status=election_status
-        )
 
-        return Response({"message": "Election created successfully."}, status=status.HTTP_201_CREATED)
-
-    except Exception as e:    
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 @api_view(['POST'])
