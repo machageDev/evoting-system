@@ -40,7 +40,7 @@ class _VoteViewState extends State<VoteView> {
   }
 
   Future<void> fetchCandidates(int electionId) async {
-    final url = Uri.parse('http://127.168.0.27:8000/apiget_candidate');
+    final url = Uri.parse('http://127.168.0.27:8000/apicandidates');
 
     try {
       final response = await http.get(url);

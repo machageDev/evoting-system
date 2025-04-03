@@ -12,7 +12,7 @@ class ManageCandidatesView extends StatefulWidget {
 class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   late Future<List<Map<String, dynamic>>> _candidatesFuture;
 
-  final String baseUrl = "http://192.168.0.27:8000"; 
+  final String baseUrl = "http://192.168.0.27:8000"; // Ensure your server is accessible from your mobile device
 
   @override
   void initState() {
@@ -22,22 +22,32 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
 
   Future<List<Map<String, dynamic>>> _fetchCandidates() async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/candidates/<int:election>"));
-      
+      // Making the HTTP GET request
+      final response = await http.get(Uri.parse("$baseUrl/apicandidate"));
+
+      // Print the status code and response body for debugging
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
       if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
         final List<dynamic> data = jsonDecode(response.body);
 
         return data
             .where((candidate) {
+              // Filtering the candidates based on 'election_status'
               final electionStatus = candidate['election_status'] ?? ''; 
               return electionStatus == 'active' || electionStatus == 'pending';
             })
             .map((e) => e as Map<String, dynamic>)
             .toList();
       } else {
+        // If the server responds with an error, print and throw
+        print("Server error: ${response.body}");
         throw Exception('Failed to load candidates');
       }
     } catch (e) {
+      // If there's an error with the network request, print and throw
       print("Error fetching candidates: $e");
       throw Exception('Error fetching candidates');
     }
@@ -47,13 +57,13 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Candidates')),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<List<Map<String, dynamic>>>(  // Build the UI based on the future
         future: _candidatesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching candidates'));
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No candidates found.'));
           }
@@ -70,26 +80,13 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
                   DataColumn(label: Text('Name')),
                   DataColumn(label: Text('Position')),
                   DataColumn(label: Text('Election')),
-                  DataColumn(label: Text('Actions')),
                 ],
                 rows: candidates.map((candidate) {
                   return DataRow(cells: [
-                    DataCell(Text(candidate['id'].toString())),
+                    DataCell(Text(candidate['id']?.toString() ?? 'N/A')),
                     DataCell(Text(candidate['name'] ?? 'N/A')),
                     DataCell(Text(candidate['position'] ?? 'N/A')),
-                    DataCell(Text(candidate['election_name'] ?? 'N/A')),
-                    DataCell(Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.orange),
-                          onPressed: () => _editCandidate(candidate),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteCandidate(candidate['id']),
-                        ),
-                      ],
-                    )),
+                    DataCell(Text(candidate['election_name'] ?? candidate['election'] ?? 'N/A')),
                   ]);
                 }).toList(),
               ),
@@ -104,15 +101,5 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
         },
       ),
     );
-  }
-
-  void _editCandidate(Map<String, dynamic> candidate) {
-    // Implement edit candidate functionality
-    print("Edit Candidate: ${candidate['name']}");
-  }
-
-  void _deleteCandidate(int candidateId) {
-    // Implement delete candidate functionality
-    print("Delete Candidate ID: $candidateId");
   }
 }

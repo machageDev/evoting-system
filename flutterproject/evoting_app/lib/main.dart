@@ -1,4 +1,6 @@
 import 'package:evoting_app/screens/profile_view.dart';
+import 'package:evoting_app/settings/settings_view.dart';
+import 'package:evoting_app/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/Api/api_service.dart';
@@ -13,6 +15,7 @@ import 'home/voterdashboard_view.dart';
 import 'view/result_view.dart';
 import 'view/vote_view.dart';
 import 'manage/manageelection_view.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -53,7 +56,8 @@ class MyApp extends StatelessWidget {
         '/vote_view': (context) => VoteView(),
         '/manageelection_view': (context) => ManageElectionsView(),
         '/profile':(context) =>  const ProfileView(user: {},),
-
+        '/custom_buttons':(context) =>  const CustomButtonsDemo(),
+        '/settings':(context) => const SettingsView(),
       },
 
       home: const HomeScreen(),

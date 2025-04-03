@@ -1,55 +1,7 @@
-// ignore_for_file: deprecated_member_use
-
-
-
-import 'package:evoting_app/Api/api_service.dart';
 import 'package:flutter/material.dart';
 
-class HomePageView extends StatefulWidget {
+class HomePageView extends StatelessWidget {
   const HomePageView({super.key});
-
-  @override
-  State<HomePageView> createState() => _HomePageViewState();
-}
-
-class _HomePageViewState extends State<HomePageView> {
-  String welcomeMessage = "Welcome to the eVoting System"; // Default message
-  bool isLoading = false;
-  String pageTitle = "Loading..."; // Title of the home page
-  String aboutSystem = "Loading..."; // About system text
-
-  @override
-  void initState() {
-    super.initState();
-    fetchHomePageData(); 
-  }
-
-  // Function to call your API via ApiService
-  Future<void> fetchHomePageData() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    // Fetch home page data from ApiService
-    ApiService apiService = ApiService();
-    try {
-      Map<String, dynamic> homePageData = await apiService.fetchHomePageData();
-
-      setState(() {
-        // Update the UI with the fetched data
-        welcomeMessage = homePageData['welcome_message'] ?? 'Welcome to the eVoting System';
-        pageTitle = homePageData['home_page_title'] ?? 'Home Page';
-        aboutSystem = homePageData['about_system'] ?? '';
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        welcomeMessage = 'Failed to load home page data';
-        isLoading = false;
-      });
-      print("Error fetching home page data: $e" );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,28 +25,20 @@ class _HomePageViewState extends State<HomePageView> {
                 ),
                 child: Column(
                   children: [
-                    isLoading
-                        ? const CircularProgressIndicator(
+                    Text(
+                      "Welcome to the eVoting System",
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             color: Colors.white,
-                          )
-                        : Text(
-                            welcomeMessage,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            textAlign: TextAlign.center,
+                            fontWeight: FontWeight.bold,
                           ),
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       "Your secure and efficient platform for online voting.",
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
@@ -154,7 +98,7 @@ class _HomePageViewState extends State<HomePageView> {
                 child: Column(
                   children: [
                     Text(
-                      pageTitle,
+                      "Home Page",
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -163,7 +107,7 @@ class _HomePageViewState extends State<HomePageView> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      aboutSystem,
+                      "The eVoting system provides a seamless and secure voting process, ensuring transparency and efficiency for all users.",
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.black87,
                             fontSize: 16,
@@ -179,8 +123,4 @@ class _HomePageViewState extends State<HomePageView> {
       ),
     );
   }
-}
-
-extension on ApiService {
-  fetchHomePageData() {}
 }

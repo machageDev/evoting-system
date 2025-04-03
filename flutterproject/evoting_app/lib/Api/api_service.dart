@@ -6,7 +6,7 @@ import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.0.27:8000';  
-  static const String candidateUrl = '$baseUrl/apiget_candidates';
+  static const String candidateUrl = '$baseUrl/apicandidates';
   static const String dashboardUrl ='$baseUrl/api/dashboard';
   static const String electionUrl = '$baseUrl/api/elections/results';
   static const String forgot_passwordUrl = '$baseUrl/apiforgot_password';
