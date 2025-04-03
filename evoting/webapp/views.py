@@ -416,6 +416,22 @@ def apimanage_candidate(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
         
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def apiget_candidate(request):
+    candidate_name = request.GET.get('candidate')
+    if candidate_name:  # If a candidate name is provided
+        try:
+            candidate = Candidate.objects.get(name=candidate_name)  # Fetch the specific candidate
+            serialized_candidate = CandidateSerializer(candidate)
+            return Response(serialized_candidate.data, status=status.HTTP_200_OK)
+        except Candidate.DoesNotExist:
+            return Response({"error": "Candidate not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    else:  # If no candidate name is provided, return all candidates
+        candidates = Candidate.objects.all()
+        serialized_candidates = CandidateSerializer(candidates, many=True)
+        return Response(serialized_candidates.data, status=status.HTTP_200_OK)
 
     
 @api_view(['GET'])
@@ -592,7 +608,6 @@ def apiget_election(request):
         elections = Election.objects.all()
         serialized_elections = ElectionSerializer(elections, many=True)
         return Response(serialized_elections.data, status=status.HTTP_200_OK)
-    
 
 @api_view(['GET']) 
 def api_result(request):

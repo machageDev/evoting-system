@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('apicreate_profile',views.apicreate_profile,name='apicreate_profile'),
     path('api_voter_dashboard',views.api_voter_dashboard,name='api_voter_dashboard'),
+    path('apicandidates',views.apiget_candidate,name='api_get_candidates'),
    
    
     path('apiactive_elections',views.apiactive_elections,name='apiactive_elections'),
