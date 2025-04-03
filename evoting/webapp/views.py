@@ -577,14 +577,21 @@ def apicreate_election(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def  apiget_election(request):
-    try:
-        id = request.GET.get('id')
-        election = Election.objects.get(id=id)
-        serialized_election = ElectionSerializer(election)
-        return Response(serialized_election.data, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+def apiget_election(request):
+    election_name = request.GET.get('election')  # Retrieve election parameter
+    
+    if election_name:  # If a specific election is requested
+        try:
+            election = Election.objects.get(name=election_name)
+            serialized_election = ElectionSerializer(election)
+            return Response(serialized_election.data, status=status.HTTP_200_OK)
+        except Election.DoesNotExist:
+            return Response({"error": "Election not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    else:  # If no election name is provided, return all elections
+        elections = Election.objects.all()
+        serialized_elections = ElectionSerializer(elections, many=True)
+        return Response(serialized_elections.data, status=status.HTTP_200_OK)
     
 
 @api_view(['GET']) 
