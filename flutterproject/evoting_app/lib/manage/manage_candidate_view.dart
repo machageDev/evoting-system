@@ -11,6 +11,9 @@ class ManageCandidatesView extends StatefulWidget {
 
 class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   late Future<List<Map<String, dynamic>>> _candidatesFuture;
+  List<Map<String, dynamic>> elections = [];
+  String errorMessage = '';
+  bool isLoading = true;
 
   final String baseUrl = "http://192.168.0.27:8000"; // Ensure your server is accessible from your mobile device
 
@@ -22,33 +25,43 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
 
   Future<List<Map<String, dynamic>>> _fetchCandidates() async {
     try {
-      // Making the HTTP GET request
       final response = await http.get(Uri.parse("$baseUrl/apicandidate"));
 
-      // Print the status code and response body for debugging
       print("Response status: ${response.statusCode}");
       print("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
-        // If the server returns a 200 OK response, parse the JSON
-        final List<dynamic> data = jsonDecode(response.body);
+        final responseData = jsonDecode(response.body);
 
-        return data
+        setState(() {
+          if (responseData is List) {
+            elections = List<Map<String, dynamic>>.from(responseData);
+          } else if (responseData is Map<String, dynamic>) {
+            elections = [responseData]; // Wrap single object inside a list
+          } else {
+            errorMessage = 'Unexpected response format';
+          }
+          isLoading = false;
+        });
+
+        return elections
             .where((candidate) {
-              // Filtering the candidates based on 'election_status'
-              final electionStatus = candidate['election_status'] ?? ''; 
+              final electionStatus = candidate['election_status'] ?? '';
               return electionStatus == 'active' || electionStatus == 'pending';
             })
-            .map((e) => e as Map<String, dynamic>)
             .toList();
       } else {
-        // If the server responds with an error, print and throw
-        print("Server error: ${response.body}");
+        setState(() {
+          errorMessage = 'Failed to load elections';
+          isLoading = false;
+        });
         throw Exception('Failed to load candidates');
       }
     } catch (e) {
-      // If there's an error with the network request, print and throw
-      print("Error fetching candidates: $e");
+      setState(() {
+        errorMessage = 'Error fetching candidates: $e';
+        isLoading = false;
+      });
       throw Exception('Error fetching candidates');
     }
   }
@@ -57,43 +70,47 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Candidates')),
-      body: FutureBuilder<List<Map<String, dynamic>>>(  // Build the UI based on the future
-        future: _candidatesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No candidates found.'));
-          }
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage))
+              : FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _candidatesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No candidates found.'));
+                    }
 
-          final candidates = snapshot.data!;
+                    final candidates = snapshot.data!;
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('#')),
-                  DataColumn(label: Text('Name')),
-                  DataColumn(label: Text('Position')),
-                  DataColumn(label: Text('Election')),
-                ],
-                rows: candidates.map((candidate) {
-                  return DataRow(cells: [
-                    DataCell(Text(candidate['id']?.toString() ?? 'N/A')),
-                    DataCell(Text(candidate['name'] ?? 'N/A')),
-                    DataCell(Text(candidate['position'] ?? 'N/A')),
-                    DataCell(Text(candidate['election_name'] ?? candidate['election'] ?? 'N/A')),
-                  ]);
-                }).toList(),
-              ),
-            ),
-          );
-        },
-      ),
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('#')),
+                            DataColumn(label: Text('Name')),
+                            DataColumn(label: Text('Position')),
+                            DataColumn(label: Text('Election')),
+                          ],
+                          rows: candidates.map((candidate) {
+                            return DataRow(cells: [
+                              DataCell(Text(candidate['id']?.toString() ?? 'N/A')),
+                              DataCell(Text(candidate['name'] ?? 'N/A')),
+                              DataCell(Text(candidate['position'] ?? 'N/A')),
+                              DataCell(Text(candidate['election_name'] ?? candidate['election'] ?? 'N/A')),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
