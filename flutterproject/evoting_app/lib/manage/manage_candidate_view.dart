@@ -16,7 +16,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
   String errorMessage = '';
   bool isLoading = true;
 
-  final String baseUrl = "http://192.168.0.27:8000"; // Update if necessary
+  final String baseUrl = "http://192.168.0.27:8000"; 
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _ManageCandidatesViewState extends State<ManageCandidatesView> {
 
   Future<List<Map<String, dynamic>>> _fetchCandidates() async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/apicandidate"));
+      final response = await http.get(Uri.parse("$baseUrl/apicandidates"));
 
       print("Response status: ${response.statusCode}");
       print("Response body: ${response.body}");

@@ -1,7 +1,11 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:evoting_app/manage/manage_candidate_view.dart';
 import 'package:evoting_app/manage/manageelection_view.dart';
 import 'package:evoting_app/home/voterdashboard_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -38,9 +42,21 @@ class _DashboardViewState extends State<DashboardView> {
             icon: const Icon(Icons.settings),
             onPressed: _onSettingsSelected,
           ),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: _onProfileSelected,
+           GestureDetector(
+            onTap: _onProfileSelected,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.transparent,
+                child: SvgPicture.asset(
+                  "assets/img/undraw_profile_2.svg",
+                  width: 36,
+                  height: 36,
+                  placeholderBuilder: (context) => Icon(Icons.account_circle, size: 36),
+                ),
+              ),
+            ),
           ),
         ],
       ),
