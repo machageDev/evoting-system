@@ -16,7 +16,7 @@ class ApiService {
   static const String managecandidateUrl ='$baseUrl/apimanage_candidate';
   static const String manageelctionUrl ='$baseUrl/apimanage_election';
   static const String registerUrl = '$baseUrl/apiregister';
-  static const String resultUrl = '$baseUrl/api_result';
+  static const String resultUrl = '$baseUrl/apiresults';
   static const String voteUrl = '$baseUrl/apivote';
   static const  String CreateElctionUrl='$baseUrl/apicreate_election';
   static const String  ProfileViewUrl = '$baseUrl/apicreate_profile';
@@ -334,3 +334,21 @@ Future<List<Map<String, dynamic>>> getCandidates(String baseUrl) async {
       return false;
     }
   }
+Future<Map<String, Map<String, int>>> fetchElectionResults() async {
+  final url = Uri.parse('http://198.168.0.27:8000/apiresults');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final jsonData = json.decode(response.body);
+    final Map<String, dynamic> results = jsonData['election_results'];
+
+    // Convert nested map values from dynamic to int
+    return results.map((election, candidates) {
+      final casted = (candidates as Map<String, dynamic>)
+          .map((candidate, votes) => MapEntry(candidate, votes as int));
+      return MapEntry(election, casted);
+    });
+  } else {
+    throw Exception('Failed to load election results');
+  }
+}

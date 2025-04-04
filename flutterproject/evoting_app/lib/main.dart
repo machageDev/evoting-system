@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
       title: 'eVoting System',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.nunitoTextTheme(), // ✅ Apply Nunito font
-        scaffoldBackgroundColor: Colors.grey[200], // ✅ Match sb-admin styling
+        textTheme: GoogleFonts.nunitoTextTheme(),
+        scaffoldBackgroundColor: Colors.grey[200], 
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue, // ✅ Button Color
