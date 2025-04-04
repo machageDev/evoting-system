@@ -430,8 +430,11 @@ def apiget_candidate(request):
     
     else:  # If no candidate name is provided, return all candidates
         candidates = Candidate.objects.all()
-        serialized_candidates = CandidateSerializer(candidates, many=True)
-        return Response(serialized_candidates.data, status=status.HTTP_200_OK)
+    if not candidates.exists():
+        return Response({"message": "No candidates found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    serialized_candidates = CandidateSerializer(candidates, many=True)
+    return Response(serialized_candidates.data, status=status.HTTP_200_OK)
 
     
 @api_view(['GET'])
@@ -610,21 +613,20 @@ def apiget_election(request):
         return Response(serialized_elections.data, status=status.HTTP_200_OK)
 
 @api_view(['GET']) 
+@permission_classes([AllowAny])
 def api_result(request):
-    elections = Election.objects.all()
     election_results = {}
 
-    for election in elections:
-        results = {}
+    for election in Election.objects.all():
         candidates = Candidate.objects.filter(election=election)
-        
-        for candidate in candidates:
-            vote_count = Vote.objects.filter(candidate=candidate).count()
-            results[candidate.name] = vote_count
-
+        results = {
+            candidate.name: Vote.objects.filter(candidate=candidate).count()
+            for candidate in candidates
+        }
         election_results[election.name] = results
 
     return JsonResponse({"election_results": election_results})
+
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 def api_delete_candidate(request,candidate_id):
@@ -651,39 +653,7 @@ def api_delete_candidate(request,candidate_id):
             "status": "error",
             "message": str(e)
         }, status=500)
-@permission_classes([IsAuthenticated])  # Optional: Add authentication
-def dashboard(request):
-    user = request.user
-    current_time = timezone.now()
 
-    # Active polls: end_date is in the future
-    active_polls = Pool.objects.filter(end_date__gte=current_time)
-
-    # Closed polls: end_date is in the past
-    closed_polls = Pool.objects.filter(end_date__lt=current_time)
-
-    # Prepare the response
-    data = {
-        "username": user.username,
-        "active_polls": [
-            {
-                "id": poll.id,
-                "question": poll.question,
-                "end_date": poll.end_date.strftime("%Y-%m-%d")
-            }
-            for poll in active_polls
-        ],
-        "closed_polls": [
-            {
-                "id": poll.id,
-                "question": poll.question,
-                "winner_option": poll.get_winner_option()  # Make sure this method exists
-            }
-            for poll in closed_polls
-        ]
-    }
-
-    return Response(data) 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -719,7 +689,6 @@ def api_voter_dashboard(request):
         'voter': voter_data,
         'elections': election_data,
     })
-
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])  

@@ -31,7 +31,7 @@ urlpatterns = [
     path('apimanage_elections',views.apimanage_election, name='manage_election'),
     path('apicreate_election',views.apicreate_election , name='apicreate_election'),
     path('apielection', views.apiget_election, name='api_get_election'),
-
+    path('apiprofile',views.api_user_profile,name='api_user_profile'), 
     path('apicreate_profile',views.apicreate_profile,name='apicreate_profile'),
     path('api_voter_dashboard',views.api_voter_dashboard,name='api_voter_dashboard'),
     path('apicandidates',views.apiget_candidate,name='api_get_candidates'),
